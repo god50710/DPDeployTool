@@ -118,8 +118,7 @@ def get_app_info(job):
     for each in info:
         result = re.findall('(.*-oozie-oozi-C)[ ]*(%s.*)\.[\S ]*RUNNING.*GMT    ([0-9: -]*).*    ' % job, each)
         if len(result) > 0:
-            print
-            result[0][0], result[0][2], result[0][1]
+            print(result[0][0], result[0][2], result[0][1])
             app_info.update({result[0][1]: [result[0][0], result[0][2]]})
     print('\nCurrent time: %s' % datetime.now())
     print()
