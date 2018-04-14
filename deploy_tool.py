@@ -11,6 +11,9 @@ class DeployTool:
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature/"
     PROD_ENV_PATH = "output/data-pipeline-aws/op-utils/env"
     BETA_ENV_PATH = "output/data-pipeline-aws-beta/op-utils/env"
+    BETA_OOZIE_PATH = "output/data-pipeline-aws-beta/oozie/*/job.properties"
+    BETA_SCRIPT_PATH = "output/data-pipeline-aws-beta/script/hql_external_partition.sh"
+    BETA_HQL_PATH = "output/data-pipeline-aws-beta/hql/*.hql"
     VERSION = "20180414"
 
     def __init__(self):
@@ -32,6 +35,9 @@ class DeployTool:
     def get_build(self):
         build_file = self.run_command("aws s3 ls %s | grep 'SHN-Data-Pipeline' | sort | tail -1 | awk '{print $4}'"
                                       % self.AWS_BUILD_PATH)[:-1]
+        if build_file:
+            raise Exception('No available build to deploy')
+
         self.run_command("aws s3 cp %s%s ~" % (self.AWS_BUILD_PATH, build_file))
         self.run_command("tar -zxvf ~/%s" % build_file)
         print("[Info] Build %s is ready" % build_file.split('.tar')[0])
@@ -49,8 +55,9 @@ class DeployTool:
                              % (self.BETA_ENV_PATH, self.BETA_ENV_PATH))
             self.run_command("echo 'OOZIE_APP_EXT=.AWSBeta%s' >> %s/$(whoami)\@$(hostname).sh" %
                              (self.build_version, self.BETA_ENV_PATH))
-            # fix all cnt low bound
-            # remove memory limitation
+            self.run_command("sed -i 's/^cntLowerbound=.*$/cntLowerbound=0/g' %s" % self.BETA_OOZIE_PATH)
+            self.run_command("sed -i 's/ --driver-memory 12G --executor-memory 12G//g' %s" % self.BETA_SCRIPT_PATH)
+            self.run_command("sed -i '/SET hive.tez.java.opts=-Xmx10240m;/d' %s" % self.BETA_HQL_PATH)
 
     def config_app_time(self, site):
         pass
