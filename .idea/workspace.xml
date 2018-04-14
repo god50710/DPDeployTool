@@ -6,7 +6,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/deploy_tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/deploy_tool.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_deployTool.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_deployTool.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_deployTool.py" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -20,8 +20,8 @@
       <file leaf-file-name="quick_deploy.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/quick_deploy.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="504">
-              <caret line="51" column="49" lean-forward="true" selection-start-line="51" selection-start-column="49" selection-end-line="51" selection-end-column="49" />
+            <state relative-caret-position="756">
+              <caret line="51" column="49" selection-start-line="51" selection-start-column="49" selection-end-line="51" selection-end-column="49" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -32,8 +32,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="294">
-              <caret line="26" lean-forward="true" selection-start-line="26" selection-end-line="26" />
+            <state relative-caret-position="-50">
+              <caret line="25" column="27" lean-forward="true" selection-start-line="25" selection-start-column="27" selection-end-line="25" selection-end-column="27" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -62,15 +62,15 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/quick_deploy..py" />
-        <option value="$PROJECT_DIR$/test_deployTool.py" />
         <option value="$PROJECT_DIR$/quick_deploy.py" />
+        <option value="$PROJECT_DIR$/test_deployTool.py" />
         <option value="$PROJECT_DIR$/deploy_tool.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
-    <option name="x" value="-8" />
-    <option name="y" value="-8" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="12" />
+    <option name="y" value="31" />
     <option name="width" value="1696" />
     <option name="height" value="1026" />
   </component>
@@ -151,9 +151,6 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="Unittests_in_test_deployTool_py - 2018.04.12 at 11h 25m 25s.xml">
-      <configuration name="Unittests in test_deployTool.py" configurationId="tests" />
-    </history-entry>
     <history-entry file="Unittests_in_test_deployTool_py - 2018.04.12 at 11h 26m 12s.xml">
       <configuration name="Unittests in test_deployTool.py" configurationId="tests" />
     </history-entry>
@@ -175,14 +172,23 @@
     <history-entry file="Unittests_in_test_deployTool_py - 2018.04.14 at 19h 05m 39s.xml">
       <configuration name="Unittests in test_deployTool.py" configurationId="tests" />
     </history-entry>
+    <history-entry file="Unittests_in_test_deployTool_py - 2018.04.14 at 20h 39m 58s.xml">
+      <configuration name="Unittests in test_deployTool.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_in_test_deployTool_py - 2018.04.14 at 20h 40m 39s.xml">
+      <configuration name="Unittests in test_deployTool.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_in_test_deployTool_py - 2018.04.14 at 20h 43m 54s.xml">
+      <configuration name="Unittests in test_deployTool.py" configurationId="tests" />
+    </history-entry>
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1696" height="1026" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14226191" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.14226191" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info active="true" anchor="bottom" id="Event Log" order="7" sideWeight="0.5011905" side_tool="true" visible="true" weight="0.35384616" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5011905" side_tool="true" visible="true" weight="0.35384616" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49880952" visible="true" weight="0.35384616" />
@@ -260,30 +266,30 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test_deployTool.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="8" />
-          <folding>
-            <element signature="e#0#29#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/quick_deploy.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="51" column="49" lean-forward="true" selection-start-line="51" selection-start-column="49" selection-end-line="51" selection-end-column="49" />
+        <state relative-caret-position="756">
+          <caret line="51" column="49" selection-start-line="51" selection-start-column="49" selection-end-line="51" selection-end-column="49" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/test_deployTool.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="9" lean-forward="true" selection-start-line="9" selection-end-line="9" />
+          <folding>
+            <element signature="e#0#35#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="26" lean-forward="true" selection-start-line="26" selection-end-line="26" />
+        <state relative-caret-position="-50">
+          <caret line="25" column="27" lean-forward="true" selection-start-line="25" selection-start-column="27" selection-end-line="25" selection-end-column="27" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
