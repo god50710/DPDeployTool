@@ -88,8 +88,6 @@ class DeployTool(object):
         if result[1] != "":
             print(result)
             raise Exception
-        elif result[0] == "":
-            raise Exception
         else:
             return result[0]
 
@@ -138,7 +136,7 @@ class DeployTool(object):
             f_flag_minute = self.run_command(
                 "cat %s/output/data-pipeline-aws/op-utils/app-time.conf | grep '%s' | grep coordStart | head -1 " % (
                     self.build_folder, table))[-4:-1]
-            app_start_time = datetime.strptime(f_flag_day + f_flag_hour, '%Y-%m-%d%H') + timedelta(hours=1)
+            app_start_time = datetime.strptime(f_flag_day + f_flag_hour, '%Y-%m-%d%H') + timedelta(hours=2)
             app_end_time = app_start_time + timedelta(days=36524)
             app_time.append("%s:    coordStart=%s:%s" % (table, app_start_time.strftime('%Y-%m-%dT%H'), f_flag_minute))
             app_time.append("%s:    coordEnd=%s:00Z" % (table, app_end_time.strftime('%Y-%m-%dT%H')))
@@ -150,7 +148,7 @@ class DeployTool(object):
                 f_flag_day = self.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
                                               (self.AWS_PROD_S3_PATH, self.TABLE_MAPPING[table]))[-11:-1]
 
-                app_start_time = datetime.strptime(f_flag_day, '%Y-%m-%d') + timedelta(days=1)
+                app_start_time = datetime.strptime(f_flag_day, '%Y-%m-%d') + timedelta(days=2)
             app_end_time = app_start_time + timedelta(days=36524)
             f_flag_minute = self.run_command(
                 "cat %s/output/data-pipeline-aws/op-utils/app-time.conf | grep '%s' | grep coordStart | head -1 " %
@@ -158,7 +156,7 @@ class DeployTool(object):
             app_time.append(
                 "%s:    coordStart=%sT00:%s" % (table, app_start_time.strftime('%Y-%m-%d'), f_flag_minute))
             app_time.append("%s:    coordEnd=%sT00:00Z" % (table, app_end_time.strftime('%Y-%m-%d')))
-        app_time.append("$weekly jobs")
+        app_time.append("#weekly jobs")
         for table in self.WEEKLY_JOB:
             f_flag_day = self.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
                                           (self.AWS_PROD_S3_PATH, self.TABLE_MAPPING[table]))[-11:-1]
