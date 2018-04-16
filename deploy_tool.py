@@ -14,6 +14,64 @@ class DeployTool(object):
     BETA_OOZIE_PATH = "output/data-pipeline-aws-beta/oozie/*/job.properties"
     BETA_SCRIPT_PATH = "output/data-pipeline-aws-beta/script/hql_external_partition.sh"
     BETA_HQL_PATH = "output/data-pipeline-aws-beta/hql/*.hql"
+    HOURLY_JOB = ["T0DatalakeAkamaiRgom", "T0DatalakeAkamaiWeb", "T0Ddi001Parquet", "T0Ncie001Parquet",
+                  "T0RouterInfo001Parquet", "T0RouterStat001Parquet", "T0TmisCam001Parquet", "T1CamBfld", "T1CamInfo",
+                  "T1CamSecurity", "T1CamSession", "T1CamStat", "T1CamTrs", "T1Device", "T1DeviceSession", "T1Router",
+                  "T1RouterSecurity", "T1Security", "TxExportAkamaiMalicious20171218", "TxExportDdi20171218",
+                  "TxExportIps20171218", "TxExportNcie20171218", "TxExportRouterSecurity20171218", "TxPmSrcIps"]
+    DAILY_JOB = ["System-JobLogBackupDaily", "System-StunnelLogBackupDaily", "T1CamRule", "T1Rule", "T1Traffic",
+                 "T2CamCollectionDaily", "T2CamIpsRuleHitCollection", "T2DeviceCollection", "T2IpsRuleHitCollection",
+                 "T2TrafficStats", "TxPmSrcIpsStats180d", "TxPmSrcIpsStats1d", "TxPmSrcIpsStats30d",
+                 "TxPmSrcIpsStats7d", "TxPmSrcIpsStats90d"]
+    WEEKLY_JOB = ["T2CamCollectionWeekly", "T2RouterCollection", "T2RuleStats", "TxPmSrcDpiConfigStatsBrand",
+                  "TxPmSrcDpiConfigStatsCountry", "TxPmSrcDpiConfigStatsRaw"]
+    TABLE_MAPPING = {'T0DatalakeAkamaiRgom': 'Application/shnprj_spn/hive/datalake.db/f_akamai_rgom',
+                     'T0DatalakeAkamaiWeb': 'Application/shnprj_spn/hive/datalake.db/f_akamai_web',
+                     'T0Ddi001Parquet': 'Application/shnprj_spn/hive/dp.db/f_ddi_hourly',
+                     'T0Ncie001Parquet': 'Application/shnprj_spn/hive/dp.db/f_ncie_hourly',
+                     'T0RouterInfo001Parquet': 'Application/shnprj_spn/hive/dp.db/f_routerinfo_hourly',
+                     'T0RouterStat001Parquet': 'Application/shnprj_spn/hive/dp.db/f_routerstat_hourly',
+                     'T0TmisCam001Parquet': 'Application/shnprj_spn/hive/dp.db/f_tmis_cam_hourly',
+                     'T1CamBfld': 'Application/shnprj_spn/hive/dp.db/f_cam_bfld_hourly',
+                     'T1CamInfo': 'Application/shnprj_spn/hive/dp.db/f_cam_info_hourly',
+                     'T1CamSecurity': 'Application/shnprj_spn/hive/dp.db/f_cam_security_hourly',
+                     'T1CamSession': 'Application/shnprj_spn/hive/dp.db/f_cam_session_hourly',
+                     'T1CamStat': 'Application/shnprj_spn/hive/dp.db/f_cam_stat_hourly',
+                     'T1CamTrs': 'Application/shnprj_spn/hive/dp.db/f_cam_trs_hourly',
+                     'T1Device': 'Application/shnprj_spn/hive/dp.db/f_device_hourly',
+                     'T1DeviceSession': 'Application/shnprj_spn/hive/dp.db/f_device_session_hourly',
+                     'T1Router': 'Application/shnprj_spn/hive/dp.db/f_router_hourly',
+                     'T1RouterSecurity': 'Application/shnprj_spn/hive/dp.db/f_router_security_hourly',
+                     'T1Security': 'Application/shnprj_spn/hive/dp.db/f_security_hourly',
+                     'TxExportAkamaiMalicious20171218': 'trs_src/f_akamai_malicious_20171218',
+                     'TxExportDdi20171218': 'trs_src/f_ddi_001_20171218',
+                     'TxExportIps20171218': 'trs_src/f_ips_20171218',
+                     'TxExportNcie20171218': 'trs_src/f_ncie_001_20171218',
+                     'TxExportRouterSecurity20171218': 'trs_src/f_router_security_20171218',
+                     'TxPmSrcIps': 'Application/shnprj_spn/hive/pm_src.db/f_ips_hourly',
+                     'System-JobLogBackupDaily': '',
+                     'System-StunnelLogBackupDaily': '',
+                     'T1CamRule': 'Application/shnprj_spn/hive/dp.db/f_cam_rule_daily',
+                     'T1Rule': 'Application/shnprj_spn/hive/dp.db/f_rule_daily',
+                     'T1Traffic': 'Application/shnprj_spn/hive/dp.db/f_traffic_daily',
+                     'T2CamCollectionDaily': 'Application/shnprj_spn/hive/dp.db/f_cam_collection_daily',
+                     'T2CamIpsRuleHitCollection': 'Application/shnprj_spn/hive/dp.db/f_cam_ips_hit_rule_collection_daily',
+                     'T2DeviceCollection': 'Application/shnprj_spn/hive/dp.db/f_device_collection_daily',
+                     'T2DeviceStats': 'Application/shnprj_spn/hive/dp.db/f_router_device_daily',
+                     'T2IpsRuleHitCollection': 'Application/shnprj_spn/hive/dp.db/f_ips_hit_rule_collection_daily',
+                     'T2TrafficStats': 'Application/shnprj_spn/hive/dp.db/f_traffic_stats_daily',
+                     'TxPmSrcIpsStats180d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily',
+                     'TxPmSrcIpsStats1d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily',
+                     'TxPmSrcIpsStats30d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily',
+                     'TxPmSrcIpsStats7d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily',
+                     'TxPmSrcIpsStats90d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily',
+                     'T2CamCollectionWeekly': 'Application/shnprj_spn/hive/dp.db/f_cam_collection_weekly',
+                     'T2RouterCollection': 'Application/shnprj_spn/hive/dp.db/f_router_collection_weekly',
+                     'T2RuleStats': 'Application/shnprj_spn/hive/dp.db/f_rule_stats_weekly',
+                     'TxPmSrcDpiConfigStatsBrand': 'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_by_brand_weekly',
+                     'TxPmSrcDpiConfigStatsCountry': 'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_by_country_weekly',
+                     'TxPmSrcDpiConfigStatsRaw': 'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_raw_weekly'
+                     }
     VERSION = "20180414"
 
     def __init__(self):
@@ -49,12 +107,12 @@ class DeployTool(object):
             self.run_command("cp %s/%s/aws-production.sh %s/%s/$(whoami)\@$(hostname).sh"
                              % (self.build_folder, self.PROD_ENV_PATH, self.build_folder, self.PROD_ENV_PATH))
             self.run_command("echo 'OOZIE_APP_EXT=.AWSProduction%s' >> %s/%s/$(whoami)\@$(hostname).sh" %
-                             (self.build_version,self.build_folder, self.PROD_ENV_PATH))
+                             (self.build_version, self.build_folder, self.PROD_ENV_PATH))
         else:
             self.run_command("cp %s/%s/aws-production-beta-data.sh %s/%s/$(whoami)\@$(hostname).sh"
                              % (self.build_folder, self.BETA_ENV_PATH, self.build_folder, self.BETA_ENV_PATH))
             self.run_command("echo 'OOZIE_APP_EXT=.AWSBeta%s' >> %s/%s/$(whoami)\@$(hostname).sh" %
-                             (self.build_version,self.build_folder, self.BETA_ENV_PATH))
+                             (self.build_version, self.build_folder, self.BETA_ENV_PATH))
             self.run_command("sed -i 's/^cntLowerbound=.*$/cntLowerbound=0/g' %s/%s" %
                              (self.build_folder, self.BETA_OOZIE_PATH))
             self.run_command("sed -i 's/ --driver-memory 12G --executor-memory 12G//g' %s/%s" %
