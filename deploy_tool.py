@@ -88,6 +88,8 @@ class DeployTool(object):
         if result[1] != "":
             print(result)
             raise Exception
+        elif result[0] == "":
+            raise Exception
         else:
             return result[0]
 
@@ -97,10 +99,10 @@ class DeployTool(object):
         if not build_file:
             raise Exception('No available build to deploy')
 
-        self.run_command("aws s3 cp %s/%s ~" % (self.AWS_BUILD_PATH, build_file))
-        self.run_command("tar -zxvf ~/%s" % build_file)
+        self.run_command("aws s3 cp %s/%s /home/hadoop/" % (self.AWS_BUILD_PATH, build_file))
+        self.run_command("tar -zxvf /home/hadoop/%s" % build_file)
         print("[Info] Build %s is ready" % build_file.split('.tar')[0])
-        self.build_folder = "~/%s" % build_file.split('.tar')[0]
+        self.build_folder = "/home/hadoop/%s" % build_file.split('.tar')[0]
         self.build_version = self.build_folder.split('1.0.')[1]
 
     def config_env(self, site):
@@ -127,13 +129,17 @@ class DeployTool(object):
         for table in self.HOURLY_JOB:
             f_flag_day = self.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
                                           (self.AWS_PROD_S3_PATH, self.TABLE_MAPPING[table]))[-11:-1]
-            f_flag_hour = self.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
-                                           (self.AWS_PROD_S3_PATH, self.TABLE_MAPPING[table], f_flag_day))[3:4]
+            if "TxExport" in table:
+                f_flag_hour = self.run_command("aws s3 ls %s/%s/pdd=%s/ | tail -1 | awk '{print $4}'" %
+                                               (self.AWS_PROD_S3_PATH, self.TABLE_MAPPING[table], f_flag_day))[5:6]
+            else:
+                f_flag_hour = self.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
+                                               (self.AWS_PROD_S3_PATH, self.TABLE_MAPPING[table], f_flag_day))[3:4]
             f_flag_minute = self.run_command(
                 "cat %s/output/data-pipeline-aws/op-utils/app-time.conf | grep '%s' | grep coordStart | head -1 " % (
                     self.build_folder, table))[-4:-1]
             app_start_time = datetime.strptime(f_flag_day + f_flag_hour, '%Y-%m-%d%H') + timedelta(hours=1)
-            app_end_time = app_start_time + timedelta(days=36500)
+            app_end_time = app_start_time + timedelta(days=36524)
             app_time.append("%s:    coordStart=%s:%s" % (table, app_start_time.strftime('%Y-%m-%dT%H'), f_flag_minute))
             app_time.append("%s:    coordEnd=%s:00Z" % (table, app_end_time.strftime('%Y-%m-%dT%H')))
         app_time.append("#daily jobs")
@@ -145,7 +151,7 @@ class DeployTool(object):
                                               (self.AWS_PROD_S3_PATH, self.TABLE_MAPPING[table]))[-11:-1]
 
                 app_start_time = datetime.strptime(f_flag_day, '%Y-%m-%d') + timedelta(days=1)
-            app_end_time = app_start_time + timedelta(days=36500)
+            app_end_time = app_start_time + timedelta(days=36524)
             f_flag_minute = self.run_command(
                 "cat %s/output/data-pipeline-aws/op-utils/app-time.conf | grep '%s' | grep coordStart | head -1 " %
                 (self.build_folder, table))[-4:-1]
@@ -160,11 +166,14 @@ class DeployTool(object):
                 "cat %s/output/data-pipeline-aws/op-utils/app-time.conf | grep '%s' | grep coordStart | head -1 " % (
                     self.build_folder, table))[-4:-1]
             app_start_time = datetime.strptime(f_flag_day, '%Y-%m-%d') + timedelta(days=8)
-            app_end_time = app_start_time + timedelta(days=36500)
+            app_end_time = app_start_time + timedelta(days=36524)
             app_time.append("%s:    coordStart=%sT00:%s" % (table, app_start_time.strftime('%Y-%m-%d'), f_flag_minute))
             app_time.append("%s:    coordEnd=%sT00:00Z" % (table, app_end_time.strftime('%Y-%m-%d')))
-        for i in app_time:
-            print(i)
+        app_time_file = open("/home/hadoop/SHN-Data-Pipeline-1.0.271/output/data-pipeline-aws/op-utils/app-time.conf",
+                             "w")
+        for line in app_time:
+            app_time_file.write(line + "\n")
+        app_time_file.close()
 
     def deploy(self, site):
         pass
