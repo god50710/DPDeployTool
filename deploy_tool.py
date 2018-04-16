@@ -21,23 +21,24 @@ class DeployTool(object):
                      "T1Router", "T1RouterSecurity", "T1Rule", "T1Security", "T1Traffic", "T2CamCollectionDaily",
                      "T2CamCollectionWeekly", "T2CamIpsRuleHitCollection", "T2DeviceCollection", "T2DeviceStats",
                      "T2IpsRuleHitCollection", "T2RouterCollection", "T2RuleStats", "T2TrafficStats"]
-    HOURLY_JOB = ["T0DatalakeAkamaiRgom", "T0DatalakeAkamaiWeb", "T0Ddi001Parquet", "T0Ncie001Parquet",
-                  "T0RouterInfo001Parquet", "T0RouterStat001Parquet", "T0TmisCam001Parquet", "T1CamBfld", "T1CamInfo",
-                  "T1CamSecurity", "T1CamSession", "T1CamStat", "T1CamTrs", "T1Device", "T1DeviceSession", "T1Router",
-                  "T1RouterSecurity", "T1Security", "TxExportAkamaiMalicious20171218", "TxExportDdi20171218",
-                  "TxExportIps20171218", "TxExportNcie20171218", "TxExportRouterSecurity20171218", "TxPmSrcIps"]
-    DAILY_JOB = ["System-JobLogBackupDaily", "System-StunnelLogBackupDaily", "T1CamRule", "T1Rule", "T1Traffic",
-                 "T2CamCollectionDaily", "T2CamIpsRuleHitCollection", "T2DeviceCollection", "T2IpsRuleHitCollection",
-                 "T2TrafficStats", "TxPmSrcIpsStats180d", "TxPmSrcIpsStats1d", "TxPmSrcIpsStats30d",
-                 "TxPmSrcIpsStats7d", "TxPmSrcIpsStats90d"]
-    WEEKLY_JOB = ["T2CamCollectionWeekly", "T2RouterCollection", "T2RuleStats", "TxPmSrcDpiConfigStatsBrand",
-                  "TxPmSrcDpiConfigStatsCountry", "TxPmSrcDpiConfigStatsRaw"]
+    HOURLY_JOB = ["hourly", ["T0DatalakeAkamaiRgom", "T0DatalakeAkamaiWeb", "T0Ddi001Parquet", "T0Ncie001Parquet",
+                             "T0RouterInfo001Parquet", "T0RouterStat001Parquet", "T0TmisCam001Parquet", "T1CamBfld",
+                             "T1CamInfo", "T1CamSecurity", "T1CamSession", "T1CamStat", "T1CamTrs", "T1Device",
+                             "T1DeviceSession", "T1Router", "T1RouterSecurity", "T1Security",
+                             "TxExportAkamaiMalicious20171218", "TxExportDdi20171218", "TxExportIps20171218",
+                             "TxExportNcie20171218", "TxExportRouterSecurity20171218", "TxPmSrcIps"]]
+    DAILY_JOB = ["daily", ["System-JobLogBackupDaily", "System-StunnelLogBackupDaily", "T1CamRule", "T1Rule",
+                           "T1Traffic", "T2CamCollectionDaily", "T2CamIpsRuleHitCollection", "T2DeviceCollection",
+                           "T2IpsRuleHitCollection", "T2TrafficStats", "TxPmSrcIpsStats180d", "TxPmSrcIpsStats1d",
+                           "TxPmSrcIpsStats30d", "TxPmSrcIpsStats7d", "TxPmSrcIpsStats90d"]]
+    WEEKLY_JOB = ["weekly", ["T2CamCollectionWeekly", "T2RouterCollection", "T2RuleStats", "TxPmSrcDpiConfigStatsBrand",
+                             "TxPmSrcDpiConfigStatsCountry", "TxPmSrcDpiConfigStatsRaw"]]
     PROD_MAPPING = {'T0DatalakeAkamaiRgom': 'Application/shnprj_spn/hive/datalake.db/f_akamai_rgom',
-                     'T0DatalakeAkamaiWeb': 'Application/shnprj_spn/hive/datalake.db/f_akamai_web',
-                     'T0Ddi001Parquet': 'Application/shnprj_spn/hive/dp.db/f_ddi_hourly',
-                     'T0Ncie001Parquet': 'Application/shnprj_spn/hive/dp.db/f_ncie_hourly',
-                     'T0RouterInfo001Parquet': 'Application/shnprj_spn/hive/dp.db/f_routerinfo_hourly',
-                     'T0RouterStat001Parquet': 'Application/shnprj_spn/hive/dp.db/f_routerstat_hourly',
+                    'T0DatalakeAkamaiWeb': 'Application/shnprj_spn/hive/datalake.db/f_akamai_web',
+                    'T0Ddi001Parquet': 'Application/shnprj_spn/hive/dp.db/f_ddi_hourly',
+                    'T0Ncie001Parquet': 'Application/shnprj_spn/hive/dp.db/f_ncie_hourly',
+                    'T0RouterInfo001Parquet': 'Application/shnprj_spn/hive/dp.db/f_routerinfo_hourly',
+                    'T0RouterStat001Parquet': 'Application/shnprj_spn/hive/dp.db/f_routerstat_hourly',
                     'T0TmisCam001Parquet': 'Application/shnprj_spn/hive/dp.db/f_tmis_cam_hourly',
                     'T1CamBfld': 'Application/shnprj_spn/hive/dp.db/f_cam_bfld_hourly',
                     'T1CamInfo': 'Application/shnprj_spn/hive/dp.db/f_cam_info_hourly',
@@ -62,7 +63,8 @@ class DeployTool(object):
                     'T1Rule': 'Application/shnprj_spn/hive/dp.db/f_rule_daily',
                     'T1Traffic': 'Application/shnprj_spn/hive/dp.db/f_traffic_daily',
                     'T2CamCollectionDaily': 'Application/shnprj_spn/hive/dp.db/f_cam_collection_daily',
-                    'T2CamIpsRuleHitCollection': 'Application/shnprj_spn/hive/dp.db/f_cam_ips_hit_rule_collection_daily',
+                    'T2CamIpsRuleHitCollection':
+                        'Application/shnprj_spn/hive/dp.db/f_cam_ips_hit_rule_collection_daily',
                     'T2DeviceCollection': 'Application/shnprj_spn/hive/dp.db/f_device_collection_daily',
                     'T2DeviceStats': 'Application/shnprj_spn/hive/dp.db/f_router_device_daily',
                     'T2IpsRuleHitCollection': 'Application/shnprj_spn/hive/dp.db/f_ips_hit_rule_collection_daily',
@@ -75,8 +77,10 @@ class DeployTool(object):
                     'T2CamCollectionWeekly': 'Application/shnprj_spn/hive/dp.db/f_cam_collection_weekly',
                     'T2RouterCollection': 'Application/shnprj_spn/hive/dp.db/f_router_collection_weekly',
                     'T2RuleStats': 'Application/shnprj_spn/hive/dp.db/f_rule_stats_weekly',
-                    'TxPmSrcDpiConfigStatsBrand': 'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_by_brand_weekly',
-                    'TxPmSrcDpiConfigStatsCountry': 'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_by_country_weekly',
+                    'TxPmSrcDpiConfigStatsBrand':
+                        'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_by_brand_weekly',
+                    'TxPmSrcDpiConfigStatsCountry':
+                        'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_by_country_weekly',
                     'TxPmSrcDpiConfigStatsRaw': 'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_raw_weekly'
                     }
     BETA_MAPPING = {'T0Ddi001Parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_ddi_hourly',
@@ -101,7 +105,8 @@ class DeployTool(object):
                     'T1Rule': 'Application/shnprj_spn/hive/dp_beta.db/f_rule_daily',
                     'T1Traffic': 'Application/shnprj_spn/hive/dp_beta.db/f_traffic_daily',
                     'T2CamCollectionDaily': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_collection_daily',
-                    'T2CamIpsRuleHitCollection': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_ips_hit_rule_collection_daily',
+                    'T2CamIpsRuleHitCollection':
+                        'Application/shnprj_spn/hive/dp_beta.db/f_cam_ips_hit_rule_collection_daily',
                     'T2DeviceCollection': 'Application/shnprj_spn/hive/dp_beta.db/f_device_collection_daily',
                     'T2DeviceStats': 'Application/shnprj_spn/hive/dp_beta.db/f_router_device_daily',
                     'T2IpsRuleHitCollection': 'Application/shnprj_spn/hive/dp_beta.db/f_ips_hit_rule_collection_daily',
@@ -109,7 +114,7 @@ class DeployTool(object):
                     'T2CamCollectionWeekly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_collection_weekly',
                     'T2RouterCollection': 'Application/shnprj_spn/hive/dp_beta.db/f_router_collection_weekly',
                     'T2RuleStats': 'Application/shnprj_spn/hive/dp_beta.db/f_rule_stats_weekly'}
-    VERSION = "20180414"
+    VERSION = "20180416"
 
     def __init__(self):
         self.build_folder = ""
@@ -123,7 +128,7 @@ class DeployTool(object):
         result = o.communicate()
         if result[1] != "":
             print(result)
-            raise Exception
+            raise Exception('Run command has stderr')
         else:
             return result[0]
 
@@ -156,7 +161,30 @@ class DeployTool(object):
             self.run_command("sed -i '/SET hive.tez.java.opts=-Xmx10240m;/d' %s/%s" %
                              (self.build_folder, self.BETA_HQL_PATH))
 
-    def config_app_time(self, site):
+    def set_app_time(self, site):
+        app_time_list = []
+        app_time_list.append("#hourly jobs")
+        app_time_list.extend(self.scan_f_flag(site, self.HOURLY_JOB))
+        app_time_list.append("#daily jobs")
+        app_time_list.extend(self.scan_f_flag(site, self.DAILY_JOB))
+        app_time_list.append("#weekly jobs")
+        app_time_list.extend(self.scan_f_flag(site, self.WEEKLY_JOB))
+        self.export_app_time(site, app_time_list)
+
+    @staticmethod
+    def export_app_time(site, app_time_list):
+        if site == "production":
+            output_path = "data-pipeline-aws"
+        else:
+            output_path = "data-pipeline-aws-beta"
+        app_time_file = open("/home/hadoop/SHN-Data-Pipeline-1.0.271/output/%s/op-utils/app-time.conf" % output_path,
+                             "w")
+        for line in app_time_list:
+            app_time_file.write(line + "\n")
+        app_time_file.close()
+
+    def scan_f_flag(self, site, jobs):
+        app_time_list = []
         if site == "production":
             site_s3_path = self.AWS_PROD_S3_PATH
             output_path = "data-pipeline-aws"
@@ -165,62 +193,37 @@ class DeployTool(object):
             site_s3_path = self.AWS_BETA_S3_PATH
             output_path = "data-pipeline-aws-beta"
             mapping = self.BETA_MAPPING
-        app_time = []
-        app_time.append("#hourly jobs")
-        for table in self.HOURLY_JOB:
-            if site == "beta" and table not in self.BETA_JOB_LIST:
-                continue
-            f_flag_day = self.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
-                                          (site_s3_path, mapping[table]))[-11:-1]
-            if "TxExport" in table:
-                f_flag_hour = self.run_command("aws s3 ls %s/%s/pdd=%s/ | tail -1 | awk '{print $4}'" %
-                                               (site_s3_path, mapping[table], f_flag_day))[5:6]
-            else:
-                f_flag_hour = self.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
-                                               (site_s3_path, mapping[table], f_flag_day))[3:4]
-            f_flag_minute = self.run_command(
-                "cat %s/output/%s/op-utils/app-time.conf | grep '%s' | grep coordStart | head -1 " % (
-                    self.build_folder, output_path, table))[-4:-1]
-            app_start_time = datetime.strptime(f_flag_day + f_flag_hour, '%Y-%m-%d%H') + timedelta(hours=2)
-            app_end_time = app_start_time + timedelta(days=36524)
-            app_time.append("%s:    coordStart=%s:%s" % (table, app_start_time.strftime('%Y-%m-%dT%H'), f_flag_minute))
-            app_time.append("%s:    coordEnd=%s:00Z" % (table, app_end_time.strftime('%Y-%m-%dT%H')))
-        app_time.append("#daily jobs")
-        for table in self.DAILY_JOB:
-            if site == "beta" and table not in self.BETA_JOB_LIST:
-                continue
-            if "System" in table:
-                app_start_time = datetime.now() + timedelta(days=1)
-            else:
-                f_flag_day = self.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
-                                              (site_s3_path, mapping[table]))[-11:-1]
 
-                app_start_time = datetime.strptime(f_flag_day, '%Y-%m-%d') + timedelta(days=2)
-            app_end_time = app_start_time + timedelta(days=36524)
-            f_flag_minute = self.run_command(
-                "cat %s/output/%s/op-utils/app-time.conf | grep '%s' | grep coordStart | head -1 " %
-                (self.build_folder, output_path, table))[-4:-1]
-            app_time.append(
-                "%s:    coordStart=%sT00:%s" % (table, app_start_time.strftime('%Y-%m-%d'), f_flag_minute))
-            app_time.append("%s:    coordEnd=%sT00:00Z" % (table, app_end_time.strftime('%Y-%m-%d')))
-        app_time.append("#weekly jobs")
-        for table in self.WEEKLY_JOB:
-            if site == "beta" and table not in self.BETA_JOB_LIST:
+        if jobs[0] == "hourly":
+            add_time = timedelta(hours=2)
+        elif jobs[0] == "daily":
+            add_time = timedelta(days=2)
+        else:
+            add_time = timedelta(days=8)
+
+        for job in jobs[1]:
+            if site == "beta" and job not in self.BETA_JOB_LIST:
                 continue
             f_flag_day = self.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
-                                          (site_s3_path, mapping[table]))[-11:-1]
+                                          (site_s3_path, mapping[job]))[-11:-1]
             f_flag_minute = self.run_command(
                 "cat %s/output/%s/op-utils/app-time.conf | grep '%s' | grep coordStart | head -1 " % (
-                    self.build_folder, output_path, table))[-4:-1]
-            app_start_time = datetime.strptime(f_flag_day, '%Y-%m-%d') + timedelta(days=8)
+                    self.build_folder, output_path, job))[-4:-1]
+            if jobs[0] == "hourly":
+                if "TxExport" in job:
+                    f_flag_hour = self.run_command("aws s3 ls %s/%s/pdd=%s/ | tail -1 | awk '{print $4}'" %
+                                                   (site_s3_path, mapping[job], f_flag_day))[5:6]
+                else:
+                    f_flag_hour = self.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
+                                                   (site_s3_path, mapping[job], f_flag_day))[3:4]
+            else:
+                f_flag_hour = "00"
+            app_start_time = datetime.strptime(f_flag_day + f_flag_hour, '%Y-%m-%d%H') + add_time
             app_end_time = app_start_time + timedelta(days=36524)
-            app_time.append("%s:    coordStart=%sT00:%s" % (table, app_start_time.strftime('%Y-%m-%d'), f_flag_minute))
-            app_time.append("%s:    coordEnd=%sT00:00Z" % (table, app_end_time.strftime('%Y-%m-%d')))
-        app_time_file = open("/home/hadoop/SHN-Data-Pipeline-1.0.271/output/%s/op-utils/app-time.conf" % output_path,
-                             "w")
-        for line in app_time:
-            app_time_file.write(line + "\n")
-        app_time_file.close()
+            app_time_list.append(
+                "%s:    coordStart=%s:%s" % (job, app_start_time.strftime('%Y-%m-%dT%H'), f_flag_minute))
+            app_time_list.append("%s:    coordEnd=%s:00Z" % (job, app_end_time.strftime('%Y-%m-%dT%H')))
+        return app_time_list
 
     def deploy(self, site):
         pass
@@ -257,10 +260,10 @@ if __name__ == "__main__":
         if main_job.new_deploy and not main_job.change_build:
             DT.get_build()
             DT.config_env(main_job.site)
-            DT.config_app_time(main_job.site)
+            DT.set_app_time(main_job.site)
         elif not main_job.new_deploy and main_job.change_build:
             DT.get_build()
             DT.config_env(main_job.site)
-            DT.config_app_time(main_job.site)
+            DT.set_app_time(main_job.site)
         else:
             print('Please choose one option for new deploy(-n)/change build(-c).')
