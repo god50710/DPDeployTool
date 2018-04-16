@@ -4,7 +4,7 @@ import sys
 from optparse import OptionParser
 
 
-class DeployTool:
+class DeployTool(object):
     AWS_PROD_S3_PATH = "s3://trs-production-us-west-2/"
     AWS_BETA_S3_PATH = "s3://trs-production-beta-data-us-west-2/"
     AWS_BUILD_PATH = "s3://eric-staging-us-west-2/build/"
@@ -35,7 +35,7 @@ class DeployTool:
     def get_build(self):
         build_file = self.run_command("aws s3 ls %s | grep 'SHN-Data-Pipeline' | sort | tail -1 | awk '{print $4}'"
                                       % self.AWS_BUILD_PATH)[:-1]
-        if build_file:
+        if not build_file:
             raise Exception('No available build to deploy')
 
         self.run_command("aws s3 cp %s%s ~" % (self.AWS_BUILD_PATH, build_file))
@@ -46,18 +46,21 @@ class DeployTool:
 
     def config_env(self, site):
         if site == "production":
-            self.run_command("cp %s/aws-production.sh %s/$(whoami)\@$(hostname).sh"
-                             % (self.PROD_ENV_PATH, self.PROD_ENV_PATH))
-            self.run_command("echo 'OOZIE_APP_EXT=.AWSProduction%s' >> %s/$(whoami)\@$(hostname).sh" %
-                             (self.build_version, self.PROD_ENV_PATH))
+            self.run_command("cp %s/%s/aws-production.sh %s/%s/$(whoami)\@$(hostname).sh"
+                             % (self.build_folder, self.PROD_ENV_PATH, self.build_folder, self.PROD_ENV_PATH))
+            self.run_command("echo 'OOZIE_APP_EXT=.AWSProduction%s' >> %s/%s/$(whoami)\@$(hostname).sh" %
+                             (self.build_version,self.build_folder, self.PROD_ENV_PATH))
         else:
-            self.run_command("cp %s/aws-production-beta-data.sh %s/$(whoami)\@$(hostname).sh"
-                             % (self.BETA_ENV_PATH, self.BETA_ENV_PATH))
-            self.run_command("echo 'OOZIE_APP_EXT=.AWSBeta%s' >> %s/$(whoami)\@$(hostname).sh" %
-                             (self.build_version, self.BETA_ENV_PATH))
-            self.run_command("sed -i 's/^cntLowerbound=.*$/cntLowerbound=0/g' %s" % self.BETA_OOZIE_PATH)
-            self.run_command("sed -i 's/ --driver-memory 12G --executor-memory 12G//g' %s" % self.BETA_SCRIPT_PATH)
-            self.run_command("sed -i '/SET hive.tez.java.opts=-Xmx10240m;/d' %s" % self.BETA_HQL_PATH)
+            self.run_command("cp %s/%s/aws-production-beta-data.sh %s/%s/$(whoami)\@$(hostname).sh"
+                             % (self.build_folder, self.BETA_ENV_PATH, self.build_folder, self.BETA_ENV_PATH))
+            self.run_command("echo 'OOZIE_APP_EXT=.AWSBeta%s' >> %s/%s/$(whoami)\@$(hostname).sh" %
+                             (self.build_version,self.build_folder, self.BETA_ENV_PATH))
+            self.run_command("sed -i 's/^cntLowerbound=.*$/cntLowerbound=0/g' %s/%s" %
+                             (self.build_folder, self.BETA_OOZIE_PATH))
+            self.run_command("sed -i 's/ --driver-memory 12G --executor-memory 12G//g' %s/%s" %
+                             (self.build_folder, self.BETA_SCRIPT_PATH))
+            self.run_command("sed -i '/SET hive.tez.java.opts=-Xmx10240m;/d' %s/%s" %
+                             (self.build_folder, self.BETA_HQL_PATH))
 
     def config_app_time(self, site):
         pass
@@ -88,14 +91,18 @@ class DeployTool:
             exit()
         return parser.parse_args()[0]
 
-    if __name__ == "__main__":
-        main_job = command_parser()
-        if not main_job.site or (main_job.site != "production" and main_job.site != "beta"):
-            print('Please assign site as "production" or "beta.".')
+
+if __name__ == "__main__":
+    DT = DeployTool()
+    main_job = DeployTool.command_parser()
+    if not main_job.site or (main_job.site != "production" and main_job.site != "beta"):
+        print('Please assign site as "production" or "beta.".')
+    else:
+        if main_job.new_deploy and not main_job.change_build:
+            DT.get_build()
+            DT.config_env(main_job.site)
+        elif not main_job.new_deploy and main_job.change_build:
+            DT.get_build()
+            DT.config_env(main_job.site)
         else:
-            if main_job.new_deploy and not main_job.change_build:
-                get_build()
-            elif not main_job.new_deploy and main_job.change_build:
-                get_build()
-            else:
-                print('Please choose one option for new deploy(-n)/change build(-c).')
+            print('Please choose one option for new deploy(-n)/change build(-c).')
