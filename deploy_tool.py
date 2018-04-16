@@ -1,14 +1,15 @@
 import os
 import subprocess
 import sys
+from datetime import datetime, timedelta
 from optparse import OptionParser
 
 
 class DeployTool(object):
-    AWS_PROD_S3_PATH = "s3://trs-production-us-west-2/"
-    AWS_BETA_S3_PATH = "s3://trs-production-beta-data-us-west-2/"
-    AWS_BUILD_PATH = "s3://eric-staging-us-west-2/build/"
-    AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature/"
+    AWS_PROD_S3_PATH = "s3://trs-production-us-west-2"
+    AWS_BETA_S3_PATH = "s3://trs-production-beta-data-us-west-2"
+    AWS_BUILD_PATH = "s3://eric-staging-us-west-2/build"
+    AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
     PROD_ENV_PATH = "output/data-pipeline-aws/op-utils/env"
     BETA_ENV_PATH = "output/data-pipeline-aws-beta/op-utils/env"
     BETA_OOZIE_PATH = "output/data-pipeline-aws-beta/oozie/*/job.properties"
@@ -60,11 +61,11 @@ class DeployTool(object):
                      'T2DeviceStats': 'Application/shnprj_spn/hive/dp.db/f_router_device_daily',
                      'T2IpsRuleHitCollection': 'Application/shnprj_spn/hive/dp.db/f_ips_hit_rule_collection_daily',
                      'T2TrafficStats': 'Application/shnprj_spn/hive/dp.db/f_traffic_stats_daily',
-                     'TxPmSrcIpsStats180d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily',
-                     'TxPmSrcIpsStats1d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily',
-                     'TxPmSrcIpsStats30d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily',
-                     'TxPmSrcIpsStats7d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily',
-                     'TxPmSrcIpsStats90d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily',
+                     'TxPmSrcIpsStats180d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=180d',
+                     'TxPmSrcIpsStats1d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=1d',
+                     'TxPmSrcIpsStats30d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=30d',
+                     'TxPmSrcIpsStats7d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=7d',
+                     'TxPmSrcIpsStats90d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=90d',
                      'T2CamCollectionWeekly': 'Application/shnprj_spn/hive/dp.db/f_cam_collection_weekly',
                      'T2RouterCollection': 'Application/shnprj_spn/hive/dp.db/f_router_collection_weekly',
                      'T2RuleStats': 'Application/shnprj_spn/hive/dp.db/f_rule_stats_weekly',
@@ -91,12 +92,12 @@ class DeployTool(object):
             return result[0]
 
     def get_build(self):
-        build_file = self.run_command("aws s3 ls %s | grep 'SHN-Data-Pipeline' | sort | tail -1 | awk '{print $4}'"
+        build_file = self.run_command("aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | sort | tail -1 | awk '{print $4}'"
                                       % self.AWS_BUILD_PATH)[:-1]
         if not build_file:
             raise Exception('No available build to deploy')
 
-        self.run_command("aws s3 cp %s%s ~" % (self.AWS_BUILD_PATH, build_file))
+        self.run_command("aws s3 cp %s/%s ~" % (self.AWS_BUILD_PATH, build_file))
         self.run_command("tar -zxvf ~/%s" % build_file)
         print("[Info] Build %s is ready" % build_file.split('.tar')[0])
         self.build_folder = "~/%s" % build_file.split('.tar')[0]
@@ -120,9 +121,50 @@ class DeployTool(object):
             self.run_command("sed -i '/SET hive.tez.java.opts=-Xmx10240m;/d' %s/%s" %
                              (self.build_folder, self.BETA_HQL_PATH))
 
-    def config_app_time(self, site):
-        pass
-        # get all table app time by f_ flags
+    def config_app_time(self):
+        app_time = []
+        app_time.append("#hourly jobs")
+        for table in self.HOURLY_JOB:
+            f_flag_day = self.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
+                                          (self.AWS_PROD_S3_PATH, self.TABLE_MAPPING[table]))[-11:-1]
+            f_flag_hour = self.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
+                                           (self.AWS_PROD_S3_PATH, self.TABLE_MAPPING[table], f_flag_day))[3:4]
+            f_flag_minute = self.run_command(
+                "cat %s/output/data-pipeline-aws/op-utils/app-time.conf | grep '%s' | grep coordStart | head -1 " % (
+                    self.build_folder, table))[-4:-1]
+            app_start_time = datetime.strptime(f_flag_day + f_flag_hour, '%Y-%m-%d%H') + timedelta(hours=1)
+            app_end_time = app_start_time + timedelta(days=36500)
+            app_time.append("%s:    coordStart=%s:%s" % (table, app_start_time.strftime('%Y-%m-%dT%H'), f_flag_minute))
+            app_time.append("%s:    coordEnd=%s:00Z" % (table, app_end_time.strftime('%Y-%m-%dT%H')))
+        app_time.append("#daily jobs")
+        for table in self.DAILY_JOB:
+            if "System" in table:
+                app_start_time = datetime.now() + timedelta(days=1)
+            else:
+                f_flag_day = self.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
+                                              (self.AWS_PROD_S3_PATH, self.TABLE_MAPPING[table]))[-11:-1]
+
+                app_start_time = datetime.strptime(f_flag_day, '%Y-%m-%d') + timedelta(days=1)
+            app_end_time = app_start_time + timedelta(days=36500)
+            f_flag_minute = self.run_command(
+                "cat %s/output/data-pipeline-aws/op-utils/app-time.conf | grep '%s' | grep coordStart | head -1 " %
+                (self.build_folder, table))[-4:-1]
+            app_time.append(
+                "%s:    coordStart=%sT00:%s" % (table, app_start_time.strftime('%Y-%m-%d'), f_flag_minute))
+            app_time.append("%s:    coordEnd=%sT00:00Z" % (table, app_end_time.strftime('%Y-%m-%d')))
+        app_time.append("$weekly jobs")
+        for table in self.WEEKLY_JOB:
+            f_flag_day = self.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
+                                          (self.AWS_PROD_S3_PATH, self.TABLE_MAPPING[table]))[-11:-1]
+            f_flag_minute = self.run_command(
+                "cat %s/output/data-pipeline-aws/op-utils/app-time.conf | grep '%s' | grep coordStart | head -1 " % (
+                    self.build_folder, table))[-4:-1]
+            app_start_time = datetime.strptime(f_flag_day, '%Y-%m-%d') + timedelta(days=8)
+            app_end_time = app_start_time + timedelta(days=36500)
+            app_time.append("%s:    coordStart=%sT00:%s" % (table, app_start_time.strftime('%Y-%m-%d'), f_flag_minute))
+            app_time.append("%s:    coordEnd=%sT00:00Z" % (table, app_end_time.strftime('%Y-%m-%d')))
+        for i in app_time:
+            print(i)
 
     def deploy(self, site):
         pass
@@ -159,6 +201,7 @@ if __name__ == "__main__":
         if main_job.new_deploy and not main_job.change_build:
             DT.get_build()
             DT.config_env(main_job.site)
+            DT.config_app_time()
         elif not main_job.new_deploy and main_job.change_build:
             DT.get_build()
             DT.config_env(main_job.site)
