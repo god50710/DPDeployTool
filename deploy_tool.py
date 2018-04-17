@@ -131,7 +131,7 @@ class DeployTool(object):
         if result[1] != "":
             print(result)
             if throw_error:
-                raise Exception('Run command returns stderr')
+                raise Exception('[Error] Run command returns stderr')
         else:
             return result[0]
 
@@ -139,7 +139,7 @@ class DeployTool(object):
         build_file = self.run_command("aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | sort | tail -1 | awk '{print $4}'"
                                       % self.AWS_BUILD_PATH)[:-1]
         if not build_file:
-            raise Exception('No available build to deploy')
+            raise Exception('[Error] No available build to deploy')
         self.run_command("aws s3 cp %s/%s /home/hadoop/" % (self.AWS_BUILD_PATH, build_file))
         self.run_command("tar -zxvf /home/hadoop/%s" % build_file)
         self.build_folder = "/home/hadoop/%s" % build_file.split('.tar')[0]
@@ -212,6 +212,8 @@ class DeployTool(object):
             f_flag_minute = self.run_command(
                 "cat %s/output/%s/op-utils/app-time.conf | grep '%s' | grep coordStart | head -1 " % (
                     self.build_folder, output_path, job))[-4:-1]
+            if not re.match('\d{2}Z', f_flag_minute):
+                raise Exception('[Error] Get malformed minute from app-time.conf:', f_flag_minute)
 
             # get datetime from aws
             if "System" in job:
@@ -219,6 +221,9 @@ class DeployTool(object):
             else:
                 f_flag_day = self.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
                                               (site_s3_path, mapping[job]))[-11:-1]
+            if not re.match('\d{4}-\d{2}-\d{2}', f_flag_day):
+                raise Exception('[Error] Get malformed day from s3:', f_flag_day)
+
             # get hours from aws with datetime
             if jobs[0] == "hourly":
                 if "TxExport" in job:
@@ -227,6 +232,8 @@ class DeployTool(object):
                 else:
                     f_flag_hour = self.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
                                                    (site_s3_path, mapping[job], f_flag_day))[3:4]
+                if not re.match('\d{1,2}', f_flag_hour):
+                    raise Exception('[Error] Get malformed hour from s3:', f_flag_hour)
             elif "System" in job:
                 f_flag_hour = "02"
             else:
@@ -250,7 +257,7 @@ class DeployTool(object):
         try:
             self.run_command("bash %s/deploy.sh all" % deploy_folder)
         except Exception:
-            print('Oozie dry run failed.')
+            print('[Error] Oozie dry run failed')
             exit()
         else:
             if change_build:
@@ -338,10 +345,18 @@ class DeployTool(object):
             print('python %s -s production -C' % os.path.basename(__file__))
             print('# To change build on Production Site')
             print('python %s -s beta -C' % os.path.basename(__file__))
-            print('# To check Oozie job status')
-            print('python %s -c ' % os.path.basename(__file__))
+            print('# To check all Oozie job status')
+            print('python %s -c "All"' % os.path.basename(__file__))
+            print('# To check specific Oozie job status')
+            print('python %s -c "T1Security"' % os.path.basename(__file__))
             exit()
         return parser.parse_args()[0]
+
+    @staticmethod
+    def add_cronjob(site):
+
+        # add geoip and signature crontab job
+        pass
 
 
 if __name__ == "__main__":
@@ -355,6 +370,7 @@ if __name__ == "__main__":
                 print('Please choose one option for new deploy(-n)/change build(-c).')
             elif main_job.new_deploy:
                 DT.get_build()
+                DT.add_cronjob(main_job.site)
                 DT.config_env(main_job.site)
                 DT.set_job_time(main_job.site)
                 DT.deploy(main_job.site)
