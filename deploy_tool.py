@@ -120,7 +120,7 @@ class DeployTool(object):
     def __init__(self):
         self.build_folder = ""
         self.build_version = ""
-        self.app_info_list = []
+        self.previous_jobs = {}
 
     @staticmethod
     def run_command(cmd, show_command=True, throw_error=True):
@@ -220,14 +220,16 @@ class DeployTool(object):
                 else:
                     f_flag_hour = self.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
                                                    (site_s3_path, mapping[job], f_flag_day))[3:4]
+            elif "System" in job:
+                f_flag_hour = "02"
             else:
                 f_flag_hour = "00"
-            job_start_time = (datetime.strptime(f_flag_day + f_flag_hour, '%Y-%m-%d%H') + add_time).strftime(
-                '%Y-%m-%dT%H')
-            job_end_time = (job_start_time + timedelta(days=36524)).strftime('%Y-%m-%dT%H')
-            job_time_list.append("%s:    coordStart=%s:%s" % (job, job_start_time, f_flag_minute))
+            job_start_time = datetime.strptime(f_flag_day + f_flag_hour, '%Y-%m-%d%H') + add_time
+            job_end_time = job_start_time + timedelta(days=36524)
+            job_time_list.append(
+                "%s:    coordStart=%s:%s" % (job, job_start_time.strftime('%Y-%m-%dT%H'), f_flag_minute))
             print(job_time_list[-1])
-            job_time_list.append("%s:    coordEnd=%s:00Z" % (job, job_end_time))
+            job_time_list.append("%s:    coordEnd=%s:00Z" % (job, job_end_time.strftime('%Y-%m-%dT%H')))
             print(job_time_list[-1])
         return job_time_list
 
@@ -237,24 +239,43 @@ class DeployTool(object):
         else:
             output_path = "data-pipeline-aws-beta"
         deploy_folder = "%s/output/%s/op-utils" % (self.build_folder, output_path)
-        self.run_command("bash %s/deploy.sh all" % deploy_folder, throw_error=False)
-        self.run_command("sed -i '/DeviceSession/d' %s/run-jobs.sh" % deploy_folder)
+        self.run_command("bash %s/deploy.sh all" % deploy_folder)
+        if site == "production":
+            self.run_command("sed -i '/DeviceSession/d' %s/run-jobs.sh" % deploy_folder)
+
+        #   to be change as run_command
         print("bash %s/run-jobs.sh" % deploy_folder)
 
     def change_build(self, site):
-        pass
+        self.previous_jobs = self.get_job_info("all")
+        self.suspend_all_job(self.previous_jobs)
+        try:
+            self.deploy(site)
+        except Exception:
+            self.resume_all_job(self.previous_jobs)
+        else:
+            self.kill_all_job(self.previous_jobs)
 
-    def kill_job(self, job, oozie_job_list):
-        print('=== Kill Job ===')
-        self.run_command("oozie job -kill %s" % oozie_job_list[job][0])
+    @staticmethod
+    def kill_all_job(oozie_job_list):
+        print('=== Kill All Job ===')
+        for job in oozie_job_list:
+            #    self.run_command("oozie job -kill %s" % job[0])
+            print("oozie job -kill %s" % oozie_job_list[job][0])
 
-    def suspend_job(self, job, oozie_job_list):
-        print('=== Suspend Job ===')
-        self.run_command("oozie job -suspend %s" % oozie_job_list[job][0])
+    @staticmethod
+    def suspend_all_job(oozie_job_list):
+        print('=== Suspend All Job ===')
+        for job in oozie_job_list:
+            #    self.run_command("oozie job -suspend %s" % job[0])
+            print("oozie job -suspend %s" % oozie_job_list[job][0])
 
-    def resume_job(self, job, oozie_job_list):
-        print('=== Resume Job ===')
-        self.run_command("oozie job -resume %s" % oozie_job_list[job][0])
+    @staticmethod
+    def resume_all_job(oozie_job_list):
+        print('=== Resume All Job ===')
+        for job in oozie_job_list:
+            #    self.run_command("oozie job -resume %s" % job[0])
+            print("oozie job -resume %s" % oozie_job_list[job][0])
 
     def get_job_info(self, job):
         print('\nCurrent status of Oozie job:')
@@ -334,5 +355,6 @@ if __name__ == "__main__":
                 DT.get_build()
                 DT.config_env(main_job.site)
                 DT.set_job_time(main_job.site)
-    elif main_job.check_job_status:
-        DT.check_job_status(main_job.check_job_status, DT.get_job_info(main_job.check_job_status))
+                DT.change_build(main_job.site)
+    elif main_job.check_job:
+        DT.check_job_status(main_job.check_job, DT.get_job_info(main_job.check_job))
