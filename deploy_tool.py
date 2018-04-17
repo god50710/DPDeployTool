@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import sys
 from datetime import datetime, timedelta
@@ -119,16 +120,18 @@ class DeployTool(object):
     def __init__(self):
         self.build_folder = ""
         self.build_version = ""
+        self.app_info_list = []
 
     @staticmethod
-    def run_command(cmd, show_command=True):
+    def run_command(cmd, show_command=True, throw_error=True):
         if show_command:
             print(cmd)
         o = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         result = o.communicate()
         if result[1] != "":
             print(result)
-            raise Exception('Run command has stderr')
+            if throw_error:
+                raise Exception('Run command has stderr')
         else:
             return result[0]
 
@@ -139,7 +142,6 @@ class DeployTool(object):
             raise Exception('No available build to deploy')
         self.run_command("aws s3 cp %s/%s /home/hadoop/" % (self.AWS_BUILD_PATH, build_file))
         self.run_command("tar -zxvf /home/hadoop/%s" % build_file)
-        print("[Info] Build %s is ready" % build_file.split('.tar')[0])
         self.build_folder = "/home/hadoop/%s" % build_file.split('.tar')[0]
         self.build_version = self.build_folder.split('1.0.')[1]
 
@@ -161,30 +163,29 @@ class DeployTool(object):
             self.run_command("sed -i '/SET hive.tez.java.opts=-Xmx10240m;/d' %s/%s" %
                              (self.build_folder, self.BETA_HQL_PATH))
 
-    def set_app_time(self, site):
-        app_time_list = []
-        app_time_list.append("#hourly jobs")
-        app_time_list.extend(self.scan_f_flag(site, self.HOURLY_JOB))
-        app_time_list.append("#daily jobs")
-        app_time_list.extend(self.scan_f_flag(site, self.DAILY_JOB))
-        app_time_list.append("#weekly jobs")
-        app_time_list.extend(self.scan_f_flag(site, self.WEEKLY_JOB))
-        self.export_app_time(site, app_time_list)
+    def set_job_time(self, site):
+        job_time_list = []
+        job_time_list.append("#hourly jobs")
+        job_time_list.extend(self.scan_f_flag(site, self.HOURLY_JOB))
+        job_time_list.append("#daily jobs")
+        job_time_list.extend(self.scan_f_flag(site, self.DAILY_JOB))
+        job_time_list.append("#weekly jobs")
+        job_time_list.extend(self.scan_f_flag(site, self.WEEKLY_JOB))
+        self.export_app_time(site, job_time_list)
 
-    @staticmethod
-    def export_app_time(site, app_time_list):
+    def export_app_time(self, site, job_time_list):
         if site == "production":
             output_path = "data-pipeline-aws"
         else:
             output_path = "data-pipeline-aws-beta"
-        app_time_file = open("/home/hadoop/SHN-Data-Pipeline-1.0.271/output/%s/op-utils/app-time.conf" % output_path,
-                             "w")
-        for line in app_time_list:
-            app_time_file.write(line + "\n")
-        app_time_file.close()
+        deploy_folder = "%s/output/%s/op-utils" % (self.build_folder, output_path)
+        job_time_file = open("%s/app-time.conf" % deploy_folder, "w")
+        for line in job_time_list:
+            job_time_file.write(line + "\n")
+        job_time_file.close()
 
     def scan_f_flag(self, site, jobs):
-        app_time_list = []
+        job_time_list = []
         if site == "production":
             site_s3_path = self.AWS_PROD_S3_PATH
             output_path = "data-pipeline-aws"
@@ -221,35 +222,96 @@ class DeployTool(object):
                                                    (site_s3_path, mapping[job], f_flag_day))[3:4]
             else:
                 f_flag_hour = "00"
-            app_start_time = datetime.strptime(f_flag_day + f_flag_hour, '%Y-%m-%d%H') + add_time
-            app_end_time = app_start_time + timedelta(days=36524)
-            app_time_list.append(
-                "%s:    coordStart=%s:%s" % (job, app_start_time.strftime('%Y-%m-%dT%H'), f_flag_minute))
-            app_time_list.append("%s:    coordEnd=%s:00Z" % (job, app_end_time.strftime('%Y-%m-%dT%H')))
-        return app_time_list
+            job_start_time = (datetime.strptime(f_flag_day + f_flag_hour, '%Y-%m-%d%H') + add_time).strftime(
+                '%Y-%m-%dT%H')
+            job_end_time = (job_start_time + timedelta(days=36524)).strftime('%Y-%m-%dT%H')
+            job_time_list.append("%s:    coordStart=%s:%s" % (job, job_start_time, f_flag_minute))
+            print(job_time_list[-1])
+            job_time_list.append("%s:    coordEnd=%s:00Z" % (job, job_end_time))
+            print(job_time_list[-1])
+        return job_time_list
 
     def deploy(self, site):
+        if site == "production":
+            output_path = "data-pipeline-aws"
+        else:
+            output_path = "data-pipeline-aws-beta"
+        deploy_folder = "%s/output/%s/op-utils" % (self.build_folder, output_path)
+        self.run_command("bash %s/deploy.sh all" % deploy_folder, throw_error=False)
+        self.run_command("sed -i '/DeviceSession/d' %s/run-jobs.sh" % deploy_folder)
+        print("bash %s/run-jobs.sh" % deploy_folder)
+
+    def change_build(self, site):
         pass
-        # to import quick deploy tool
+
+    def kill_job(self, job, oozie_job_list):
+        print('=== Kill Job ===')
+        self.run_command("oozie job -kill %s" % oozie_job_list[job][0])
+
+    def suspend_job(self, job, oozie_job_list):
+        print('=== Suspend Job ===')
+        self.run_command("oozie job -suspend %s" % oozie_job_list[job][0])
+
+    def resume_job(self, job, oozie_job_list):
+        print('=== Resume Job ===')
+        self.run_command("oozie job -resume %s" % oozie_job_list[job][0])
+
+    def get_job_info(self, job):
+        print('\nCurrent status of Oozie job:')
+        if job == "all":
+            job = ""
+        info = self.run_command(
+            "oozie jobs info -jobtype coordinator -len 3000|grep '%s.*RUNNING\|%s.*PREP'|sort -k8" % (job, job),
+            show_command=False)[:-1].rstrip('\n').split('\n')
+        print("JobID\t\t\t\t     Next Materialized    App Name")
+        app_info = {}
+        for each in info:
+            result = re.findall('(.*-oozie-oozi-C)[ ]*(%s.*)\.[\S ]*RUNNING.*GMT    ([0-9: -]*).*    ' % job, each)
+            if len(result) > 0:
+                print(result[0][0], result[0][2], result[0][1])
+                app_info.update({result[0][1]: [result[0][0], result[0][2]]})
+        print('\nCurrent time: %s' % datetime.now())
+        return app_info
+
+    def check_job_status(self, job, oozie_job_list):
+        jobs_to_hide = '\|SUCCEEDED\|READY'
+        if job == "all":
+            counter = 1
+            for app in oozie_job_list:
+                print('\n=== Job Checking(%d/%d) ===' % (counter, len(oozie_job_list)))
+                print(self.run_command("oozie job -info %s |grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" % (
+                    oozie_job_list[app][0], jobs_to_hide), show_command=False))
+                counter += 1
+        else:
+            if job in oozie_job_list:
+                print('=== Job Checking ===')
+                print(self.run_command("oozie job -info %s |grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" % (
+                    oozie_job_list[job][0], jobs_to_hide), show_command=False))
+            else:
+                print('Job not found in oozie job list')
 
     @staticmethod
     def command_parser():
         usage = "\t%s [options]\nTool version:\t%s" % (sys.argv[0], "20180222")
         parser = OptionParser(usage)
         parser.add_option("-s", type="string", dest="site", help='Choose deploy target site')
-        parser.add_option("-n", action="store_true", dest="new_deploy", help='Execute a new deploy on EMR')
-        parser.add_option("-c", action="store_true", dest="change_build", help='Execute change build on EMR')
+        parser.add_option("-N", action="store_true", dest="new_deploy", help='Execute a new deploy on EMR')
+        parser.add_option("-C", action="store_true", dest="change_build", help='Execute change build on EMR')
+        parser.add_option("-c", type="string", dest="check_job", help='Check oozie job status')
+
         if len(sys.argv) == 1:
             parser.print_help()
             print('\nQuick Start:')
             print('# To deploy on a new EMR as Production Site')
-            print('python %s -s production -n' % os.path.basename(__file__))
+            print('python %s -s production -N' % os.path.basename(__file__))
             print('# To deploy on a new EMR as Beta Site')
-            print('python %s -s beta -n' % os.path.basename(__file__))
+            print('python %s -s beta -N' % os.path.basename(__file__))
             print('# To change build on Production Site')
-            print('python %s -s production -c' % os.path.basename(__file__))
+            print('python %s -s production -C' % os.path.basename(__file__))
             print('# To change build on Production Site')
-            print('python %s -s beta -c' % os.path.basename(__file__))
+            print('python %s -s beta -C' % os.path.basename(__file__))
+            print('# To check oozie job status')
+            print('python %s -c T' % os.path.basename(__file__))
             exit()
         return parser.parse_args()[0]
 
@@ -257,16 +319,20 @@ class DeployTool(object):
 if __name__ == "__main__":
     DT = DeployTool()
     main_job = DeployTool.command_parser()
-    if not main_job.site or (main_job.site != "production" and main_job.site != "beta"):
-        print('Please assign site as "production" or "beta.".')
-    else:
-        if main_job.new_deploy and not main_job.change_build:
-            DT.get_build()
-            DT.config_env(main_job.site)
-            DT.set_app_time(main_job.site)
-        elif not main_job.new_deploy and main_job.change_build:
-            DT.get_build()
-            DT.config_env(main_job.site)
-            DT.set_app_time(main_job.site)
+    if main_job.site:
+        if main_job.site != "production" and main_job.site != "beta":
+            print('Please assign site as "production" or "beta.".')
         else:
-            print('Please choose one option for new deploy(-n)/change build(-c).')
+            if main_job.change_build and main_job.new_deploy:
+                print('Please choose one option for new deploy(-n)/change build(-c).')
+            elif main_job.new_deploy:
+                DT.get_build()
+                DT.config_env(main_job.site)
+                DT.set_job_time(main_job.site)
+                DT.deploy(main_job.site)
+            elif main_job.change_build:
+                DT.get_build()
+                DT.config_env(main_job.site)
+                DT.set_job_time(main_job.site)
+    elif main_job.check_job_status:
+        DT.check_job_status(main_job.check_job_status, DT.get_job_info(main_job.check_job_status))
