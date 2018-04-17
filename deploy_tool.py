@@ -204,11 +204,14 @@ class DeployTool(object):
         for job in jobs[1]:
             if site == "beta" and job not in self.BETA_JOB_LIST:
                 continue
-            f_flag_day = self.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
-                                          (site_s3_path, mapping[job]))[-11:-1]
             f_flag_minute = self.run_command(
                 "cat %s/output/%s/op-utils/app-time.conf | grep '%s' | grep coordStart | head -1 " % (
                     self.build_folder, output_path, job))[-4:-1]
+            if "System" in job:
+                f_flag_day = datetime.now().strftime('%Y-%m-%d')
+            else:
+                f_flag_day = self.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
+                                              (site_s3_path, mapping[job]))[-11:-1]
             if jobs[0] == "hourly":
                 if "TxExport" in job:
                     f_flag_hour = self.run_command("aws s3 ls %s/%s/pdd=%s/ | tail -1 | awk '{print $4}'" %
