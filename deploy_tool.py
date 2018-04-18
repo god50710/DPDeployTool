@@ -268,26 +268,23 @@ class DeployTool(object):
         #   to be change as run_command
         print("bash %s/run-jobs.sh" % deploy_folder)
 
-    @staticmethod
-    def kill_all_job(oozie_job_list):
+    def kill_all_job(self, oozie_job_list):
         print('=== Kill All Job (Count: %s) ===' % len(oozie_job_list))
         for job in oozie_job_list:
-            #    self.run_command("oozie job -kill %s" % job[0])
-            print("oozie job -kill %s" % oozie_job_list[job][0])
+            self.run_command("oozie job -kill %s" % job[0])
+            #   print("oozie job -kill %s" % oozie_job_list[job][0])
 
-    @staticmethod
-    def suspend_all_job(oozie_job_list):
+    def suspend_all_job(self, oozie_job_list):
         print('=== Suspend All Job ===')
         for job in oozie_job_list:
-            #    self.run_command("oozie job -suspend %s" % job[0])
-            print("oozie job -suspend %s" % oozie_job_list[job][0])
+            self.run_command("oozie job -suspend %s" % job[0])
+            #   print("oozie job -suspend %s" % oozie_job_list[job][0])
 
-    @staticmethod
-    def resume_all_job(oozie_job_list):
+    def resume_all_job(self, oozie_job_list):
         print('=== Resume All Job ===')
         for job in oozie_job_list:
-            #    self.run_command("oozie job -resume %s" % job[0])
-            print("oozie job -resume %s" % oozie_job_list[job][0])
+            self.run_command("oozie job -resume %s" % job[0])
+            #   print("oozie job -resume %s" % oozie_job_list[job][0])
 
     def get_job_info(self, job):
         print('\nCurrent status of Oozie job:')
