@@ -324,6 +324,22 @@ class DeployTool(object):
             else:
                 print('Job not found in Oozie job list')
 
+    def add_cronjob(self, site):
+        cronjob_file = "/home/hadoop/cron_temp"
+        self.run_command("crontab -l > %s" % cronjob_file)
+        signature_cronjob = self.run_command("cat %s | grep 'update_signature/bg_executor.sh'" % cronjob_file)
+        geoip_cronjob = self.run_command("cat %s | grep 'update_geoip/geoip_bg_executor.sh'" % cronjob_file)
+        if not signature_cronjob:
+            self.run_command("cp -r %s/QA/update_signature /home/hadoop/" % self.build_folder)
+            self.run_command("echo '0 * * * * /home/hadoop/update_signature/bg_executor.sh %s' >> %s " %
+                             (site, cronjob_file))
+        if geoip_cronjob:
+            self.run_command("sed -i '/geoip_bg_executor.sh/d' %s" % cronjob_file)
+            self.run_command("echo '0 * * * * /trs/update_geoip/geoip_bg_executor_with_mail.sh %s' >> %s " %
+                             (site, cronjob_file))
+        self.run_command("crontab %s" % cronjob_file)
+        self.run_command("rm %s" % cronjob_file)
+
     @staticmethod
     def command_parser():
         usage = "\t%s [options]\nTool version:\t%s" % (sys.argv[0], "20180222")
@@ -351,12 +367,6 @@ class DeployTool(object):
             print('python %s -c "T1Security"' % os.path.basename(__file__))
             exit()
         return parser.parse_args()[0]
-
-    @staticmethod
-    def add_cronjob(site):
-
-        # add geoip and signature crontab job
-        pass
 
 
 if __name__ == "__main__":
