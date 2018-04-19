@@ -257,23 +257,23 @@ class DeployTool(object):
             output_path = "data-pipeline-aws-beta"
         deploy_folder = "%s/output/%s/op-utils" % (self.build_folder, output_path)
         try:
-            self.run_command("bash %s/deploy.sh all" % deploy_folder)
+            self.run_command("bash %s/deploy.sh all" % deploy_folder, throw_error=False)
+            if site == "production":
+                self.run_command("sed -i '/DeviceSession/d' %s/run-jobs.sh" % deploy_folder)
+            self.run_command("bash %s/run-jobs.sh" % deploy_folder)
+            #   print("bash %s/run-jobs.sh" % deploy_folder)
         except Exception:
-            print('[Error] Oozie dry run failed, resume previous jobs')
+            print('[Error] Deploy failed, resume previous jobs')
             if change_build:
                 self.resume_all_job(self.previous_jobs)
-            exit()
+            exit(1)
         else:
             if change_build:
                 self.kill_all_job(self.previous_jobs)
-        if site == "production":
-            self.run_command("sed -i '/DeviceSession/d' %s/run-jobs.sh" % deploy_folder)
-
-        self.run_command("bash %s/run-jobs.sh" % deploy_folder)
-        #   print("bash %s/run-jobs.sh" % deploy_folder)
 
     def wait_and_suspend_all_jobs(self, oozie_job_list):
         counter = 1
+        self.previous_jobs = oozie_job_list
         while True:
             for oozie_job in oozie_job_list:
                 cannot_suspend_job = self.run_command(
@@ -282,12 +282,13 @@ class DeployTool(object):
                 cannot_suspend_status = self.run_command(
                     "oozie job -info %s | grep 'Status' | grep 'SUSPENDED'" % (oozie_job_list[oozie_job][0]),
                     show_command=False)
-                if not cannot_suspend_job or cannot_suspend_status:
+                if not (cannot_suspend_job or cannot_suspend_status):
                     print('=== Suspending %s (%d/%d) ===' % (oozie_job, counter, len(oozie_job_list)))
                     self.run_command("oozie job -suspend %s" % oozie_job_list[oozie_job][0])
                     counter += 1
+                if counter > len(oozie_job_list):
+                    break
             if counter > len(oozie_job_list):
-                self.previous_jobs = oozie_job_list
                 break
 
     def kill_all_job(self, oozie_job_list):
@@ -313,8 +314,8 @@ class DeployTool(object):
         if target == "all":
             target = ""
         info = self.run_command(
-            "oozie jobs info -jobtype coordinator -len 3000|grep '%s.*RUNNING\|%s.*PREP'|sort -k8" % (target, target),
-            show_command=False)[:-1].rstrip('\n').split('\n')
+            "oozie jobs info -jobtype coordinator -len 3000|grep '%s.*RUNNING\|%s.*PREP\|%s.*SUSPEND'|sort -k8" %
+            (target, target, target), show_command=False)[:-1].rstrip('\n').split('\n')
         print("JobID\t\t\t\t     Next Materialized    App Name")
         app_info = {}
         for each in info:
@@ -384,7 +385,7 @@ class DeployTool(object):
             print('python %s -c "All"' % os.path.basename(__file__))
             print('# To check specific Oozie job status')
             print('python %s -c "T1Security"' % os.path.basename(__file__))
-            exit()
+            exit(0)
         return parser.parse_args()[0]
 
 
