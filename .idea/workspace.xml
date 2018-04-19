@@ -26,8 +26,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="371">
-              <caret line="148" column="32" lean-forward="true" selection-start-line="148" selection-start-column="32" selection-end-line="148" selection-end-column="32" />
+            <state relative-caret-position="483">
+              <caret line="270" lean-forward="true" selection-end-line="391" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -181,7 +181,7 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1421875" />
@@ -272,8 +272,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="371">
-          <caret line="148" column="32" lean-forward="true" selection-start-line="148" selection-start-column="32" selection-end-line="148" selection-end-column="32" />
+        <state relative-caret-position="483">
+          <caret line="270" lean-forward="true" selection-end-line="391" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>

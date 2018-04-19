@@ -141,7 +141,7 @@ class DeployTool(object):
         if not build_file:
             raise Exception('[Error] No available build to deploy')
         self.run_command("aws s3 cp %s/%s /home/hadoop/" % (self.AWS_BUILD_PATH, build_file))
-        self.run_command("tar -zxvf /home/hadoop/%s" % build_file)
+        self.run_command("tar -C /home/hadoop/ -zxvf /home/hadoop/%s" % build_file)
         self.build_folder = "/home/hadoop/%s" % build_file.split('.tar')[0]
         self.build_version = self.build_folder.split('1.0.')[1]
 
@@ -266,24 +266,25 @@ class DeployTool(object):
             self.run_command("sed -i '/DeviceSession/d' %s/run-jobs.sh" % deploy_folder)
 
         #   to be change as run_command
-        print("bash %s/run-jobs.sh" % deploy_folder)
+        self.run_command("bash %s/run-jobs.sh" % deploy_folder)
+        #   print("bash %s/run-jobs.sh" % deploy_folder)
 
     def kill_all_job(self, oozie_job_list):
         print('=== Kill All Job (Count: %s) ===' % len(oozie_job_list))
         for job in oozie_job_list:
-            self.run_command("oozie job -kill %s" % job[0])
+            self.run_command("oozie job -kill %s" % oozie_job_list[job][0])
             #   print("oozie job -kill %s" % oozie_job_list[job][0])
 
     def suspend_all_job(self, oozie_job_list):
         print('=== Suspend All Job ===')
         for job in oozie_job_list:
-            self.run_command("oozie job -suspend %s" % job[0])
+            self.run_command("oozie job -suspend %s" % oozie_job_list[job][0])
             #   print("oozie job -suspend %s" % oozie_job_list[job][0])
 
     def resume_all_job(self, oozie_job_list):
         print('=== Resume All Job ===')
         for job in oozie_job_list:
-            self.run_command("oozie job -resume %s" % job[0])
+            self.run_command("oozie job -resume %s" % oozie_job_list[job][0])
             #   print("oozie job -resume %s" % oozie_job_list[job][0])
 
     def get_job_info(self, job):
