@@ -162,6 +162,8 @@ class DeployTool(object):
                              (self.build_folder, self.BETA_SCRIPT_PATH))
             self.run_command("sed -i '/SET hive.tez.java.opts=-Xmx10240m;/d' %s/%s" %
                              (self.build_folder, self.BETA_HQL_PATH))
+            self.run_command("sed -i '/SET hive.tez.container.size=12288;/d' %s/%s" %
+                             (self.build_folder, self.BETA_HQL_PATH))
         else:
             pass
 
@@ -257,47 +259,66 @@ class DeployTool(object):
         try:
             self.run_command("bash %s/deploy.sh all" % deploy_folder)
         except Exception:
-            print('[Error] Oozie dry run failed')
+            print('[Error] Oozie dry run failed, resume previous jobs')
+            if change_build:
+                self.resume_all_job(self.previous_jobs)
             exit()
         else:
             if change_build:
-                self.kill_all_job(self.get_job_info("all"))
+                self.kill_all_job(self.previous_jobs)
         if site == "production":
             self.run_command("sed -i '/DeviceSession/d' %s/run-jobs.sh" % deploy_folder)
 
-        #   to be change as run_command
         self.run_command("bash %s/run-jobs.sh" % deploy_folder)
         #   print("bash %s/run-jobs.sh" % deploy_folder)
 
+    def wait_and_suspend_all_jobs(self, oozie_job_list):
+        counter = 1
+        while True:
+            for oozie_job in oozie_job_list:
+                cannot_suspend_job = self.run_command(
+                    "oozie job -info %s | grep oozie-oozi-C@ | grep 'RUNNING\|SUSPENDED'" %
+                    (oozie_job_list[oozie_job][0]), show_command=False)
+                cannot_suspend_status = self.run_command(
+                    "oozie job -info %s | grep 'Status' | grep 'SUSPENDED'" % (oozie_job_list[oozie_job][0]),
+                    show_command=False)
+                if not cannot_suspend_job or cannot_suspend_status:
+                    print('=== Suspending %s (%d/%d) ===' % (oozie_job, counter, len(oozie_job_list)))
+                    self.run_command("oozie job -suspend %s" % oozie_job_list[oozie_job][0])
+                    counter += 1
+            if counter > len(oozie_job_list):
+                self.previous_jobs = oozie_job_list
+                break
+
     def kill_all_job(self, oozie_job_list):
-        print('=== Kill All Job (Count: %s) ===' % len(oozie_job_list))
-        for job in oozie_job_list:
-            self.run_command("oozie job -kill %s" % oozie_job_list[job][0])
-            #   print("oozie job -kill %s" % oozie_job_list[job][0])
+        print('=== Kill All Jobs (Count: %s) ===' % len(oozie_job_list))
+        for oozie_job in oozie_job_list:
+            self.run_command("oozie job -kill %s" % oozie_job_list[oozie_job][0])
+            #   print("oozie job -kill %s" % oozie_job_list[oozie_job][0])
 
     def suspend_all_job(self, oozie_job_list):
-        print('=== Suspend All Job ===')
-        for job in oozie_job_list:
-            self.run_command("oozie job -suspend %s" % oozie_job_list[job][0])
-            #   print("oozie job -suspend %s" % oozie_job_list[job][0])
+        print('=== Suspend All Jobs ===')
+        for oozie_job in oozie_job_list:
+            self.run_command("oozie job -suspend %s" % oozie_job_list[oozie_job][0])
+            #   print("oozie job -suspend %s" % oozie_job_list[oozie_job][0])
 
     def resume_all_job(self, oozie_job_list):
-        print('=== Resume All Job ===')
-        for job in oozie_job_list:
-            self.run_command("oozie job -resume %s" % oozie_job_list[job][0])
-            #   print("oozie job -resume %s" % oozie_job_list[job][0])
+        print('=== Resume All Jobs ===')
+        for oozie_job in oozie_job_list:
+            self.run_command("oozie job -resume %s" % oozie_job_list[oozie_job][0])
+            #   print("oozie job -resume %s" % oozie_job_list[oozie_job][0])
 
-    def get_job_info(self, job):
+    def get_job_info(self, target):
         print('\nCurrent status of Oozie job:')
-        if job == "all":
-            job = ""
+        if target == "all":
+            target = ""
         info = self.run_command(
-            "oozie jobs info -jobtype coordinator -len 3000|grep '%s.*RUNNING\|%s.*PREP'|sort -k8" % (job, job),
+            "oozie jobs info -jobtype coordinator -len 3000|grep '%s.*RUNNING\|%s.*PREP'|sort -k8" % (target, target),
             show_command=False)[:-1].rstrip('\n').split('\n')
         print("JobID\t\t\t\t     Next Materialized    App Name")
         app_info = {}
         for each in info:
-            result = re.findall('(.*-oozie-oozi-C)[ ]*(%s.*)\.[\S ]*.*GMT    ([0-9: -]*).*    ' % job, each)
+            result = re.findall('(.*-oozie-oozi-C)[ ]*(%s.*)\.[\S ]*.*GMT    ([0-9: -]*).*    ' % target, each)
             if len(result) > 0:
                 print(result[0][0], result[0][2], result[0][1])
                 app_info.update({result[0][1]: [result[0][0], result[0][2]]})
@@ -305,20 +326,20 @@ class DeployTool(object):
         print('\nCurrent time: %s' % datetime.now())
         return app_info
 
-    def check_job_status(self, job, oozie_job_list):
+    def check_job_status(self, oozie_job, oozie_job_list):
         jobs_to_hide = '\|SUCCEEDED\|READY'
-        if job == "all":
+        if oozie_job == "all":
             counter = 1
-            for app in oozie_job_list:
+            for oozie_job in oozie_job_list:
                 print('\n=== Job Checking(%d/%d) ===' % (counter, len(oozie_job_list)))
                 print(self.run_command("oozie job -info %s |grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" % (
-                    oozie_job_list[app][0], jobs_to_hide), show_command=False))
+                    oozie_job_list[oozie_job][0], jobs_to_hide), show_command=False))
                 counter += 1
         else:
-            if job in oozie_job_list:
+            if oozie_job in oozie_job_list:
                 print('=== Job Checking ===')
                 print(self.run_command("oozie job -info %s |grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" % (
-                    oozie_job_list[job][0], jobs_to_hide), show_command=False))
+                    oozie_job_list[oozie_job][0], jobs_to_hide), show_command=False))
             else:
                 print('Job not found in Oozie job list')
 
@@ -385,6 +406,7 @@ if __name__ == "__main__":
             elif main_job.change_build:
                 DT.get_build()
                 DT.config_env(main_job.site)
+                DT.wait_and_suspend_all_jobs(DT.get_job_info("all"))
                 DT.set_job_time(main_job.site)
                 DT.deploy(main_job.site, change_build=True)
     elif main_job.check_job:
