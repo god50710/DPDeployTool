@@ -30,8 +30,8 @@ class DeployTool(object):
                              "TxExportNcie20171218", "TxExportRouterSecurity20171218", "TxPmSrcIps"]]
     DAILY_JOB = ["daily", ["System-JobLogBackupDaily", "System-StunnelLogBackupDaily", "T1CamRule", "T1Rule",
                            "T1Traffic", "T2CamCollectionDaily", "T2CamIpsRuleHitCollection", "T2DeviceCollection",
-                           "T2IpsRuleHitCollection", "T2TrafficStats", "TxPmSrcIpsStats180d", "TxPmSrcIpsStats1d",
-                           "TxPmSrcIpsStats30d", "TxPmSrcIpsStats7d", "TxPmSrcIpsStats90d"]]
+                           "T2DeviceStats", "T2IpsRuleHitCollection", "T2TrafficStats", "TxPmSrcIpsStats180d",
+                           "TxPmSrcIpsStats1d", "TxPmSrcIpsStats30d", "TxPmSrcIpsStats7d", "TxPmSrcIpsStats90d"]]
     WEEKLY_JOB = ["weekly", ["T2CamCollectionWeekly", "T2RouterCollection", "T2RuleStats", "TxPmSrcDpiConfigStatsBrand",
                              "TxPmSrcDpiConfigStatsCountry", "TxPmSrcDpiConfigStatsRaw"]]
     PROD_MAPPING = {'T0DatalakeAkamaiRgom': 'Application/shnprj_spn/hive/datalake.db/f_akamai_rgom',
