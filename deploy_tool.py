@@ -9,7 +9,8 @@ from optparse import OptionParser
 class DeployTool(object):
     AWS_PROD_S3_PATH = "s3://trs-production-us-west-2"
     AWS_BETA_S3_PATH = "s3://trs-production-beta-data-us-west-2"
-    AWS_BUILD_PATH = "s3://eric-staging-us-west-2/build"
+    AWS_VERIFIED_BUILD_PATH = "s3://eric-staging-us-west-2/build"
+    AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
     PROD_ENV_PATH = "output/data-pipeline-aws/op-utils/env"
     BETA_ENV_PATH = "output/data-pipeline-aws-beta/op-utils/env"
@@ -135,12 +136,24 @@ class DeployTool(object):
         else:
             return result[0]
 
-    def get_build(self):
+    def get_mapping_list(self):
+        # get hourly job
+        # get daily job
+        # get weekly job
+        # get production s3 path mapping list
+        # get beta s3 path mapping list
+        pass
+
+    def get_testing_build(self, build_name):
+        # download testing build and tar zxvf
+        pass
+
+    def get_verified_build(self):
         build_file = self.run_command("aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | sort | tail -1 | awk '{print $4}'"
-                                      % self.AWS_BUILD_PATH)[:-1]
+                                      % self.AWS_VERIFIED_BUILD_PATH)[:-1]
         if not build_file:
             raise Exception('[Error] No available build to deploy')
-        self.run_command("aws s3 cp %s/%s /home/hadoop/" % (self.AWS_BUILD_PATH, build_file))
+        self.run_command("aws s3 cp %s/%s /home/hadoop/" % (self.AWS_VERIFIED_BUILD_PATH, build_file))
         self.run_command("tar -C /home/hadoop/ -zxvf /home/hadoop/%s" % build_file)
         self.build_folder = "/home/hadoop/%s" % build_file.split('.tar')[0]
         self.build_version = self.build_folder.split('1.0.')[1]
@@ -360,31 +373,26 @@ class DeployTool(object):
         self.run_command("crontab %s" % cronjob_file)
         self.run_command("rm %s" % cronjob_file)
 
-    @staticmethod
-    def command_parser():
-        usage = "\t%s [options]\nTool version:\t%s" % (sys.argv[0], "20180222")
+    def command_parser(self):
+        usage = "\t%s [options]\nTool version:\t%s" % (sys.argv[0], self.VERSION)
         parser = OptionParser(usage)
         parser.add_option("-s", type="string", dest="site", help='Choose deploy target site')
         parser.add_option("-N", action="store_true", dest="new_deploy", help='Execute a new deploy on EMR')
         parser.add_option("-C", action="store_true", dest="change_build", help='Execute change build on EMR')
         parser.add_option("-c", type="string", dest="check_job", help='Check Oozie job status')
-
         if len(sys.argv) == 1:
             parser.print_help()
             print('\nQuick Start:')
-            #  add where build come from
+            print('# Verified build location: %s' % self.AWS_VERIFIED_BUILD_PATH)
+            print('# Testing build location: %s' % self.AWS_TESTING_BUILD_PATH)
             print('# To deploy on a new EMR as Production Site')
             print('python %s -s production -N' % os.path.basename(__file__))
-            print('# To deploy on a new EMR as Beta Site')
-            print('python %s -s beta -N' % os.path.basename(__file__))
-            print('# To change build on Production Site')
-            print('python %s -s production -C' % os.path.basename(__file__))
-            print('# To change build on Production Site')
+            print('# To change build on Beta Site')
             print('python %s -s beta -C' % os.path.basename(__file__))
             print('# To check all Oozie job status')
-            print('python %s -c "All"' % os.path.basename(__file__))
+            print('python %s -c all' % os.path.basename(__file__))
             print('# To check specific Oozie job status')
-            print('python %s -c "T1Security"' % os.path.basename(__file__))
+            print('python %s -c T1Security' % os.path.basename(__file__))
             exit(0)
         return parser.parse_args()[0]
 
@@ -399,13 +407,13 @@ if __name__ == "__main__":
             if main_job.change_build and main_job.new_deploy:
                 print('Please choose one option for new deploy(-n)/change build(-c).')
             elif main_job.new_deploy:
-                DT.get_build()
+                DT.get_verified_build()
                 DT.add_cronjob(main_job.site)
                 DT.config_env(main_job.site)
                 DT.set_job_time(main_job.site)
                 DT.deploy(main_job.site)
             elif main_job.change_build:
-                DT.get_build()
+                DT.get_verified_build()
                 DT.config_env(main_job.site)
                 DT.wait_and_suspend_all_jobs(DT.get_job_info("all"))
                 DT.set_job_time(main_job.site)

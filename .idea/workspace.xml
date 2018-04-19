@@ -16,8 +16,8 @@
       <file leaf-file-name="quick_deploy.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/quick_deploy.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1085">
-              <caret line="125" lean-forward="true" selection-start-line="125" selection-end-line="125" />
+            <state relative-caret-position="2520">
+              <caret line="125" selection-start-line="125" selection-end-line="125" />
             </state>
           </provider>
         </entry>
@@ -25,8 +25,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="399">
-              <caret line="380" column="43" selection-start-line="380" selection-start-column="29" selection-end-line="380" selection-end-column="43" />
+            <state relative-caret-position="127">
+              <caret line="396" column="37" lean-forward="true" selection-start-line="396" selection-start-column="37" selection-end-line="396" selection-end-column="37" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -67,7 +67,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="74" />
     <option name="y" value="157" />
     <option name="width" value="1680" />
@@ -117,7 +117,7 @@
     </option>
   </component>
   <component name="RunManager">
-    <configuration name="Unittests in C:/Users/eric_m_kao/PycharmProjects/DPDeployTool/test_deployTool.py" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests in C:/Users/Kouitsuhou/Documents/GitHub/DPDeployTool/test_deployTool.py" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="DPDeployTool" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -132,7 +132,7 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python tests.Unittests in C:/Users/eric_m_kao/PycharmProjects/DPDeployTool/test_deployTool.py" />
+        <item itemvalue="Python tests.Unittests in C:/Users/Kouitsuhou/Documents/GitHub/DPDeployTool/test_deployTool.py" />
       </list>
     </recent_temporary>
   </component>
@@ -182,13 +182,13 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-8" y="-8" width="1696" height="1026" extended-state="7" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1421875" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14166667" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5015625" side_tool="true" visible="true" weight="0.06801275" />
-      <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4984375" weight="0.32943678" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50238097" side_tool="true" visible="true" weight="0.06703297" />
+      <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49761903" weight="0.32857144" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49880952" weight="0.35384616" />
@@ -213,6 +213,23 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/quick_deploy.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2625">
+          <caret line="125" lean-forward="true" selection-start-line="125" selection-end-line="125" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/deploy_tool.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7980">
+          <caret line="380" column="43" selection-start-line="380" selection-start-column="29" selection-end-line="380" selection-end-column="43" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/quick_deploy.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1071">
@@ -266,15 +283,15 @@
     <entry file="file://$PROJECT_DIR$/test_deployTool.py" />
     <entry file="file://$PROJECT_DIR$/quick_deploy.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1085">
-          <caret line="125" lean-forward="true" selection-start-line="125" selection-end-line="125" />
+        <state relative-caret-position="2520">
+          <caret line="125" selection-start-line="125" selection-end-line="125" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="399">
-          <caret line="380" column="43" selection-start-line="380" selection-start-column="29" selection-end-line="380" selection-end-column="43" />
+        <state relative-caret-position="127">
+          <caret line="396" column="37" lean-forward="true" selection-start-line="396" selection-start-column="37" selection-end-line="396" selection-end-column="37" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
