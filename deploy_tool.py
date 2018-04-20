@@ -52,8 +52,8 @@ class DeployTool(object):
             job = job.split('/')[-1]
             self.FLAG_MAPPING[job] = ''
             daily_job.append(job)
-        table_jobs = self.run_command("ls -d %s/oozie/T*" % output_path).split()
 
+        table_jobs = self.run_command("ls -d %s/oozie/T*" % output_path).split()
         for job_path in table_jobs:
             job = job_path.split('/')[-1]
             frequency = self.run_command("grep 'coordExecFreq=' %s/job.properties | tail -n 1" % job_path)
@@ -117,21 +117,24 @@ class DeployTool(object):
         self.DAILY_JOB.append(daily_job)
         self.WEEKLY_JOB.append(weekly_job)
 
-    def get_testing_build(self, build_name):
-        # download testing build and tar zxvf
-        pass
-
-    def get_verified_build(self):
-        build_file = self.run_command("aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | sort | tail -1 | awk '{print $4}'"
-                                      % self.AWS_VERIFIED_BUILD_PATH)[:-1]
+    def get_build(self, build_name=""):
+        if not build_name:
+            build_folder = self.AWS_VERIFIED_BUILD_PATH
+            build_file = self.run_command("aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | sort | tail -1 | awk '{print $4}'"
+                                          % self.AWS_VERIFIED_BUILD_PATH)[:-1]
+        else:
+            build_folder = self.AWS_TESTING_BUILD_PATH
+            build_file = self.run_command(
+                "aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | 'grep %s ' | sort | tail -1 | awk '{print $4}'"
+                % (build_folder, build_name))[:-1]
         if not build_file:
             raise Exception('[Error] No available build to deploy')
-        self.run_command("aws s3 cp %s/%s /home/hadoop/" % (self.AWS_VERIFIED_BUILD_PATH, build_file))
+        self.run_command("aws s3 cp %s/%s /home/hadoop/" % (build_folder, build_file))
         self.run_command("tar -C /home/hadoop/ -zxvf /home/hadoop/%s" % build_file)
         self.build_folder = "/home/hadoop/%s" % build_file.split('.tar')[0]
         self.build_version = self.build_folder.split('1.0.')[1]
 
-    def config_env(self, site):
+    def config_env(self, site, bucket_name="", database_suffix="", concurrency=[3,1], timeout=180, memory=True):
         if site == "production":
             prod_env_path = "output/data-pipeline-aws/op-utils/env"
             self.run_command("cp %s/%s/aws-production.sh %s/%s/$(whoami)\@$(hostname).sh"
@@ -380,14 +383,14 @@ if __name__ == "__main__":
             if main_job.change_build and main_job.new_deploy:
                 print('Please choose one option for new deploy(-n)/change build(-c).')
             elif main_job.new_deploy:
-                DT.get_verified_build()
+                DT.get_build()
                 DT.add_cronjob(main_job.site)
                 DT.config_env(main_job.site)
                 DT.get_mapping_list(main_job.site)
                 DT.set_job_time(main_job.site)
                 DT.deploy(main_job.site)
             elif main_job.change_build:
-                DT.get_verified_build()
+                DT.get_build()
                 DT.config_env(main_job.site)
                 DT.get_mapping_list(main_job.site)
                 DT.wait_and_suspend_all_jobs(DT.get_job_info("all"))
