@@ -134,7 +134,7 @@ class DeployTool(object):
         self.build_folder = "/home/hadoop/%s" % build_file.split('.tar')[0]
         self.build_version = self.build_folder.split('1.0.')[1]
 
-    def config_env(self, site, bucket_name="", database_suffix="", concurrency=[3,1], timeout=180, memory=True):
+    def config_env(self, site, bucket_suffix="function", concurrency=[3, 1], timeout=180, memory=True):
         if site == "production":
             prod_env_path = "output/data-pipeline-aws/op-utils/env"
             self.run_command("cp %s/%s/aws-production.sh %s/%s/$(whoami)\@$(hostname).sh"
@@ -158,8 +158,12 @@ class DeployTool(object):
                              (self.build_folder, beta_hql_path))
             self.run_command("sed -i '/SET hive.tez.container.size=12288;/d' %s/%s" %
                              (self.build_folder, beta_hql_path))
-        else:
-            pass
+        elif site == "test":
+            test_env_path = "output/data-pipeline-aws/op-utils/env"
+            #  fix timeout
+            #  remake
+            #  copy env config
+            #  
 
     def set_job_time(self, site):
         job_time_list = list()
@@ -322,7 +326,7 @@ class DeployTool(object):
             counter = 1
             for oozie_job in oozie_job_list:
                 print('\n=== Job Checking(%d/%d) ===' % (counter, len(oozie_job_list)))
-                print(self.run_command("oozie job -info %s |grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" % (
+                print(self.run_command("oozie job -info %s -len 3000|grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" % (
                     oozie_job_list[oozie_job][0], jobs_to_hide), show_command=False))
                 counter += 1
         else:
