@@ -150,8 +150,7 @@ class DeployTool(object):
                 "cp %s/aws-production-beta-data.sh %s/$(whoami)\@$(hostname).sh" % (beta_env_path, beta_env_path))
             self.run_command("echo 'OOZIE_APP_EXT=.AWS_Beta%s' >> %s/$(whoami)\@$(hostname).sh" %
                              (self.build_version, beta_env_path))
-            self.run_command("sed -i 's/^cntLowerbound=.*$/cntLowerbound=0/g' %s/%s" %
-                             (self.build_folder, beta_oozie_jobs_path))
+            self.run_command("sed -i 's/^cntLowerbound=.*$/cntLowerbound=0/g' %s" % beta_oozie_jobs_path)
             self.run_command("sed -i 's/ --driver-memory 12G --executor-memory 12G//g' %s" % beta_script_path)
             self.run_command("sed -i '/SET hive.tez.java.opts=-Xmx10240m;/d' %s" % beta_hql_path)
             self.run_command("sed -i '/SET hive.tez.container.size=12288;/d' %s" % beta_hql_path)
@@ -165,7 +164,7 @@ class DeployTool(object):
             if timeout != 180:
                 self.run_command("cd %s; sed -i 's/180/%s/g' data-pipeline/oozie/common.properties" %
                                  (test_env_make_path, timeout))
-            self.run_command("cd %s; make %s-db" % (test_env_make_path, suffix), throw_error=False)
+            self.run_command("cd %s; make %s-db" % (test_env_make_path, suffix))
             if not memory:
                 self.run_command("sed -i 's/ --driver-memory 12G --executor-memory 12G//g' %s" % test_script_path)
                 self.run_command("sed -i '/SET hive.tez.java.opts=-Xmx10240m;/d' %s" % test_hql_path)
