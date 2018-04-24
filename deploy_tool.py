@@ -134,7 +134,7 @@ class DeployTool(object):
         self.build_folder = "/home/hadoop/%s" % build_file.split('.tar')[0]
         self.build_version = self.build_folder.split('1.0.')[1]
 
-    def config_env(self, site, suffix="function", concurrency=[3, 1], timeout=180, memory=True):
+    def config_env(self, site, suffix="function", concurrency=1, timeout=180, memory=True):
         if site == "production":
             prod_env_path = "%s/output/data-pipeline-aws/op-utils/env" % self.build_folder
             self.run_command("cp %s/aws-production.sh %s/$(whoami)\@$(hostname).sh" %
@@ -156,30 +156,30 @@ class DeployTool(object):
             self.run_command("sed -i '/SET hive.tez.java.opts=-Xmx10240m;/d' %s" % beta_hql_path)
             self.run_command("sed -i '/SET hive.tez.container.size=12288;/d' %s" % beta_hql_path)
         elif site == "test":
-            test_env_path = "output/data-pipeline-aws/op-utils/env"
-            test_oozie_path = "output/data-pipeline-aws/oozie/"
-            test_script_path = "output/data-pipeline-aws/script/hql_external_partition.sh"
+            test_env_path = "%s/output/data-pipeline-aws/op-utils/env" % self.build_folder
+            test_oozie_path = "%s/output/data-pipeline-aws/oozie" % self.build_folder
+            test_script_path = "%s/output/data-pipeline-aws/script/hql_external_partition.sh" % self.build_folder
             test_hql_path = "%s/output/data-pipeline-aws/hql/*.hql" % self.build_folder
             test_env_make_path = "%s/src" % self.build_folder
             self.run_command("cd %s; make clean" % test_env_make_path)
             if timeout != 180:
                 self.run_command("cd %s; sed -i 's/180/%s/g' data-pipeline/oozie/common.properties" %
                                  (test_env_make_path, timeout))
-            self.run_command("cd %s; make %s-db" % (test_env_make_path, suffix))
+            self.run_command("cd %s; make %s-db" % (test_env_make_path, suffix), throw_error=False)
             if not memory:
                 self.run_command("sed -i 's/ --driver-memory 12G --executor-memory 12G//g' %s" % test_script_path)
                 self.run_command("sed -i '/SET hive.tez.java.opts=-Xmx10240m;/d' %s" % test_hql_path)
                 self.run_command("sed -i '/SET hive.tez.container.size=12288;/d' %s" % test_hql_path)
-            if concurrency != [3, 1]:
-                self.run_command("sed -i 's/concurrency=./concurrency=%s/g' %s/*/job.properties" %
-                                 (concurrency[0], test_oozie_path))
-                self.run_command("sed -i 's/concurrency=./concurrency=%s/g' %s/T0*/job.properties" %
-                                 (concurrency[1], test_oozie_path))
+
+            self.run_command("sed -i 's/concurrency=./concurrency=%i/g' %s/*/job.properties" %
+                             (concurrency, test_oozie_path))
             self.run_command("cp %s/hadoop\@ip-172-31-13-117.sh %s/$(whoami)\@$(hostname).sh" %
                              (test_env_path, test_env_path))
             self.run_command("sed -i '/HADOOP_NAME_NODE/d' %s/$(whoami)\@$(hostname).sh" % test_env_path)
             self.run_command("echo 'export HADOOP_NAME_NODE=s3://dp-%s' >> %s/$(whoami)\@$(hostname).sh" %
-                             (suffix, self.build_folder))
+                             (suffix, test_env_path))
+            self.run_command("echo 'OOZIE_APP_EXT=.AWS_Test%s' >> %s/$(whoami)\@$(hostname).sh" %
+                             (self.build_version, test_env_path))
 
     def set_job_time(self, site):
         job_time_list = list()
@@ -375,14 +375,12 @@ class DeployTool(object):
         parser.add_option("-N", action="store_true", dest="new_deploy", help="Execute a new deploy on EMR")
         parser.add_option("-C", action="store_true", dest="change_build", help="Execute change build on EMR")
         parser.add_option("-c", type="string", dest="check_job", help="Check Oozie job status")
-        parser.add_option("-b", type="string", dest="build_name", help="Specify build name")
+        parser.add_option("--build", type="string", dest="build_name", help="Specify build name")
         parser.add_option("--timeout", type="int", dest="timeout", default="180", help="Set oozie job timeout")
         parser.add_option("--suffix", type="string", dest="suffix", default="function",
                           help='Set database/s3 bucket name suffix')
-        parser.add_option("--t0con", type="int", dest="t0con", default=3, help="Set oozie T0 jobs concurrency")
-        parser.add_option("--othercon", type="int", dest="othercon", default=1,
-                          help="Set oozie other jobs(without T0 jobs) concurrency.")
-        parser.add_option("--memory", action="store_true", dest="memory", default=False, help="Keep hql memory limits")
+        parser.add_option("--con", type="int", dest="concurrency", default=1, help="Set oozie jobs concurrency")
+        parser.add_option("--mem", action="store_true", dest="memory", default=False, help="Keep hql memory limits")
         if len(sys.argv) == 1:
             parser.print_help()
             print('\nQuick Start:')
@@ -391,7 +389,7 @@ class DeployTool(object):
             print('# To deploy on a new EMR as Production Site')
             print('python %s -s production -N' % os.path.basename(__file__))
             print('# To change build on Beta Site')
-            print('python %s -s test -b 280 -suffix eric_test -timeout 28800 -t0con 3 -othercon 3 -memory' %
+            print('python %s -s test -b 280 -suffix eric_test -timeout 28800 -concurrency 3 -memory' %
                   os.path.basename(__file__))
             print('# To change build on Beta Site')
             print('python %s -s beta -C' % os.path.basename(__file__))
@@ -416,14 +414,15 @@ if __name__ == "__main__":
             if main_job.site == "test":
                 if not main_job.build_name:
                     print('Please insert build version or full name with -b.')
-                DT.get_build(main_job.build_name)
-                DT.config_env(main_job.site, suffix=main_job.suffix, concurrency=[main_job.t0con, main_job.othercon],
-                              timeout=main_job.timeout, memory=main_job.memory)
-                print('Testing build %s is ready to go' % DT.build_version)
-                print('Need to create database metadata')
-                print('Need to msck repair')
-                print('Need to set oozie jobs start and end time')
-                print('Need to kill stunnel')
+                else:
+                    DT.get_build(main_job.build_name)
+                    DT.config_env(main_job.site, suffix=main_job.suffix, concurrency=main_job.concurrency,
+                                  timeout=main_job.timeout, memory=main_job.memory)
+                    print('Testing build %s is ready to go' % DT.build_version)
+                    print('Need to create database metadata')
+                    print('Need to msck repair')
+                    print('Need to set oozie jobs start and end time')
+                    print('Need to kill stunnel')
             else:
                 if main_job.change_build and main_job.new_deploy:
                     print('Please choose one option for new deploy(-N)/change build(-C).')
