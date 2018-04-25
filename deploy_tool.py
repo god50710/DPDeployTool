@@ -227,7 +227,7 @@ class DeployTool(object):
 
             # get datetime from aws
             if "System" in job:
-                f_flag_day = datetime.now().strftime('%Y-%m-%d')
+                f_flag_day = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
             else:
                 f_flag_day = self.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
                                               (site_s3_path, self.FLAG_MAPPING[job]))[-11:-1]
@@ -238,17 +238,17 @@ class DeployTool(object):
             if jobs[0] == "hourly":
                 if "TxExport" in job:
                     f_flag_hour = self.run_command("aws s3 ls %s/%s/pdd=%s/ | tail -1 | awk '{print $4}'" %
-                                                   (site_s3_path, self.FLAG_MAPPING[job], f_flag_day))[5:6]
+                                                   (site_s3_path, self.FLAG_MAPPING[job], f_flag_day))[4:6]
                 else:
                     f_flag_hour = self.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
-                                                   (site_s3_path, self.FLAG_MAPPING[job], f_flag_day))[3:4]
+                                                   (site_s3_path, self.FLAG_MAPPING[job], f_flag_day))[2:4]
                 if not re.match('\d{1,2}', f_flag_hour):
                     raise Exception('[Error] Get malformed hour from s3:', f_flag_hour)
             elif "System" in job:
                 f_flag_hour = "02"
             else:
                 f_flag_hour = "00"
-
+            print('Last f_flag date: %s, hour: %s' % (f_flag_day, f_flag_hour))
             job_start_time = datetime.strptime(f_flag_day + f_flag_hour, '%Y-%m-%d%H') + add_time
             job_end_time = job_start_time + timedelta(days=36524)
             job_time_list.append(
@@ -388,7 +388,7 @@ class DeployTool(object):
             print('# To deploy on a new EMR as Production Site')
             print('python %s -s production -N' % os.path.basename(__file__))
             print('# To change build on Beta Site')
-            print('python %s -s test -b 280 -suffix eric_test -timeout 28800 -concurrency 3 -memory' %
+            print('python %s -s test -b 280 -suffix eric_test -timeout 28800 -con 3 -memory' %
                   os.path.basename(__file__))
             print('# To change build on Beta Site')
             print('python %s -s beta -C' % os.path.basename(__file__))
@@ -401,6 +401,11 @@ class DeployTool(object):
 
     def import_signature(self):
         pass
+
+    def repair_partition(self):
+        pass
+
+
 
 
 if __name__ == "__main__":
