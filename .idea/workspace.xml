@@ -25,8 +25,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="339">
-              <caret line="242" column="100" lean-forward="true" selection-end-line="443" />
+            <state relative-caret-position="-6503">
+              <caret line="188" column="54" lean-forward="true" selection-start-line="188" selection-start-column="54" selection-end-line="188" selection-end-column="54" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -69,9 +69,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="7">
-    <option name="y" value="45" />
-    <option name="width" value="1680" />
-    <option name="height" value="877" />
+    <option name="x" value="-1441" />
+    <option name="y" value="143" />
+    <option name="width" value="1278" />
+    <option name="height" value="760" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="1" id="Add" />
@@ -182,12 +183,12 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-1928" y="-8" width="1936" height="1096" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14166667" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.503125" side_tool="true" visible="true" weight="0.06695005" />
+      <window_info active="true" anchor="bottom" id="Event Log" order="7" sideWeight="0.503125" side_tool="true" visible="true" weight="0.06422018" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.496875" weight="0.3282365" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" />
@@ -549,8 +550,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="339">
-          <caret line="242" column="100" lean-forward="true" selection-end-line="443" />
+        <state relative-caret-position="-6503">
+          <caret line="188" column="54" lean-forward="true" selection-start-line="188" selection-start-column="54" selection-end-line="188" selection-end-column="54" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>

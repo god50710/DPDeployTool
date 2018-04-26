@@ -12,7 +12,67 @@ class DeployTool(object):
     AWS_VERIFIED_BUILD_PATH = "s3://eric-staging-us-west-2/build"
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
-    VERSION = "20180420"
+    VERSION = "20180425"
+    REPAIR_TABLES = {
+        "trs_src": ["akamai_malicious_20171218",
+                    "akamai_malicious_20180319",
+                    "ddi_001_20171218",
+                    "honeypot_ssh_2",
+                    "honeypot_telnet_2",
+                    "ips_20171218",
+                    "ncie_001_20171218",
+                    "router_security_20171218"],
+        "pm_src": ["t_dpi_config_stats_by_brand_weekly",
+                   "t_dpi_config_stats_by_country_weekly",
+                   "t_dpi_config_stats_raw_weekly",
+                   "t_ips_hourly",
+                   "t_ips_stat_daily"],
+        "dp": ["e_app_inf",
+               "e_app_rule",
+               "e_country_region_mapping",
+               "e_ddi_001_parquet",
+               "e_device_family",
+               "e_device_name",
+               "e_device_type",
+               "e_fingerprint",
+               "e_ips_rule",
+               "e_ips_rule_bypass_list",
+               "e_ncie_001_parquet",
+               "e_os_class",
+               "e_os_name",
+               "e_os_vendor",
+               "e_routerinfo_001_parquet",
+               "e_routerstat_001_parquet",
+               "e_tmis_cam_001_parquet",
+               "e_user_agent",
+               "t_cam_bfld_hourly",
+               "t_cam_collection_daily",
+               "t_cam_collection_weekly",
+               "t_cam_info_hourly",
+               "t_cam_ips_hit_rule_collection_daily",
+               "t_cam_rule_daily",
+               "t_cam_security_hourly",
+               "t_cam_session_hourly",
+               "t_cam_stat_hourly",
+               "t_cam_trs_hourly",
+               "t_device_collection_daily",
+               "t_device_hourly",
+               "t_device_session_hourly",
+               "t_ips_hit_rule_collection_daily",
+               "t_router_collection_weekly",
+               "t_router_device_daily",
+               "t_router_hourly",
+               "t_router_scanned_port_event_aggregation_daily",
+               "t_router_security_hourly",
+               "t_rule_daily",
+               "t_rule_stats_weekly",
+               "t_security_hourly",
+               "t_traffic_daily",
+               "t_traffic_stats_daily",
+               ],
+        "datalake": ["akamai_rgom",
+                     "akamai_web",
+                     "iotlog"]}
 
     def __init__(self):
         self.build_folder = ""
@@ -117,7 +177,7 @@ class DeployTool(object):
         self.DAILY_JOB.append(daily_job)
         self.WEEKLY_JOB.append(weekly_job)
 
-    def get_build(self, build_name=""):
+    def get_build(self,build_name=""):
         if not build_name:
             build_folder = self.AWS_VERIFIED_BUILD_PATH
             build_file = self.run_command("aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | sort | tail -1 | awk '{print $4}'"
@@ -126,7 +186,7 @@ class DeployTool(object):
             build_folder = self.AWS_TESTING_BUILD_PATH
             build_file = self.run_command(
                 "aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | grep '%s' | sort | tail -1 | awk '{print $4}'"
-                % (build_folder, build_name))[:-1]
+                    % (build_folder, build_name))[:-1]
         if not build_file:
             raise Exception('[Error] No available build to deploy')
         self.run_command("aws s3 cp %s/%s /home/hadoop/" % (build_folder, build_file))
@@ -242,7 +302,7 @@ class DeployTool(object):
                 else:
                     f_flag_hour = self.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
                                                    (site_s3_path, self.FLAG_MAPPING[job], f_flag_day))[2:4]
-                if not re.match('\d{1,2}', f_flag_hour):
+                if not re.match('\d{2}', f_flag_hour):
                     raise Exception('[Error] Get malformed hour from s3:', f_flag_hour)
             elif "System" in job:
                 f_flag_hour = "02"
@@ -367,6 +427,32 @@ class DeployTool(object):
         self.run_command("crontab %s" % cronjob_file)
         self.run_command("rm %s" % cronjob_file)
 
+    def disable_stunnel(self):
+        self.run_command("ps -ef | grep stunnel | awk '{print $1}' | xargs sudo kill -9")
+
+    def repair_partition(self, site, database):
+        def repair(repair_site, repair_database):
+            repair_tables = self.REPAIR_TABLES[repair_database]
+            if repair_site == "beta":
+                repair_database = repair_database + "_beta"
+            for table in repair_tables:
+                # self.run_command('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' %
+                # (repair_database, table))
+                print('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' %
+                      (repair_database, table))
+
+        if (site == "production" and database in ("trs_src", "pm_src", "datalake", "dp")) or (
+                site == "beta" and database == "dp"):
+            repair(site, database)
+        elif database == "all":
+            if site == "beta":
+                repair(site, "dp")
+            else:
+                for database in self.REPAIR_TABLES.keys():
+                    repair(site, database)
+        else:
+            raise Exception('[Error] Repair target database %s is invalid' % database)
+
     def command_parser(self):
         usage = "\t%s [options]\nTool version:\t%s" % (sys.argv[0], self.VERSION)
         parser = OptionParser(usage)
@@ -374,12 +460,13 @@ class DeployTool(object):
         parser.add_option("-N", action="store_true", dest="new_deploy", help="Execute a new deploy on EMR")
         parser.add_option("-C", action="store_true", dest="change_build", help="Execute change build on EMR")
         parser.add_option("-c", type="string", dest="check_job", help="Check Oozie job status")
-        parser.add_option("--build", type="string", dest="build_name", help="Specify build name")
-        parser.add_option("--timeout", type="int", dest="timeout", default="180", help="Set oozie job timeout")
+        parser.add_option("-r", type="string", dest="repair", help="Repair partitions")
+        parser.add_option("-b", type="string", dest="build_name", help="Specify build name")
+        parser.add_option("-t", type="int", dest="timeout", default="180", help="Set oozie job timeout")
         parser.add_option("--suffix", type="string", dest="suffix", default="function",
                           help='Set database/s3 bucket name suffix')
         parser.add_option("--con", type="int", dest="concurrency", default=1, help="Set oozie jobs concurrency")
-        parser.add_option("--mem", action="store_true", dest="memory", default=False, help="Keep hql memory limits")
+        parser.add_option("-m", action="store_true", dest="memory", default=False, help="Keep hql memory limits")
         if len(sys.argv) == 1:
             parser.print_help()
             print('\nQuick Start:')
@@ -388,10 +475,13 @@ class DeployTool(object):
             print('# To deploy on a new EMR as Production Site')
             print('python %s -s production -N' % os.path.basename(__file__))
             print('# To change build on Beta Site')
-            print('python %s -s test -b 280 -suffix eric_test -timeout 28800 -con 3 -memory' %
-                  os.path.basename(__file__))
-            print('# To change build on Beta Site')
             print('python %s -s beta -C' % os.path.basename(__file__))
+            print('# To repair partition on Production Site')
+            print('python %s -s production -r' % os.path.basename(__file__))
+            print('python %s -s beta -C' % os.path.basename(__file__))
+            print('# To prepare testing build on current site')
+            print('python %s -s test -b 280 -suffix eric_test -t 28800 -con 3 -m' %
+                  os.path.basename(__file__))
             print('# To check all Oozie job status')
             print('python %s -c all' % os.path.basename(__file__))
             print('# To check specific Oozie job status')
@@ -399,26 +489,16 @@ class DeployTool(object):
             exit(0)
         return parser.parse_args()[0]
 
-    def import_signature(self):
-        pass
-
-    def repair_partition(self):
-        pass
-
-
-
 
 if __name__ == "__main__":
     DT = DeployTool()
     main_job = DT.command_parser()
     if main_job.site:
-        if main_job.site != "production" and main_job.site != "beta" and main_job.site != "test":
+        if main_job.site not in ("production", "beta", "test"):
             print('Please assign site as "production", "beta" or "test".')
         else:
             if main_job.site == "test":
-                if not main_job.build_name:
-                    print('Please insert build version or full name with -b.')
-                else:
+                if main_job.build_name:
                     DT.get_build(main_job.build_name)
                     DT.config_env(main_job.site, suffix=main_job.suffix, concurrency=main_job.concurrency,
                                   timeout=main_job.timeout, memory=main_job.memory)
@@ -427,9 +507,12 @@ if __name__ == "__main__":
                     print('Need to msck repair')
                     print('Need to set oozie jobs start and end time')
                     print('Need to kill stunnel')
+                elif main_job.repair:
+                    print('Testing site cannot using repair partition function')
+
             else:
                 if main_job.change_build and main_job.new_deploy:
-                    print('Please choose one option for new deploy(-N)/change build(-C).')
+                    print('Please choose one option for new deploy(-N)/change build(-C)/repair partition(-r).')
                 elif main_job.new_deploy:
                     DT.get_build()
                     DT.add_cronjob(main_job.site)
@@ -444,5 +527,7 @@ if __name__ == "__main__":
                     DT.wait_and_suspend_all_jobs(DT.get_job_info("all"))
                     DT.set_job_time(main_job.site)
                     DT.deploy(main_job.site, change_build=True)
+                elif main_job.repair:
+                    DT.repair_partition(main_job.site, main_job.repair)
     elif main_job.check_job:
         DT.check_job_status(main_job.check_job, DT.get_job_info(main_job.check_job))
