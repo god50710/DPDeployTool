@@ -4,7 +4,6 @@ import re
 import subprocess
 import sys
 from datetime import datetime, timedelta
-from optparse import OptionParser
 
 
 class DeployTool(object):
@@ -178,13 +177,16 @@ class DeployTool(object):
         self.DAILY_JOB.append(daily_job)
         self.WEEKLY_JOB.append(weekly_job)
 
-    def get_build(self, build_name=""):
-        if not build_name:
-            build_folder = self.AWS_VERIFIED_BUILD_PATH
-            build_file = self.run_command("aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | sort | tail -1 | awk '{print $4}'"
-                                          % self.AWS_VERIFIED_BUILD_PATH)[:-1]
-        else:
+    def get_build(self, mode="verified", build_name=""):
+        if mode == "test":
             build_folder = self.AWS_TESTING_BUILD_PATH
+        else:
+            build_folder = self.AWS_VERIFIED_BUILD_PATH
+
+        if not build_name:
+            build_file = self.run_command("aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | sort | tail -1 | awk '{print $4}'"
+                                          % build_folder)[:-1]
+        else:
             build_file = self.run_command(
                 "aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | grep '%s' | sort | tail -1 | awk '{print $4}'"
                 % (build_folder, build_name))[:-1]
@@ -503,19 +505,16 @@ if __name__ == "__main__":
         else:
             if main_job.site == "test":
                 if main_job.build_name:
-                    DT.get_build(main_job.build_name)
-                    DT.config_env(main_job.site, suffix=main_job.suffix, concurrency=main_job.concurrency,
-                                  timeout=main_job.timeout, memory=main_job.memory)
-                    print('Testing build %s is ready to go' % DT.build_version)
-                    print('Need to create database metadata')
-                    print('Need to msck repair')
-                    print('Need to set oozie jobs start and end time')
-                    DT.disable_stunnel()
-                elif main_job.repair:
-                    print('Testing site cannot using repair partition function')
+                    DT.get_build(build_name=main_job.build_name, mode="test")
                 else:
-                    print('Please using -b <build_number>, -m, --con <concurrency>, -t <timeout>, '
-                          '--suffix <bucket and database suffix> after "-s test"')
+                    DT.get_build(mode="test")
+                DT.config_env(main_job.site, suffix=main_job.suffix, concurrency=main_job.concurrency,
+                              timeout=main_job.timeout, memory=main_job.memory)
+                print('Testing build %s is ready to go' % DT.build_version)
+                print('Need to create database metadata')
+                print('Need to msck repair')
+                print('Need to set oozie jobs start and end time')
+                DT.disable_stunnel()
             else:
                 if main_job.new_deploy:
                     DT.get_build()

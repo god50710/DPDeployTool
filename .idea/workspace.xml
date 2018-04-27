@@ -25,8 +25,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="429">
-              <caret line="463" column="52" lean-forward="true" selection-start-line="463" selection-start-column="52" selection-end-line="463" selection-end-column="52" />
+            <state relative-caret-position="555">
+              <caret line="512" column="17" selection-end-line="540" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
               </folding>
@@ -68,7 +68,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="123" />
     <option name="y" value="158" />
     <option name="width" value="1278" />
@@ -550,8 +550,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="429">
-          <caret line="463" column="52" lean-forward="true" selection-start-line="463" selection-start-column="52" selection-end-line="463" selection-end-column="52" />
+        <state relative-caret-position="555">
+          <caret line="512" column="17" selection-end-line="540" />
           <folding>
             <element signature="e#0#15#0" expanded="true" />
           </folding>
