@@ -441,10 +441,10 @@ class DeployTool(object):
             if repair_site == "beta":
                 repair_database = repair_database + "_beta"
             for table in repair_tables:
-                # self.run_command('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' %
-                # (repair_database, table))
-                print('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' %
-                      (repair_database, table))
+                self.run_command('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' %
+                                 (repair_database, table))
+                # print('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' %
+                #      (repair_database, table))
 
         if (site == "production" and database in ("trs_src", "pm_src", "datalake", "dp")) or (
                 site == "beta" and database == "dp"):
