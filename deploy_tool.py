@@ -1,3 +1,4 @@
+import argparse
 import os
 import re
 import subprocess
@@ -177,7 +178,7 @@ class DeployTool(object):
         self.DAILY_JOB.append(daily_job)
         self.WEEKLY_JOB.append(weekly_job)
 
-    def get_build(self,build_name=""):
+    def get_build(self, build_name=""):
         if not build_name:
             build_folder = self.AWS_VERIFIED_BUILD_PATH
             build_file = self.run_command("aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | sort | tail -1 | awk '{print $4}'"
@@ -186,7 +187,7 @@ class DeployTool(object):
             build_folder = self.AWS_TESTING_BUILD_PATH
             build_file = self.run_command(
                 "aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | grep '%s' | sort | tail -1 | awk '{print $4}'"
-                    % (build_folder, build_name))[:-1]
+                % (build_folder, build_name))[:-1]
         if not build_file:
             raise Exception('[Error] No available build to deploy')
         self.run_command("aws s3 cp %s/%s /home/hadoop/" % (build_folder, build_file))
@@ -428,7 +429,9 @@ class DeployTool(object):
         self.run_command("rm %s" % cronjob_file)
 
     def disable_stunnel(self):
-        self.run_command("ps -ef | grep stunnel | awk '{print $1}' | xargs sudo kill -9")
+        current_job = self.run_command("ps -ef | grep [s]tunnel | awk '{print $2}'")
+        if current_job:
+            self.run_command("ps -ef | grep [s]tunnel | awk '{print $2}' | xargs sudo kill -9", throw_error=False)
 
     def repair_partition(self, site, database):
         def repair(repair_site, repair_database):
@@ -454,19 +457,22 @@ class DeployTool(object):
             raise Exception('[Error] Repair target database %s is invalid' % database)
 
     def command_parser(self):
-        usage = "\t%s [options]\nTool version:\t%s" % (sys.argv[0], self.VERSION)
-        parser = OptionParser(usage)
-        parser.add_option("-s", type="string", dest="site", help="Choose deploy target site")
-        parser.add_option("-N", action="store_true", dest="new_deploy", help="Execute a new deploy on EMR")
-        parser.add_option("-C", action="store_true", dest="change_build", help="Execute change build on EMR")
-        parser.add_option("-c", type="string", dest="check_job", help="Check Oozie job status")
-        parser.add_option("-r", type="string", dest="repair", help="Repair partitions")
-        parser.add_option("-b", type="string", dest="build_name", help="Specify build name")
-        parser.add_option("-t", type="int", dest="timeout", default="180", help="Set oozie job timeout")
-        parser.add_option("--suffix", type="string", dest="suffix", default="function",
-                          help='Set database/s3 bucket name suffix')
-        parser.add_option("--con", type="int", dest="concurrency", default=1, help="Set oozie jobs concurrency")
-        parser.add_option("-m", action="store_true", dest="memory", default=False, help="Keep hql memory limits")
+        parser = argparse.ArgumentParser()
+        action_group = parser.add_argument_group('Actions')
+        action_group.add_argument("-s", dest="site", help="Choose deploy target site")
+        action_group.add_argument("-c", dest="check_job", help="Check Oozie job status")
+        site_group = parser.add_mutually_exclusive_group()
+        site_group.add_argument("-N", action="store_true", dest="new_deploy", help="Execute a new deploy on EMR")
+        site_group.add_argument("-C", action="store_true", dest="change_build", help="Execute change build on EMR")
+        site_group.add_argument("-r", dest="repair", help="Repair partitions")
+        test_env_group = parser.add_argument_group('Parameters for test site environment')
+        test_env_group.add_argument("-b", dest="build_name", help="Specify build name")
+        test_env_group.add_argument("-t", type=int, dest="timeout", default="180", help="Set oozie job timeout")
+        test_env_group.add_argument("--suffix", dest="suffix", default="function",
+                                    help='Set database/s3 bucket name suffix')
+        test_env_group.add_argument("--con", type=int, dest="concurrency", default=1, help="Set oozie jobs concurrency")
+        test_env_group.add_argument("-m", action="store_true", dest="memory", default=False,
+                                    help="Keep hql memory limits")
         if len(sys.argv) == 1:
             parser.print_help()
             print('\nQuick Start:')
@@ -478,16 +484,14 @@ class DeployTool(object):
             print('python %s -s beta -C' % os.path.basename(__file__))
             print('# To repair partition on Production Site')
             print('python %s -s production -r' % os.path.basename(__file__))
-            print('python %s -s beta -C' % os.path.basename(__file__))
             print('# To prepare testing build on current site')
-            print('python %s -s test -b 280 -suffix eric_test -t 28800 -con 3 -m' %
-                  os.path.basename(__file__))
+            print('python %s -s test -b 280 -suffix eric_test -t 28800 -con 3 -m' % os.path.basename(__file__))
             print('# To check all Oozie job status')
             print('python %s -c all' % os.path.basename(__file__))
             print('# To check specific Oozie job status')
             print('python %s -c T1Security' % os.path.basename(__file__))
             exit(0)
-        return parser.parse_args()[0]
+        return parser.parse_args()
 
 
 if __name__ == "__main__":
@@ -506,14 +510,14 @@ if __name__ == "__main__":
                     print('Need to create database metadata')
                     print('Need to msck repair')
                     print('Need to set oozie jobs start and end time')
-                    print('Need to kill stunnel')
+                    DT.disable_stunnel()
                 elif main_job.repair:
                     print('Testing site cannot using repair partition function')
-
+                else:
+                    print('Please using -b <build_number>, -m, --con <concurrency>, -t <timeout>, '
+                          '--suffix <bucket and database suffix> after "-s test"')
             else:
-                if main_job.change_build and main_job.new_deploy:
-                    print('Please choose one option for new deploy(-N)/change build(-C)/repair partition(-r).')
-                elif main_job.new_deploy:
+                if main_job.new_deploy:
                     DT.get_build()
                     DT.add_cronjob(main_job.site)
                     DT.config_env(main_job.site)
@@ -529,5 +533,9 @@ if __name__ == "__main__":
                     DT.deploy(main_job.site, change_build=True)
                 elif main_job.repair:
                     DT.repair_partition(main_job.site, main_job.repair)
+                else:
+                    print('Please using one of -N, -C and -r <database> after "-s production" and "-s beta"')
     elif main_job.check_job:
         DT.check_job_status(main_job.check_job, DT.get_job_info(main_job.check_job))
+    else:
+        print('Please using -s <site> or -c <job>')
