@@ -484,7 +484,7 @@ class DeployTool(object):
             for table in repair_tables:
                 cls.run_command(
                     'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                    (repair_database, table))
+                    (repair_database, table), throw_error=False)
 
         if (site == "production" and database in ("trs_src", "pm_src", "datalake", "dp")) or \
                 (site == "beta" and database == "dp_beta"):
