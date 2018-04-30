@@ -501,6 +501,18 @@ class DeployTool(object):
             raise Exception('[Error] Repair target database %s is invalid' % database)
 
     @classmethod
+    def get_partitions(cls):
+        pass
+
+    @classmethod
+    def get_missing_partitions(cls):
+        pass
+
+    @classmethod
+    def fill_dependency(cls):
+        pass
+
+    @classmethod
     def command_parser(cls):
         parser = argparse.ArgumentParser()
         action_group = parser.add_argument_group('Actions')

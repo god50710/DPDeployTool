@@ -25,10 +25,22 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="470">
-              <caret line="493" column="33" lean-forward="true" selection-start-line="493" selection-start-column="33" selection-end-line="493" selection-end-column="33" />
+            <state relative-caret-position="401">
+              <caret line="514" column="16" lean-forward="true" selection-start-line="514" selection-start-column="16" selection-end-line="514" selection-end-column="16" />
               <folding>
                 <element signature="e#0#40#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="check_partitions.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/check_partitions.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="506">
+              <caret line="248" lean-forward="true" selection-start-line="248" selection-end-line="248" />
+              <folding>
+                <element signature="e#0#11#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -59,6 +71,7 @@
       <find>FLAG_MAPPING</find>
       <find>FLAG_MA</find>
       <find>version</find>
+      <find>pass</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -70,11 +83,12 @@
         <option value="$PROJECT_DIR$/quick_deploy..py" />
         <option value="$PROJECT_DIR$/quick_deploy.py" />
         <option value="$PROJECT_DIR$/test_deployTool.py" />
+        <option value="$PROJECT_DIR$/check_partitions.py" />
         <option value="$PROJECT_DIR$/deploy_tool.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="-1289" />
     <option name="y" value="213" />
     <option name="width" value="1278" />
@@ -194,17 +208,17 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1928" y="-8" width="1936" height="1096" extended-state="6" />
+    <frame x="-1928" y="-8" width="1696" height="1026" extended-state="7" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49889624" visible="true" weight="0.14166667" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49880382" visible="true" weight="0.16190477" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50416666" side_tool="true" visible="true" weight="0.0764526" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50416666" side_tool="true" visible="true" weight="0.08232711" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49583334" weight="0.3282365" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49880952" weight="0.35384616" />
-      <window_info active="true" id="Structure" order="1" sideWeight="0.50110376" side_tool="true" visible="true" weight="0.14166667" />
+      <window_info id="Structure" order="1" sideWeight="0.50119615" side_tool="true" visible="true" weight="0.16190477" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
@@ -236,16 +250,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/deploy_tool.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="483">
-          <caret line="23" column="38" lean-forward="true" selection-start-line="23" selection-start-column="38" selection-end-line="23" selection-end-column="38" />
-          <folding>
-            <element signature="e#0#40#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/quick_deploy.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2142">
@@ -559,10 +563,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/check_partitions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="506">
+          <caret line="248" lean-forward="true" selection-start-line="248" selection-end-line="248" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="470">
-          <caret line="493" column="33" lean-forward="true" selection-start-line="493" selection-start-column="33" selection-end-line="493" selection-end-column="33" />
+        <state relative-caret-position="401">
+          <caret line="514" column="16" lean-forward="true" selection-start-line="514" selection-start-column="16" selection-end-line="514" selection-end-column="16" />
           <folding>
             <element signature="e#0#40#0" expanded="true" />
           </folding>
