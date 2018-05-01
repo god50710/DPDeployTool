@@ -505,7 +505,7 @@ class DeployTool(object):
         pass
 
     @classmethod
-    def get_missing_partitions(cls):
+    def check_missing_partitions(cls):
         pass
 
     @classmethod
