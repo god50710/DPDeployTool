@@ -395,7 +395,7 @@ class DeployTool(object):
         if target == "all":
             target = ""
         info = cls.run_command(
-            "oozie jobs info -jobtype coordinator -len 3000|grep '%s.*RUNNING\|%s.*PREP\|%s.*SUSPEND'|sort -k8" %
+            "oozie jobs info -jobtype coordinator -len 5000|grep '%s.*RUNNING\|%s.*PREP\|%s.*SUSPEND'|sort -k8" %
             (target, target, target), show_command=False)[:-1].rstrip('\n').split('\n')
         print("JobID\t\t\t\t     Next Materialized    App Name")
         app_info = {}
@@ -415,7 +415,7 @@ class DeployTool(object):
             counter = 1
             for oozie_job in oozie_job_list:
                 print('\n=== Job Checking(%d/%d) ===' % (counter, len(oozie_job_list)))
-                print(cls.run_command("oozie job -info %s -len 3000|grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" %
+                print(cls.run_command("oozie job -info %s -len 5000|grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" %
                                       (oozie_job_list[oozie_job][0], jobs_to_hide), show_command=False))
                 counter += 1
         else:
@@ -492,14 +492,16 @@ class DeployTool(object):
             missing_partitions = list()
             partition_list = cls.get_partitions(check_db, check_table)
             while check_time < datetime.now() - timedelta(days=1):
-                if time_unit == timedelta(hours=1) and \
-                        check_time.strftime('d=%Y-%m-%d/h=%H') not in partition_list and \
-                        check_time.strftime('pdd=%Y-%m-%d/phh=%H') not in partition_list and \
-                        check_time.strftime('dt=%Y-%m-%d-%H') not in partition_list:
-                    missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
-                elif check_time.strftime('d=%Y-%m-%d') not in partition_list and \
-                        check_time.strftime('pdd=%Y-%m-%d') not in partition_list:
-                    missing_partitions.append(check_time.strftime('date=%Y-%m-%d'))
+                if time_unit == timedelta(hours=1):
+                    if check_time.strftime('d=%Y-%m-%d/h=%H') not in partition_list and \
+                            check_time.strftime('pdd=%Y-%m-%d/phh=%H') not in partition_list and \
+                            check_time.strftime('dt=%Y-%m-%d-%H') not in partition_list:
+                        missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
+                else:
+                    if check_time.strftime('d=%Y-%m-%d') not in partition_list and \
+                            check_time.strftime('pdd=%Y-%m-%d') not in partition_list and \
+                            check_time.strftime('dt=%Y-%m-%d') not in partition_list:
+                        missing_partitions.append(check_time.strftime('date=%Y-%m-%d'))
                 check_time += time_unit
             return missing_partitions
 
@@ -522,7 +524,15 @@ class DeployTool(object):
         for item in all_missing_partitions.keys():
             if all_missing_partitions[item]:
                 print(item + ' has %s missing partitions:' % len(all_missing_partitions[item]))
-                print('\t' + all_missing_partitions[item][0])
+                if len(all_missing_partitions[item]) < 50:
+                    for each in all_missing_partitions[item]:
+                        print('\t' + each)
+                else:
+                    print('\t' + all_missing_partitions[item][0])
+                    print('\t' + all_missing_partitions[item][1])
+                    print('\t.....')
+                    print('\t' + all_missing_partitions[item][-2])
+                    print('\t' + all_missing_partitions[item][-1])
         return all_missing_partitions
 
     @classmethod
