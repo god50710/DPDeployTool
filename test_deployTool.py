@@ -1,4 +1,4 @@
-from unittest import TestCase, mock
+from unittest import TestCase
 from unittest.mock import MagicMock
 
 from deploy_tool import DeployTool
@@ -59,5 +59,3 @@ class TestDeployTool(TestCase):
         DT.add_cronjob("production", "/home/hadoop/SHN-Data-Pipeline-1.0.530")
         if "/trs/update_geoip/geoip_bg_executor_with_mail.sh production" not in str(DT.run_command.call_args_list):
             raise Exception
-
-

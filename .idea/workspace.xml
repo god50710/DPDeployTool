@@ -18,8 +18,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1122">
-              <caret line="464" column="28" selection-start-line="464" selection-start-column="28" selection-end-line="464" selection-end-column="28" />
+            <state relative-caret-position="294">
+              <caret line="500" column="54" selection-start-line="500" selection-start-column="54" selection-end-line="500" selection-end-column="54" />
             </state>
           </provider>
         </entry>
@@ -27,10 +27,22 @@
       <file leaf-file-name="test_deployTool.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test_deployTool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="408">
-              <caret line="61" lean-forward="true" selection-start-line="61" selection-end-line="61" />
+            <state relative-caret-position="126">
+              <caret line="24" column="17" lean-forward="true" selection-start-line="24" selection-start-column="17" selection-end-line="24" selection-end-column="17" />
               <folding>
-                <element signature="e#0#35#0" expanded="true" />
+                <element signature="e#0#30#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="check_partitions.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/check_partitions.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="575">
+              <caret line="202" column="20" lean-forward="true" selection-start-line="202" selection-start-column="20" selection-end-line="202" selection-end-column="20" />
+              <folding>
+                <element signature="e#0#11#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -63,6 +75,9 @@
       <find>version</find>
       <find>pass</find>
       <find>beeline</find>
+      <find>%h</find>
+      <find>result</find>
+      <find>conf</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -74,16 +89,16 @@
         <option value="$PROJECT_DIR$/quick_deploy..py" />
         <option value="$PROJECT_DIR$/quick_deploy.py" />
         <option value="$PROJECT_DIR$/check_partitions.py" />
-        <option value="$PROJECT_DIR$/deploy_tool.py" />
         <option value="$PROJECT_DIR$/test_deployTool.py" />
+        <option value="$PROJECT_DIR$/deploy_tool.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
-    <option name="x" value="-8" />
-    <option name="y" value="-8" />
-    <option name="width" value="1696" />
-    <option name="height" value="1026" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="38" />
+    <option name="y" value="140" />
+    <option name="width" value="1278" />
+    <option name="height" value="760" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="1" id="Add" />
@@ -129,7 +144,7 @@
     </option>
   </component>
   <component name="RunManager">
-    <configuration name="Unittests in C:/Users/eric_m_kao/PycharmProjects/DPDeployTool/test_deployTool.py" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests in test_deployTool.py" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="DPDeployTool" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -144,7 +159,7 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python tests.Unittests in C:/Users/eric_m_kao/PycharmProjects/DPDeployTool/test_deployTool.py" />
+        <item itemvalue="Python tests.Unittests in test_deployTool.py" />
       </list>
     </recent_temporary>
   </component>
@@ -167,18 +182,6 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="Unittests_in_C__Users_eric_m_kao_PycharmProjects_DPDeployTool_test_deployTool_py - 2018.05.01 at 23h 50m 30s.xml">
-      <configuration name="Unittests in C:/Users/eric_m_kao/PycharmProjects/DPDeployTool/test_deployTool.py" configurationId="tests" />
-    </history-entry>
-    <history-entry file="Unittests_in_C__Users_eric_m_kao_PycharmProjects_DPDeployTool_test_deployTool_py - 2018.05.01 at 23h 50m 41s.xml">
-      <configuration name="Unittests in C:/Users/eric_m_kao/PycharmProjects/DPDeployTool/test_deployTool.py" configurationId="tests" />
-    </history-entry>
-    <history-entry file="Unittests_in_C__Users_eric_m_kao_PycharmProjects_DPDeployTool_test_deployTool_py - 2018.05.01 at 23h 50m 49s.xml">
-      <configuration name="Unittests in C:/Users/eric_m_kao/PycharmProjects/DPDeployTool/test_deployTool.py" configurationId="tests" />
-    </history-entry>
-    <history-entry file="Unittests_in_C__Users_eric_m_kao_PycharmProjects_DPDeployTool_test_deployTool_py - 2018.05.01 at 23h 50m 54s.xml">
-      <configuration name="Unittests in C:/Users/eric_m_kao/PycharmProjects/DPDeployTool/test_deployTool.py" configurationId="tests" />
-    </history-entry>
     <history-entry file="Unittests_in_C__Users_eric_m_kao_PycharmProjects_DPDeployTool_test_deployTool_py - 2018.05.01 at 23h 52m 16s.xml">
       <configuration name="Unittests in C:/Users/eric_m_kao/PycharmProjects/DPDeployTool/test_deployTool.py" configurationId="tests" />
     </history-entry>
@@ -197,28 +200,50 @@
     <history-entry file="Unittests_in_C__Users_eric_m_kao_PycharmProjects_DPDeployTool_test_deployTool_py - 2018.05.01 at 23h 57m 25s.xml">
       <configuration name="Unittests in C:/Users/eric_m_kao/PycharmProjects/DPDeployTool/test_deployTool.py" configurationId="tests" />
     </history-entry>
+    <history-entry file="Unittests_in_C__Users_eric_m_kao_PycharmProjects_DPDeployTool_test_deployTool_py - 2018.05.02 at 10h 07m 48s.xml">
+      <configuration name="Unittests in C:/Users/eric_m_kao/PycharmProjects/DPDeployTool/test_deployTool.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_in_C__Users_eric_m_kao_PycharmProjects_DPDeployTool_test_deployTool_py - 2018.05.02 at 10h 08m 16s.xml">
+      <configuration name="Unittests in C:/Users/eric_m_kao/PycharmProjects/DPDeployTool/test_deployTool.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_in_C__Users_eric_m_kao_PycharmProjects_DPDeployTool_test_deployTool_py - 2018.05.02 at 10h 10m 08s.xml">
+      <configuration name="Unittests in C:/Users/eric_m_kao/PycharmProjects/DPDeployTool/test_deployTool.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_in_C__Users_eric_m_kao_PycharmProjects_DPDeployTool_test_deployTool_py - 2018.05.02 at 10h 10m 57s.xml">
+      <configuration name="Unittests in C:/Users/eric_m_kao/PycharmProjects/DPDeployTool/test_deployTool.py" configurationId="tests" />
+    </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1696" height="1026" extended-state="7" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.16190477" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10625" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.20476191" side_tool="true" visible="true" weight="0.31208792" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5015625" side_tool="true" weight="0.35281616" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.7952381" visible="true" weight="0.31208792" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.4984375" visible="true" weight="0.141339" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="bottom" id="Version Control" order="7" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.16190477" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.7952381" visible="true" weight="0.31208792" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.20476191" side_tool="true" visible="true" weight="0.31208792" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.496875" weight="0.3282365" />
+      <window_info anchor="bottom" id="Terminal" order="7" />
+      <window_info anchor="bottom" id="Python Console" order="7" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
@@ -226,7 +251,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="8" />
+      <option name="time" value="9" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
@@ -495,32 +520,35 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/quick_deploy.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1609">
-          <caret line="233" column="27" lean-forward="true" selection-start-line="233" selection-start-column="27" selection-end-line="233" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/check_partitions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="651">
-          <caret line="188" column="50" lean-forward="true" selection-start-line="188" selection-start-column="50" selection-end-line="188" selection-end-column="50" />
+        <state relative-caret-position="21">
+          <caret line="125" selection-start-line="125" selection-end-line="125" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test_deployTool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="408">
-          <caret line="61" lean-forward="true" selection-start-line="61" selection-end-line="61" />
+        <state relative-caret-position="126">
+          <caret line="24" column="17" lean-forward="true" selection-start-line="24" selection-start-column="17" selection-end-line="24" selection-end-column="17" />
           <folding>
-            <element signature="e#0#35#0" expanded="true" />
+            <element signature="e#0#30#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/check_partitions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="575">
+          <caret line="202" column="20" lean-forward="true" selection-start-line="202" selection-start-column="20" selection-end-line="202" selection-end-column="20" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1122">
-          <caret line="464" column="28" selection-start-line="464" selection-start-column="28" selection-end-line="464" selection-end-column="28" />
+        <state relative-caret-position="294">
+          <caret line="500" column="54" selection-start-line="500" selection-start-column="54" selection-end-line="500" selection-end-column="54" />
         </state>
       </provider>
     </entry>

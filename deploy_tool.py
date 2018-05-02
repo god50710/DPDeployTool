@@ -7,12 +7,13 @@ from datetime import datetime, timedelta
 
 
 class DeployTool(object):
+    START_TIME = datetime(2018, 1, 1)
     AWS_PROD_S3_PATH = "s3://trs-production-us-west-2"
     AWS_BETA_S3_PATH = "s3://trs-production-beta-data-us-west-2"
     AWS_VERIFIED_BUILD_PATH = "s3://eric-staging-us-west-2/build"
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
-    TOOL_VERSION = "20180430"
+    TOOL_VERSION = "20180502"
     REPAIR_TABLES = {
         "trs_src": ["akamai_malicious_20171218",
                     "akamai_malicious_20180319",
@@ -27,24 +28,10 @@ class DeployTool(object):
                    "t_dpi_config_stats_raw_weekly",
                    "t_ips_hourly",
                    "t_ips_stat_daily"],
-        "dp": ["e_app_inf",
-               "e_app_rule",
-               "e_country_region_mapping",
-               "e_ddi_001_parquet",
-               "e_device_family",
-               "e_device_name",
-               "e_device_type",
-               "e_fingerprint",
-               "e_ips_rule",
-               "e_ips_rule_bypass_list",
-               "e_ncie_001_parquet",
-               "e_os_class",
-               "e_os_name",
-               "e_os_vendor",
+        "dp": ["e_ncie_001_parquet",
                "e_routerinfo_001_parquet",
                "e_routerstat_001_parquet",
                "e_tmis_cam_001_parquet",
-               "e_user_agent",
                "t_cam_bfld_hourly",
                "t_cam_collection_daily",
                "t_cam_collection_weekly",
@@ -62,7 +49,6 @@ class DeployTool(object):
                "t_router_collection_weekly",
                "t_router_device_daily",
                "t_router_hourly",
-               "t_router_scanned_port_event_aggregation_daily",
                "t_router_security_hourly",
                "t_rule_daily",
                "t_rule_stats_weekly",
@@ -70,22 +56,9 @@ class DeployTool(object):
                "t_traffic_daily",
                "t_traffic_stats_daily",
                ],
-        "dp_beta": ["e_app_inf",
-                    "e_app_rule",
-                    "e_country_region_mapping",
-                    "e_device_family",
-                    "e_device_name",
-                    "e_device_type",
-                    "e_fingerprint",
-                    "e_ips_rule",
-                    "e_ips_rule_bypass_list",
-                    "e_os_class",
-                    "e_os_name",
-                    "e_os_vendor",
-                    "e_routerinfo_001_parquet",
+        "dp_beta": ["e_routerinfo_001_parquet",
                     "e_routerstat_001_parquet",
                     "e_tmis_cam_001_parquet",
-                    "e_user_agent",
                     "t_cam_bfld_hourly",
                     "t_cam_collection_daily",
                     "t_cam_collection_weekly",
@@ -103,7 +76,6 @@ class DeployTool(object):
                     "t_router_collection_weekly",
                     "t_router_device_daily",
                     "t_router_hourly",
-                    "t_router_scanned_port_event_aggregation_daily",
                     "t_router_security_hourly",
                     "t_rule_daily",
                     "t_rule_stats_weekly",
@@ -501,12 +473,57 @@ class DeployTool(object):
             raise Exception('[Error] Repair target database %s is invalid' % database)
 
     @classmethod
-    def get_partitions(cls):
-        pass
+    def get_partitions(cls, database, table):
+        return cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "show partitions %s.%s;"' %
+                               (database, table))
 
     @classmethod
-    def check_missing_partitions(cls):
-        pass
+    def get_missing_partitions(cls, database="all", table=""):
+        def check_missing_partitions(check_db, check_table):
+            check_time = cls.START_TIME
+            if "daily" in check_table:
+                time_unit = timedelta(days=1)
+            elif "weekly" in check_table:
+                time_unit = timedelta(days=7)
+                while check_time.weekday() != 6:
+                    check_time += timedelta(days=1)
+            else:
+                time_unit = timedelta(hours=1)
+            missing_partitions = list()
+            partition_list = cls.get_partitions(check_db, check_table)
+            while check_time < datetime.now() - timedelta(days=1):
+                if time_unit == timedelta(hours=1) and \
+                        check_time.strftime('d=%Y-%m-%d/h=%H') not in partition_list and \
+                        check_time.strftime('pdd=%Y-%m-%d/phh=%H') not in partition_list and \
+                        check_time.strftime('dt=%Y-%m-%d-%H') not in partition_list:
+                    missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
+                elif check_time.strftime('d=%Y-%m-%d') not in partition_list and \
+                        check_time.strftime('pdd=%Y-%m-%d') not in partition_list:
+                    missing_partitions.append(check_time.strftime('date=%Y-%m-%d'))
+                check_time += time_unit
+            return missing_partitions
+
+        if database != "all" and database not in cls.REPAIR_TABLES.keys():
+            raise Exception('[Error] Invalid database name')
+        elif table and table not in cls.REPAIR_TABLES[database]:
+            raise Exception('[Error] Invalid table name')
+
+        all_missing_partitions = dict()
+        if database == "all":
+            for database in cls.REPAIR_TABLES.keys():
+                for table in cls.REPAIR_TABLES[database]:
+                    all_missing_partitions[database + '.' + table] = check_missing_partitions(database, table)
+        elif not table:
+            for table in cls.REPAIR_TABLES[database]:
+                all_missing_partitions[database + '.' + table] = check_missing_partitions(database, table)
+        else:
+            all_missing_partitions[database + '.' + table] = check_missing_partitions(database, table)
+
+        for item in all_missing_partitions.keys():
+            if all_missing_partitions[item]:
+                print(item + ' has %s missing partitions:' % len(all_missing_partitions[item]))
+                print('\t' + all_missing_partitions[item][0])
+        return all_missing_partitions
 
     @classmethod
     def fill_dependency(cls):
@@ -518,6 +535,10 @@ class DeployTool(object):
         action_group = parser.add_argument_group('Actions')
         action_group.add_argument("-s", dest="site", help="Choose deploy target site")
         action_group.add_argument("-c", dest="check_job", help="Check Oozie job status")
+        action_group.add_argument("-p", action="store_true", dest="check_partition", help="Check missing partition")
+        partition_group = parser.add_argument_group('Parameters for check missing partition')
+        partition_group.add_argument("--database", dest="database", help="Database name")
+        partition_group.add_argument("--table", dest="table", help="Table name")
         site_group = parser.add_mutually_exclusive_group()
         site_group.add_argument("-N", action="store_true", dest="new_deploy", help="Execute a new deploy on EMR")
         site_group.add_argument("-C", action="store_true", dest="change_build", help="Execute change build on EMR")
@@ -590,5 +611,12 @@ if __name__ == "__main__":
                     print('Please using one of -N, -C and -r <database> after "-s production" and "-s beta"')
     elif main_job.check_job:
         DT.check_job_status(main_job.check_job, DT.get_job_info(main_job.check_job))
+    elif main_job.check_partition:
+        if main_job.database and main_job.table:
+            DT.get_missing_partitions(database=main_job.database, table=main_job.table)
+        elif main_job.database:
+            DT.get_missing_partitions(database=main_job.database)
+        else:
+            DT.get_missing_partitions()
     else:
         print('Please using -s <site> or -c <job>')
