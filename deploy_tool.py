@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 
 class DeployTool(object):
-    START_TIME = datetime(2018, 1, 1)
+    START_TIME = datetime(2017, 12, 30)
     AWS_PROD_S3_PATH = "s3://trs-production-us-west-2"
     AWS_BETA_S3_PATH = "s3://trs-production-beta-data-us-west-2"
     AWS_VERIFIED_BUILD_PATH = "s3://eric-staging-us-west-2/build"
@@ -478,7 +478,7 @@ class DeployTool(object):
                                (database, table))
 
     @classmethod
-    def get_missing_partitions(cls, database="all", table=""):
+    def get_missing_partitions_from_cmd(cls, database="all", table=""):
         def check_missing_partitions(check_db, check_table):
             check_time = cls.START_TIME
             if "daily" in check_table:
@@ -534,6 +534,15 @@ class DeployTool(object):
                     print('\t' + all_missing_partitions[item][-2])
                     print('\t' + all_missing_partitions[item][-1])
         return all_missing_partitions
+
+    @classmethod
+    def find_current_build(cls):
+        cls.run_command("ls /home/hadoop/ | grep SHN-Data-Pipeline*/" )
+        pass
+
+    @classmethod
+    def get_missing_partitions_from_flag(cls, database="all", table=""):
+        pass
 
     @classmethod
     def fill_dependency(cls):
@@ -623,10 +632,10 @@ if __name__ == "__main__":
         DT.check_job_status(main_job.check_job, DT.get_job_info(main_job.check_job))
     elif main_job.check_partition:
         if main_job.database and main_job.table:
-            DT.get_missing_partitions(database=main_job.database, table=main_job.table)
+            DT.get_missing_partitions_from_cmd(database=main_job.database, table=main_job.table)
         elif main_job.database:
-            DT.get_missing_partitions(database=main_job.database)
+            DT.get_missing_partitions_from_cmd(database=main_job.database)
         else:
-            DT.get_missing_partitions()
+            DT.get_missing_partitions_from_cmd()
     else:
         print('Please using -s <site> or -c <job>')
