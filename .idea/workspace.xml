@@ -17,8 +17,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="304">
-              <caret line="525" column="95" lean-forward="true" selection-start-line="525" selection-start-column="95" selection-end-line="525" selection-end-column="95" />
+            <state relative-caret-position="498">
+              <caret line="635" column="46" lean-forward="true" selection-start-line="635" selection-start-column="46" selection-end-line="635" selection-end-column="46" />
             </state>
           </provider>
         </entry>
@@ -62,7 +62,12 @@
       <find>%h</find>
       <find>result</find>
       <find>conf</find>
+      <find>get_job_list</find>
+      <find>trs_src</find>
     </findStrings>
+    <replaceStrings>
+      <replace>'t_</replace>
+    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -198,17 +203,16 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="7" />
+    <frame x="-8" y="-8" width="1696" height="1026" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.16145833" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49880952" visible="true" weight="0.16130953" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50364584" side_tool="true" visible="true" weight="0.07757705" />
-      <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49635416" weight="0.32731137" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50364584" side_tool="true" visible="true" weight="0.07692308" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.7952381" weight="0.31208792" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Structure" order="1" sideWeight="0.5011905" side_tool="true" visible="true" weight="0.16130953" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
@@ -218,6 +222,7 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49635416" weight="0.32731137" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
@@ -515,8 +520,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="304">
-          <caret line="525" column="95" lean-forward="true" selection-start-line="525" selection-start-column="95" selection-end-line="525" selection-end-column="95" />
+        <state relative-caret-position="498">
+          <caret line="635" column="46" lean-forward="true" selection-start-line="635" selection-start-column="46" selection-end-line="635" selection-end-column="46" />
         </state>
       </provider>
     </entry>

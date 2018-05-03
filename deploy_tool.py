@@ -14,6 +14,88 @@ class DeployTool(object):
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
     TOOL_VERSION = "20180502"
+    FLAG = {'akamai': {'akamai_rgom': 'Application/shnprj_spn/hive/datalake.db/f_akamai_rgom',
+                       'akamai_web': 'Application/shnprj_spn/hive/datalake.db/f_akamai_web'},
+            'dp': {'e_ddi_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ddi_hourly',
+                   'e_ncie_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ncie_hourly',
+                   'e_routerinfo_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_routerinfo_hourly',
+                   'e_routerstat_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_routerstat_hourly',
+                   'e_tmis_cam_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_tmis_cam_hourly',
+                   't_cam_bfld_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_bfld_hourly',
+                   't_cam_info_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_info_hourly',
+                   't_cam_security_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_security_hourly',
+                   't_cam_session_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_session_hourly',
+                   't_cam_stat_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_stat_hourly',
+                   't_cam_trs_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_trs_hourly',
+                   't_device_hourly': 'Application/shnprj_spn/hive/dp.db/f_device_hourly',
+                   't_device_session_hourly': 'Application/shnprj_spn/hive/dp.db/f_device_session_hourly',
+                   't_router_hourly': 'Application/shnprj_spn/hive/dp.db/f_router_hourly',
+                   't_router_security_hourly': 'Application/shnprj_spn/hive/dp.db/f_router_security_hourly',
+                   't_security_hourly': 'Application/shnprj_spn/hive/dp.db/f_security_hourly',
+                   't_cam_rule_daily': 'Application/shnprj_spn/hive/dp.db/f_cam_rule_daily',
+                   't_rule_daily': 'Application/shnprj_spn/hive/dp.db/f_rule_daily',
+                   't_traffic_daily': 'Application/shnprj_spn/hive/dp.db/f_traffic_daily',
+                   't_cam_collection_daily': 'Application/shnprj_spn/hive/dp.db/f_cam_collection_daily',
+                   't_cam_ips_hit_rule_collection_daily':
+                       'Application/shnprj_spn/hive/dp.db/f_cam_ips_hit_rule_collection_daily',
+                   't_device_collection_daily': 'Application/shnprj_spn/hive/dp.db/f_device_collection_daily',
+                   't_router_device_daily': 'Application/shnprj_spn/hive/dp.db/f_router_device_daily',
+                   't_ips_hit_rule_collection_daily':
+                       'Application/shnprj_spn/hive/dp.db/f_ips_hit_rule_collection_daily',
+                   't_traffic_stats_daily': 'Application/shnprj_spn/hive/dp.db/f_traffic_stats_daily',
+                   't_cam_collection_weekly': 'Application/shnprj_spn/hive/dp.db/f_cam_collection_weekly',
+                   't_router_collection_weekly': 'Application/shnprj_spn/hive/dp.db/f_router_collection_weekly',
+                   't_rule_stats_weekly': 'Application/shnprj_spn/hive/dp.db/f_rule_stats_weekly'},
+            'trs_src': {'akamai_malicious_20171218': 'trs_src/f_akamai_malicious_20171218',
+                        'ddi_001_20171218': 'trs_src/f_ddi_001_20171218',
+                        'ips_20171218': 'trs_src/f_ips_20171218',
+                        'ncie_001_20171218': 'trs_src/f_ncie_001_20171218',
+                        'router_security_20171218': 'trs_src/f_router_security_20171218'},
+            'pm_src': {'t_dpi_config_stats_by_brand_weekly':
+                           'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_by_brand_weekly',
+                       't_dpi_config_stats_by_country_weekly':
+                           'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_by_country_weekly',
+                       't_dpi_config_stats_raw_weekly':
+                           'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_raw_weekly',
+                       't_ips_hourly': 'Application/shnprj_spn/hive/pm_src.db/f_ips_hourly',
+                       't_ips_stat_daily_180d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=180d',
+                       't_ips_stat_daily_1d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=1d',
+                       't_ips_stat_daily_30d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=30d',
+                       't_ips_stat_daily_70d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=7d',
+                       't_ips_stat_daily_90d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=90d',
+                       },
+            'dp_beta': {'e_ddi_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_ddi_hourly',
+                        'e_ncie_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_ncie_hourly',
+                        'e_routerinfo_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_routerinfo_hourly',
+                        'e_routerstat_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_routerstat_hourly',
+                        't_tmis_cam_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_tmis_cam_hourly',
+                        't_cam_bfld_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_bfld_hourly',
+                        't_cam_info_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_info_hourly',
+                        't_cam_security_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_security_hourly',
+                        't_cam_session_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_session_hourly',
+                        't_cam_stat_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_stat_hourly',
+                        't_cam_trs_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_trs_hourly',
+                        't_device_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_device_hourly',
+                        't_device_session_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_device_session_hourly',
+                        't_router_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_router_hourly',
+                        't_router_security_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_router_security_hourly',
+                        't_security_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_security_hourly',
+                        't_cam_rule_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_rule_daily',
+                        't_rule_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_rule_daily',
+                        't_traffic_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_traffic_daily',
+                        't_cam_collection_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_collection_daily',
+                        't_cam_ips_hit_rule_collection_daily':
+                            'Application/shnprj_spn/hive/dp_beta.db/f_cam_ips_hit_rule_collection_daily',
+                        't_device_collection_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_device_collection_daily',
+                        't_router_device_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_router_device_daily',
+                        't_ips_hit_rule_collection_daily':
+                            'Application/shnprj_spn/hive/dp_beta.db/f_ips_hit_rule_collection_daily',
+                        't_traffic_stats_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_traffic_stats_daily',
+                        't_cam_collection_weekly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_collection_weekly',
+                        't_router_collection_weekly':
+                            'Application/shnprj_spn/hive/dp_beta.db/f_router_collection_weekly',
+                        't_rule_stats_weekly': 'Application/shnprj_spn/hive/dp_beta.db/f_rule_stats_weekly'}
+            }
     REPAIR_TABLES = {
         "trs_src": ["akamai_malicious_20171218",
                     "akamai_malicious_20180319",
@@ -473,11 +555,6 @@ class DeployTool(object):
             raise Exception('[Error] Repair target database %s is invalid' % database)
 
     @classmethod
-    def get_partitions(cls, database, table):
-        return cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "show partitions %s.%s;"' %
-                               (database, table))
-
-    @classmethod
     def get_missing_partitions_from_cmd(cls, database="all", table=""):
         def check_missing_partitions(check_db, check_table):
             check_time = cls.START_TIME
@@ -490,7 +567,9 @@ class DeployTool(object):
             else:
                 time_unit = timedelta(hours=1)
             missing_partitions = list()
-            partition_list = cls.get_partitions(check_db, check_table)
+            partition_list = cls.run_command(
+                'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "show partitions %s.%s;"'
+                % (check_db, check_table))
             while check_time < datetime.now() - timedelta(days=1):
                 if time_unit == timedelta(hours=1):
                     if check_time.strftime('d=%Y-%m-%d/h=%H') not in partition_list and \
@@ -537,12 +616,69 @@ class DeployTool(object):
 
     @classmethod
     def find_current_build(cls):
-        cls.run_command("ls /home/hadoop/ | grep SHN-Data-Pipeline*/" )
-        pass
+        current_build = cls.run_command("find /home/hadoop/SHN-Data-Pipeline-* -maxdepth 0 -type d | sort | tail -1 ")
+        if current_build:
+            return current_build, current_build.split('1.0.')[1]
+        else:
+            return cls.get_build()
 
     @classmethod
     def get_missing_partitions_from_flag(cls, database="all", table=""):
-        pass
+        def check_missing_partitions(check_db, check_table):
+            check_time = cls.START_TIME
+            if "daily" in check_table:
+                time_unit = timedelta(days=1)
+            elif "weekly" in check_table:
+                time_unit = timedelta(days=7)
+                while check_time.weekday() != 6:
+                    check_time += timedelta(days=1)
+            else:
+                time_unit = timedelta(hours=1)
+            missing_partitions = list()
+            partition_list = cls.run_command('aws s3 ls %s/%s/ --recursive' % (cls.FLAG[check_db][check_table]))
+            while check_time < datetime.now() - timedelta(days=1):
+                if time_unit == timedelta(hours=1):
+                    if check_time.strftime('d=%Y-%m-%d/h=%H\$') not in partition_list and \
+                            check_time.strftime('pdd=%Y-%m-%d/phh=%H\$') not in partition_list and \
+                            check_time.strftime('dt=%Y-%m-%d-%H\$') not in partition_list:
+                        missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
+                else:
+                    if check_time.strftime('d=%Y-%m-%d\$') not in partition_list and \
+                            check_time.strftime('pdd=%Y-%m-%d\$') not in partition_list and \
+                            check_time.strftime('dt=%Y-%m-%d\$') not in partition_list:
+                        missing_partitions.append(check_time.strftime('date=%Y-%m-%d'))
+                check_time += time_unit
+            return missing_partitions
+
+        if database != "all" and database not in cls.REPAIR_TABLES.keys():
+            raise Exception('[Error] Invalid database name')
+        elif table and table not in cls.REPAIR_TABLES[database]:
+            raise Exception('[Error] Invalid table name')
+
+        all_missing_partitions = dict()
+        if database == "all":
+            for database in cls.FLAG.keys():
+                for table in cls.FLAG[database].keys():
+                    all_missing_partitions[database + '.' + table] = check_missing_partitions(database, table)
+        elif not table:
+            for table in cls.FLAG[database].keys():
+                all_missing_partitions[database + '.' + table] = check_missing_partitions(database, table)
+        else:
+            all_missing_partitions[database + '.' + table] = check_missing_partitions(database, table)
+
+        for item in all_missing_partitions.keys():
+            if all_missing_partitions[item]:
+                print(item + ' has %s missing partitions:' % len(all_missing_partitions[item]))
+                if len(all_missing_partitions[item]) < 50:
+                    for each in all_missing_partitions[item]:
+                        print('\t' + each)
+                else:
+                    print('\t' + all_missing_partitions[item][0])
+                    print('\t' + all_missing_partitions[item][1])
+                    print('\t.....')
+                    print('\t' + all_missing_partitions[item][-2])
+                    print('\t' + all_missing_partitions[item][-1])
+        return all_missing_partitions
 
     @classmethod
     def fill_dependency(cls):
@@ -632,10 +768,13 @@ if __name__ == "__main__":
         DT.check_job_status(main_job.check_job, DT.get_job_info(main_job.check_job))
     elif main_job.check_partition:
         if main_job.database and main_job.table:
-            DT.get_missing_partitions_from_cmd(database=main_job.database, table=main_job.table)
+            # DT.get_missing_partitions_from_cmd(database=main_job.database, table=main_job.table)
+            DT.get_missing_partitions_from_flag(database=main_job.database, table=main_job.table)
         elif main_job.database:
-            DT.get_missing_partitions_from_cmd(database=main_job.database)
+            # DT.get_missing_partitions_from_cmd(database=main_job.database)
+            DT.get_missing_partitions_from_flag(database=main_job.database, table=main_job.table)
         else:
-            DT.get_missing_partitions_from_cmd()
+            # DT.get_missing_partitions_from_cmd()
+            DT.get_missing_partitions_from_flag(database=main_job.database, table=main_job.table)
     else:
         print('Please using -s <site> or -c <job>')
