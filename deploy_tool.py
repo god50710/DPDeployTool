@@ -96,10 +96,15 @@ class DeployTool(object):
             }
 
     @staticmethod
-    def run_command(cmd, show_command=True, throw_error=True):
+    def run_command(command, show_command=True, throw_error=True):
+        # cmd : command we want to execute on shell
+        # show_command(boolean) : display command
+        # throw_error(boolean) : throw Exception when stderr is not empty
+        # output : stdout(string)
+        # print stderr when stderr is not empty
         if show_command:
-            print(cmd)
-        o = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print(command)
+        o = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         result = o.communicate()
         if result[1] != "":
             print(result)
@@ -109,24 +114,25 @@ class DeployTool(object):
             return result[0]
 
     @classmethod
-    def get_job_list(cls, site, folder):
+    def get_job_list_from_build(cls, data_site, folder):
+        # data_site : for adjusting reference data path and database suffix
+        # folder : build folder for specific reference data path
+        # output : [["hourly",[jobs]],["daily",[jobs]],["weekly",[jobs]]], {'oozie job name' : 'flag path'}
         output_path = "output/data-pipeline-aws"
-        if site == "beta":
+        if data_site == "beta":
             output_path = output_path + "-beta"
         output_path = folder + "/" + output_path
-
         flags = dict()
         hourly = list()
         daily = list()
         weekly = list()
         flag = ""
-        # system monitor jobs no f_flag, add to mapping list with '' directly
+        # system monitor jobs has no f_flag, add to mapping list with empty directly
         system_jobs = cls.run_command("ls -d %s/oozie/System*" % output_path).split()
         for job in system_jobs:
             job = job.split('/')[-1]
             flags[job] = ''
             daily.append(job)
-
         table_jobs = cls.run_command("ls -d %s/oozie/T*" % output_path).split()
         for job_path in table_jobs:
             job = job_path.split('/')[-1]
@@ -139,7 +145,6 @@ class DeployTool(object):
                     break
             if not flag:
                 raise Exception('[Error] Flag is empty')
-
             database = "dp"
             if "T0Datalake" in job:
                 dataset_path = "%s/datasets/datalake.xml" % output_path
@@ -158,7 +163,6 @@ class DeployTool(object):
                 database = "pm_src"
             else:
                 raise Exception('[Error] dataset selection failed')
-
             if "1d" in flag:
                 flag = "f_ips_stat_daily/period=1d"
             elif "7d" in flag:
@@ -169,15 +173,13 @@ class DeployTool(object):
                 flag = "f_ips_stat_daily/period=90d"
             elif "180d" in flag:
                 flag = "f_ips_stat_daily/period=180d"
-
             flag_path_prefix = cls.run_command("grep '%s' %s | grep 'uri-template'" %
                                                (flag, dataset_path)).split('${nameNode}/')[1].split('${')[0]
             if database != "trs_src":
-                if site == "beta":
+                if data_site == "beta":
                     database = database + "_beta.db"
                 else:
                     database = database + ".db"
-
             flags[job] = '%s%s/%s' % (flag_path_prefix, database, flag)
             if "hours(1)" in frequency:
                 hourly.append(job)
@@ -191,6 +193,9 @@ class DeployTool(object):
 
     @classmethod
     def get_build(cls, mode="verified", build_name=""):
+        # mode(string) : for switch build source folder
+        # build_name(string) : for get build with specific version
+        # output : build_folder(string), build_version(string)
         if mode == "test":
             s3_build_folder = cls.AWS_TESTING_BUILD_PATH
         else:
@@ -211,6 +216,9 @@ class DeployTool(object):
 
     @classmethod
     def config_env(cls, site, folder, version, suffix="function", concurrency=1, timeout=180, memory=True):
+        # site(string) : for judge to configure as production, beta or test site
+        # folder(string) : target build folder that will be configured
+        # version(string) : for adding oozie job name suffix name to identify easier
         if site == "production":
             prod_env_path = "%s/output/data-pipeline-aws/op-utils/env" % folder
             cls.run_command("cp %s/aws-production.sh %s/$(whoami)\@$(hostname).sh" %
@@ -218,6 +226,7 @@ class DeployTool(object):
             cls.run_command("echo 'OOZIE_APP_EXT=.AWS_Production%s' >> %s/$(whoami)\@$(hostname).sh" %
                             (version, prod_env_path))
         elif site == "beta":
+            # beta site running on a low-end site, needs to remove memory limitation
             beta_env_path = "%s/output/data-pipeline-aws-beta/op-utils/env" % folder
             beta_oozie_jobs_path = "%s/output/data-pipeline-aws-beta/oozie/*/job.properties" % folder
             beta_script_path = "%s/output/data-pipeline-aws-beta/script/hql_external_partition.sh" % folder
@@ -236,16 +245,18 @@ class DeployTool(object):
             test_script_path = "%s/output/data-pipeline-aws/script/hql_external_partition.sh" % folder
             test_hql_path = "%s/output/data-pipeline-aws/hql/*.hql" % folder
             test_env_make_path = "%s/src" % folder
+            # test site needs remake source for adjust timeout, oozie job concurrency and import specific database name
             cls.run_command("cd %s; make clean" % test_env_make_path)
+            # default timeout is 180 minutes
             if timeout != 180:
                 cls.run_command("cd %s; sed -i 's/180/%s/g' data-pipeline/oozie/common.properties" %
                                 (test_env_make_path, timeout))
             cls.run_command("cd %s; make %s-db" % (test_env_make_path, suffix))
+            # default has memory limitation on T0 spark shell and part of T1 hql files
             if not memory:
                 cls.run_command("sed -i 's/ --driver-memory 12G --executor-memory 12G//g' %s" % test_script_path)
                 cls.run_command("sed -i '/SET hive.tez.java.opts=-Xmx10240m;/d' %s" % test_hql_path)
                 cls.run_command("sed -i '/SET hive.tez.container.size=12288;/d' %s" % test_hql_path)
-
             cls.run_command("sed -i 's/concurrency=./concurrency=%i/g' %s/*/job.properties" %
                             (concurrency, test_oozie_path))
             cls.run_command("cp %s/hadoop\@ip-172-31-13-117.sh %s/$(whoami)\@$(hostname).sh" %
@@ -258,17 +269,27 @@ class DeployTool(object):
 
     @classmethod
     def set_job_time(cls, site, folder, jobs, flags):
+        # site(string) : transport to methods
+        # folder(string)  : transport to methods
+        # jobs(list) : transport to methods, [0]=hourly, [1]=daily, [2]=weekly
+        # flags(dict) : transport to methods
+        # control flow for get oozie job start, end time list and export to config file
+
         job_time_list = list()
         job_time_list.append("#hourly jobs")
-        job_time_list.extend(cls.scan_f_flag(site, folder, flags, jobs[0]))
+        job_time_list.extend(cls.get_next_start_time(site, folder, flags, jobs[0]))
         job_time_list.append("#daily jobs")
-        job_time_list.extend(cls.scan_f_flag(site, folder, flags, jobs[1]))
+        job_time_list.extend(cls.get_next_start_time(site, folder, flags, jobs[1]))
         job_time_list.append("#weekly jobs")
-        job_time_list.extend(cls.scan_f_flag(site, folder, flags, jobs[2]))
+        job_time_list.extend(cls.get_next_start_time(site, folder, flags, jobs[2]))
         cls.export_app_time(site, job_time_list, folder)
 
     @staticmethod
     def export_app_time(site, job_time_list, folder):
+        # site(string) : for switch output folder as production/beta
+        # job_time_list(list) : contains each job name, start time and end time
+        # folder : build folder
+        # export oozie job start and end time to app-time.conf
         if site == "production":
             output_path = "data-pipeline-aws"
         else:
@@ -280,7 +301,13 @@ class DeployTool(object):
         job_time_file.close()
 
     @classmethod
-    def scan_f_flag(cls, site, folder, flags, jobs):
+    def get_next_start_time(cls, site, folder, flags, jobs):
+        # site(string): for switch search latest flag s3 path ,and output path
+        # folder(string): build folder
+        # flags(dict): oozie job name and flag path mapping table. ex: 'T1Device': '<path_without_bucket>'
+        # jobs(list): oozie job frequency and oozie job name mapping table
+        # output : oozie next job time(list)
+        # [0][1]=hourly jobs, [1][1]=daily jobs, [2][1]=weekly jobs
         job_time_list = []
         if site == "production":
             site_s3_path = cls.AWS_PROD_S3_PATH
@@ -288,23 +315,23 @@ class DeployTool(object):
         else:
             site_s3_path = cls.AWS_BETA_S3_PATH
             output_path = "data-pipeline-aws-beta"
-
+        # oozie job start time executes previous hour/day/week partition
+        # if we got flag h=09, next job is h=10, so oozie job start time needs to be configured as 11:00(+2h)
         if jobs[0] == "hourly":
             add_time = timedelta(hours=2)
         elif jobs[0] == "daily":
             add_time = timedelta(days=2)
         else:
             add_time = timedelta(days=8)
-
         for job in jobs[1]:
-            # get minutes from app-time.conf
+            # get oozie job start time minutes from original app-time.conf
             f_flag_minute = cls.run_command(
                 "cat %s/output/%s/op-utils/app-time.conf | grep '%s' | grep coordStart | head -1 " % (
                     folder, output_path, job))[-4:-1]
             if not re.match('\d{2}Z', f_flag_minute):
                 raise Exception('[Error] Get malformed minute from app-time.conf:', f_flag_minute)
 
-            # get datetime from aws
+            # get oozie job start time date from flag path
             if "System" in job:
                 f_flag_day = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
             else:
@@ -313,7 +340,7 @@ class DeployTool(object):
             if not re.match('\d{4}-\d{2}-\d{2}', f_flag_day):
                 raise Exception('[Error] Get malformed day from s3:', f_flag_day)
 
-            # get hours from aws with datetime
+            # get oozie job start time hours from flag
             if jobs[0] == "hourly":
                 if "TxExport" in job:
                     f_flag_hour = cls.run_command("aws s3 ls %s/%s/pdd=%s/ | tail -1 | awk '{print $4}'" %
@@ -338,12 +365,17 @@ class DeployTool(object):
         return job_time_list
 
     @classmethod
-    def deploy(cls, site, folder, suspend_jobs=list(), change_build=False):
+    def deploy_build(cls, site, folder, suspend_jobs=list(), change_build=False):
+        # site(string) : for switch configured environment folder path
+        # folder(string) : build folder
+        # suspend_jobs(list) : suspended oozie jobs ID list
+        # change_build(boolean) : for control deploy flow will enter job recover or not
+        # if deploy failed, suspended jobs will be resumed, otherwise will be killed
         if site == "production":
-            output_path = "data-pipeline-aws"
+            target_folder = "data-pipeline-aws"
         else:
-            output_path = "data-pipeline-aws-beta"
-        deploy_folder = "%s/output/%s/op-utils" % (folder, output_path)
+            target_folder = "data-pipeline-aws-beta"
+        deploy_folder = "%s/output/%s/op-utils" % (folder, target_folder)
         try:
             cls.run_command("bash %s/deploy.sh all" % deploy_folder, throw_error=False)
             if site == "production":
@@ -351,8 +383,8 @@ class DeployTool(object):
             #  self.run_command("bash %s/run-jobs.sh" % deploy_folder)
             print("bash %s/run-jobs.sh" % deploy_folder)
         except Exception:
-            print('[Error] Deploy failed, resume previous jobs')
             if change_build:
+                print('[Error] Deploy failed, resume previous jobs')
                 cls.resume_all_job(suspend_jobs)
             exit(1)
         else:
@@ -689,16 +721,16 @@ if __name__ == "__main__":
                 build_folder, build_version = DT.get_build()
                 DT.add_cronjob(main_job.site, build_folder)
                 DT.config_env(main_job.site, build_folder, build_version)
-                all_jobs, flag_list = DT.get_job_list(main_job.site, build_folder)
+                all_jobs, flag_list = DT.get_job_list_from_build(main_job.site, build_folder)
                 DT.set_job_time(main_job.site, build_folder, all_jobs, flag_list)
-                DT.deploy(main_job.site, build_folder)
+                DT.deploy_build(main_job.site, build_folder)
             elif main_job.change_build:
                 build_folder, build_version = DT.get_build()
                 DT.config_env(main_job.site, build_folder, build_version)
-                all_jobs, flag_list = DT.get_job_list(main_job.site, build_folder)
+                all_jobs, flag_list = DT.get_job_list_from_build(main_job.site, build_folder)
                 previous_jobs = DT.wait_and_suspend_all_jobs(DT.get_job_info("all"))
                 DT.set_job_time(main_job.site, build_folder, all_jobs, flag_list)
-                DT.deploy(main_job.site, build_folder, suspend_jobs=previous_jobs, change_build=True)
+                DT.deploy_build(main_job.site, build_folder, suspend_jobs=previous_jobs, change_build=True)
             else:
                 print('Please using one of -N and -C after "-s production" and "-s beta"')
     elif main_job.repair_partition:
