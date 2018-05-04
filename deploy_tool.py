@@ -7,15 +7,15 @@ from datetime import datetime, timedelta
 
 
 class DeployTool(object):
-    START_TIME = datetime(2017, 12, 30)
+    START_TIME = datetime(2018, 1, 1)
     AWS_PROD_S3_PATH = "s3://trs-production-us-west-2"
     AWS_BETA_S3_PATH = "s3://trs-production-beta-data-us-west-2"
     AWS_VERIFIED_BUILD_PATH = "s3://eric-staging-us-west-2/build"
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
     TOOL_VERSION = "20180502"
-    FLAG = {'akamai': {'akamai_rgom': 'Application/shnprj_spn/hive/datalake.db/f_akamai_rgom',
-                       'akamai_web': 'Application/shnprj_spn/hive/datalake.db/f_akamai_web'},
+    FLAG = {'datalake': {'akamai_rgom': 'Application/shnprj_spn/hive/datalake.db/f_akamai_rgom',
+                         'akamai_web': 'Application/shnprj_spn/hive/datalake.db/f_akamai_web'},
             'dp': {'e_ddi_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ddi_hourly',
                    'e_ncie_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ncie_hourly',
                    'e_routerinfo_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_routerinfo_hourly',
@@ -28,7 +28,7 @@ class DeployTool(object):
                    't_cam_stat_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_stat_hourly',
                    't_cam_trs_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_trs_hourly',
                    't_device_hourly': 'Application/shnprj_spn/hive/dp.db/f_device_hourly',
-                   't_device_session_hourly': 'Application/shnprj_spn/hive/dp.db/f_device_session_hourly',
+                   #  't_device_session_hourly': 'Application/shnprj_spn/hive/dp.db/f_device_session_hourly',
                    't_router_hourly': 'Application/shnprj_spn/hive/dp.db/f_router_hourly',
                    't_router_security_hourly': 'Application/shnprj_spn/hive/dp.db/f_router_security_hourly',
                    't_security_hourly': 'Application/shnprj_spn/hive/dp.db/f_security_hourly',
@@ -64,9 +64,7 @@ class DeployTool(object):
                        't_ips_stat_daily_70d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=7d',
                        't_ips_stat_daily_90d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=90d',
                        },
-            'dp_beta': {'e_ddi_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_ddi_hourly',
-                        'e_ncie_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_ncie_hourly',
-                        'e_routerinfo_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_routerinfo_hourly',
+            'dp_beta': {'e_routerinfo_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_routerinfo_hourly',
                         'e_routerstat_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_routerstat_hourly',
                         't_tmis_cam_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_tmis_cam_hourly',
                         't_cam_bfld_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_bfld_hourly',
@@ -96,78 +94,6 @@ class DeployTool(object):
                             'Application/shnprj_spn/hive/dp_beta.db/f_router_collection_weekly',
                         't_rule_stats_weekly': 'Application/shnprj_spn/hive/dp_beta.db/f_rule_stats_weekly'}
             }
-    REPAIR_TABLES = {
-        "trs_src": ["akamai_malicious_20171218",
-                    "akamai_malicious_20180319",
-                    "ddi_001_20171218",
-                    "honeypot_ssh_2",
-                    "honeypot_telnet_2",
-                    "ips_20171218",
-                    "ncie_001_20171218",
-                    "router_security_20171218"],
-        "pm_src": ["t_dpi_config_stats_by_brand_weekly",
-                   "t_dpi_config_stats_by_country_weekly",
-                   "t_dpi_config_stats_raw_weekly",
-                   "t_ips_hourly",
-                   "t_ips_stat_daily"],
-        "dp": ["e_ncie_001_parquet",
-               "e_routerinfo_001_parquet",
-               "e_routerstat_001_parquet",
-               "e_tmis_cam_001_parquet",
-               "t_cam_bfld_hourly",
-               "t_cam_collection_daily",
-               "t_cam_collection_weekly",
-               "t_cam_info_hourly",
-               "t_cam_ips_hit_rule_collection_daily",
-               "t_cam_rule_daily",
-               "t_cam_security_hourly",
-               "t_cam_session_hourly",
-               "t_cam_stat_hourly",
-               "t_cam_trs_hourly",
-               "t_device_collection_daily",
-               "t_device_hourly",
-               "t_device_session_hourly",
-               "t_ips_hit_rule_collection_daily",
-               "t_router_collection_weekly",
-               "t_router_device_daily",
-               "t_router_hourly",
-               "t_router_security_hourly",
-               "t_rule_daily",
-               "t_rule_stats_weekly",
-               "t_security_hourly",
-               "t_traffic_daily",
-               "t_traffic_stats_daily",
-               ],
-        "dp_beta": ["e_routerinfo_001_parquet",
-                    "e_routerstat_001_parquet",
-                    "e_tmis_cam_001_parquet",
-                    "t_cam_bfld_hourly",
-                    "t_cam_collection_daily",
-                    "t_cam_collection_weekly",
-                    "t_cam_info_hourly",
-                    "t_cam_ips_hit_rule_collection_daily",
-                    "t_cam_rule_daily",
-                    "t_cam_security_hourly",
-                    "t_cam_session_hourly",
-                    "t_cam_stat_hourly",
-                    "t_cam_trs_hourly",
-                    "t_device_collection_daily",
-                    "t_device_hourly",
-                    "t_device_session_hourly",
-                    "t_ips_hit_rule_collection_daily",
-                    "t_router_collection_weekly",
-                    "t_router_device_daily",
-                    "t_router_hourly",
-                    "t_router_security_hourly",
-                    "t_rule_daily",
-                    "t_rule_stats_weekly",
-                    "t_security_hourly",
-                    "t_traffic_daily",
-                    "t_traffic_stats_daily",
-                    ],
-        "datalake": ["akamai_rgom",
-                     "akamai_web",
-                     "iotlog"]}
 
     @staticmethod
     def run_command(cmd, show_command=True, throw_error=True):
@@ -532,140 +458,139 @@ class DeployTool(object):
             cls.run_command("ps -ef | grep [s]tunnel | awk '{print $2}' | xargs sudo kill -9", throw_error=False)
 
     @classmethod
-    def repair_partition(cls, site, database):
-        def repair(repair_database):
-            repair_tables = cls.REPAIR_TABLES[repair_database]
-            for table in repair_tables:
-                cls.run_command(
-                    'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                    (repair_database, table), throw_error=False)
-
-        if (site == "production" and database in ("trs_src", "pm_src", "datalake", "dp")) or \
-                (site == "beta" and database == "dp_beta"):
-            repair(database)
-        elif database == "all":
-            if site == "beta":
-                repair("dp_beta")
-            else:
-                for database in cls.REPAIR_TABLES.keys():
-                    if database == "dp_beta":
-                        continue
-                    repair(database)
-        else:
-            raise Exception('[Error] Repair target database %s is invalid' % database)
-
-    @classmethod
-    def get_missing_partitions_from_cmd(cls, database="all", table=""):
-        def check_missing_partitions(check_db, check_table):
-            check_time = cls.START_TIME
-            if "daily" in check_table:
-                time_unit = timedelta(days=1)
-            elif "weekly" in check_table:
-                time_unit = timedelta(days=7)
-                while check_time.weekday() != 6:
-                    check_time += timedelta(days=1)
-            else:
-                time_unit = timedelta(hours=1)
-            missing_partitions = list()
-            partition_list = cls.run_command(
-                'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "show partitions %s.%s;"'
-                % (check_db, check_table))
-            while check_time < datetime.now() - timedelta(days=1):
-                if time_unit == timedelta(hours=1):
-                    if check_time.strftime('d=%Y-%m-%d/h=%H') not in partition_list and \
-                            check_time.strftime('pdd=%Y-%m-%d/phh=%H') not in partition_list and \
-                            check_time.strftime('dt=%Y-%m-%d-%H') not in partition_list:
-                        missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
-                else:
-                    if check_time.strftime('d=%Y-%m-%d') not in partition_list and \
-                            check_time.strftime('pdd=%Y-%m-%d') not in partition_list and \
-                            check_time.strftime('dt=%Y-%m-%d') not in partition_list:
-                        missing_partitions.append(check_time.strftime('date=%Y-%m-%d'))
-                check_time += time_unit
-            return missing_partitions
-
-        if database != "all" and database not in cls.REPAIR_TABLES.keys():
+    def check_database_table(cls, database, table):
+        if database != "all" and database not in cls.FLAG.keys():
             raise Exception('[Error] Invalid database name')
-        elif table and table not in cls.REPAIR_TABLES[database]:
+        elif table and table not in cls.FLAG[database].keys():
             raise Exception('[Error] Invalid table name')
 
-        all_missing_partitions = dict()
+    @classmethod
+    def repair_partition(cls, database="all", table=""):
+        cls.check_database_table(database, table)
         if database == "all":
-            for database in cls.REPAIR_TABLES.keys():
-                for table in cls.REPAIR_TABLES[database]:
-                    all_missing_partitions[database + '.' + table] = check_missing_partitions(database, table)
+            for database in cls.FLAG.keys():
+                for table in cls.FLAG[database].keys():
+                    # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
+                    cls.clean_fake_folder(database, table)
+                    print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
+                        database, table))
         elif not table:
-            for table in cls.REPAIR_TABLES[database]:
-                all_missing_partitions[database + '.' + table] = check_missing_partitions(database, table)
+            for table in cls.FLAG[database].keys():
+                # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
+                cls.clean_fake_folder(database, table)
+                print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
+                    database, table))
         else:
-            all_missing_partitions[database + '.' + table] = check_missing_partitions(database, table)
-
-        for item in all_missing_partitions.keys():
-            if all_missing_partitions[item]:
-                print(item + ' has %s missing partitions:' % len(all_missing_partitions[item]))
-                if len(all_missing_partitions[item]) < 50:
-                    for each in all_missing_partitions[item]:
-                        print('\t' + each)
-                else:
-                    print('\t' + all_missing_partitions[item][0])
-                    print('\t' + all_missing_partitions[item][1])
-                    print('\t.....')
-                    print('\t' + all_missing_partitions[item][-2])
-                    print('\t' + all_missing_partitions[item][-1])
-        return all_missing_partitions
+            # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
+            cls.clean_fake_folder(database, table)
+            print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                  (database, table))
 
     @classmethod
-    def find_current_build(cls):
-        current_build = cls.run_command("find /home/hadoop/SHN-Data-Pipeline-* -maxdepth 0 -type d | sort | tail -1 ")
-        if current_build:
-            return current_build, current_build.split('1.0.')[1]
+    def clean_fake_folder(cls, database, table):
+        if database in ["dp", "dp_beta", "pm_src"]:
+            s3_folder = cls.FLAG[database][table].replace('f_', 't_')
+        elif database == "trs_src":
+            s3_folder = cls.FLAG[database][table].replace('f_', '')
         else:
-            return cls.get_build()
+            return 0
+        if database != "dp_beta":
+            bucket = cls.AWS_PROD_S3_PATH
+        else:
+            bucket = cls.AWS_BETA_S3_PATH
+        #   cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (bucket, s3_folder))
+        print("aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (bucket, s3_folder))
 
     @classmethod
-    def get_missing_partitions_from_flag(cls, database="all", table=""):
-        def check_missing_partitions(check_db, check_table):
-            check_time = cls.START_TIME
-            if "daily" in check_table:
-                time_unit = timedelta(days=1)
-            elif "weekly" in check_table:
-                time_unit = timedelta(days=7)
-                while check_time.weekday() != 6:
-                    check_time += timedelta(days=1)
+    def check_missing_partitions(cls, database, table):
+        check_time = cls.START_TIME
+        if "daily" in table:
+            time_unit = timedelta(days=1)
+        elif "weekly" in table:
+            time_unit = timedelta(days=7)
+            while check_time.weekday() != 6:
+                check_time += timedelta(days=1)
+        else:
+            time_unit = timedelta(hours=1)
+        missing_partitions = list()
+        partition_list = cls.run_command(
+            'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "show partitions %s.%s;"'
+            % (database, table))
+        while check_time < datetime.now() - timedelta(days=1):
+            if time_unit == timedelta(hours=1):
+                if check_time.strftime('d=%Y-%m-%d/h=%H') not in partition_list and \
+                        check_time.strftime('pdd=%Y-%m-%d/phh=%H') not in partition_list and \
+                        check_time.strftime('dt=%Y-%m-%d-%H') not in partition_list:
+                    missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
             else:
-                time_unit = timedelta(hours=1)
-            missing_partitions = list()
-            partition_list = cls.run_command('aws s3 ls %s/%s/ --recursive' % (cls.FLAG[check_db][check_table]))
-            while check_time < datetime.now() - timedelta(days=1):
-                if time_unit == timedelta(hours=1):
-                    if check_time.strftime('d=%Y-%m-%d/h=%H\$') not in partition_list and \
-                            check_time.strftime('pdd=%Y-%m-%d/phh=%H\$') not in partition_list and \
-                            check_time.strftime('dt=%Y-%m-%d-%H\$') not in partition_list:
-                        missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
-                else:
-                    if check_time.strftime('d=%Y-%m-%d\$') not in partition_list and \
-                            check_time.strftime('pdd=%Y-%m-%d\$') not in partition_list and \
-                            check_time.strftime('dt=%Y-%m-%d\$') not in partition_list:
-                        missing_partitions.append(check_time.strftime('date=%Y-%m-%d'))
-                check_time += time_unit
-            return missing_partitions
+                if check_time.strftime('d=%Y-%m-%d') not in partition_list and \
+                        check_time.strftime('pdd=%Y-%m-%d') not in partition_list and \
+                        check_time.strftime('dt=%Y-%m-%d') not in partition_list:
+                    missing_partitions.append(check_time.strftime('date=%Y-%m-%d'))
+            check_time += time_unit
+        return missing_partitions
 
-        if database != "all" and database not in cls.REPAIR_TABLES.keys():
-            raise Exception('[Error] Invalid database name')
-        elif table and table not in cls.REPAIR_TABLES[database]:
-            raise Exception('[Error] Invalid table name')
+    # @classmethod
+    # def find_current_build(cls):
+    #     current_build = cls.run_command("find /home/hadoop/SHN-Data-Pipeline-* -maxdepth 0 -type d | sort | tail -1 ")
+    #     if current_build:
+    #         return current_build, current_build.split('1.0.')[1]
+    #     else:
+    #         return cls.get_build()
 
+    @classmethod
+    def check_missing_flags(cls, database, table):
+        check_time = cls.START_TIME
+        if "daily" in table:
+            time_unit = timedelta(days=1)
+        elif "weekly" in table:
+            time_unit = timedelta(days=7)
+            while check_time.weekday() != 6:
+                check_time += timedelta(days=1)
+        else:
+            time_unit = timedelta(hours=1)
+        missing_partitions = list()
+        target_s3 = cls.AWS_PROD_S3_PATH
+        if database == "dp_beta":
+            target_s3 = cls.AWS_BETA_S3_PATH
+        partition_list = cls.run_command('aws s3 ls %s/%s/ --recursive' %
+                                         (target_s3, cls.FLAG[database][table]))
+        while check_time < datetime.now() - timedelta(days=1):
+            if time_unit == timedelta(hours=1):
+                if check_time.strftime('d=%Y-%m-%d/h=%H_') not in partition_list and \
+                        check_time.strftime('pdd=%Y-%m-%d/phh=%H_') not in partition_list and \
+                        check_time.strftime('dt=%Y-%m-%d-%H_') not in partition_list:
+                    missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
+            else:
+                if check_time.strftime('d=%Y-%m-%d_') not in partition_list and \
+                        check_time.strftime('pdd=%Y-%m-%d_') not in partition_list and \
+                        check_time.strftime('dt=%Y-%m-%d_') not in partition_list:
+                    missing_partitions.append(check_time.strftime('date=%Y-%m-%d'))
+            check_time += time_unit
+        return missing_partitions
+
+    @classmethod
+    def get_missing_partitions(cls, database="all", table="", source="flag"):
+        cls.check_database_table(database, table)
         all_missing_partitions = dict()
         if database == "all":
             for database in cls.FLAG.keys():
                 for table in cls.FLAG[database].keys():
-                    all_missing_partitions[database + '.' + table] = check_missing_partitions(database, table)
+                    if source == "flag":
+                        all_missing_partitions[database + '.' + table] = cls.check_missing_flags(database, table)
+                    else:
+                        all_missing_partitions[database + '.' + table] = cls.check_missing_partitions(database, table)
         elif not table:
             for table in cls.FLAG[database].keys():
-                all_missing_partitions[database + '.' + table] = check_missing_partitions(database, table)
+                if source == "flag":
+                    all_missing_partitions[database + '.' + table] = cls.check_missing_flags(database, table)
+                else:
+                    all_missing_partitions[database + '.' + table] = cls.check_missing_partitions(database, table)
         else:
-            all_missing_partitions[database + '.' + table] = check_missing_partitions(database, table)
-
+            if source == "flag":
+                all_missing_partitions[database + '.' + table] = cls.check_missing_flags(database, table)
+            else:
+                all_missing_partitions[database + '.' + table] = cls.check_missing_partitions(database, table)
         for item in all_missing_partitions.keys():
             if all_missing_partitions[item]:
                 print(item + ' has %s missing partitions:' % len(all_missing_partitions[item]))
@@ -691,13 +616,14 @@ class DeployTool(object):
         action_group.add_argument("-s", dest="site", help="Choose deploy target site")
         action_group.add_argument("-c", dest="check_job", help="Check Oozie job status")
         action_group.add_argument("-p", action="store_true", dest="check_partition", help="Check missing partition")
+        action_group.add_argument("-r", action="store_true", dest="repair_partition", help="Repair partitions")
         partition_group = parser.add_argument_group('Parameters for check missing partition')
         partition_group.add_argument("--database", dest="database", help="Database name")
         partition_group.add_argument("--table", dest="table", help="Table name")
+        partition_group.add_argument("--src", dest="source", default="flag", help="Check partition by flag or list")
         site_group = parser.add_mutually_exclusive_group()
         site_group.add_argument("-N", action="store_true", dest="new_deploy", help="Execute a new deploy on EMR")
         site_group.add_argument("-C", action="store_true", dest="change_build", help="Execute change build on EMR")
-        site_group.add_argument("-r", dest="repair", help="Repair partitions")
         test_env_group = parser.add_argument_group('Parameters for test site environment')
         test_env_group.add_argument("-b", dest="build_name", help="Specify build name")
         test_env_group.add_argument("-t", type=int, dest="timeout", default="180", help="Set oozie job timeout")
@@ -710,18 +636,25 @@ class DeployTool(object):
             print('\nQuick Start:')
             print('# Verified build location: %s' % cls.AWS_VERIFIED_BUILD_PATH)
             print('# Testing build location: %s' % cls.AWS_TESTING_BUILD_PATH)
-            print('# To deploy on a new EMR as Production Site')
+            print('\n# To deploy on a new EMR as Production Site')
             print('python %s -s production -N' % os.path.basename(__file__))
-            print('# To change build on Beta Site')
+            print('\n# To change build on Beta Site')
             print('python %s -s beta -C' % os.path.basename(__file__))
-            print('# To repair partition on Production Site')
-            print('python %s -s production -r' % os.path.basename(__file__))
-            print('# To prepare testing build on current site')
+            print('\n# To prepare testing build on current site')
             print('python %s -s test -b 280 -suffix eric_test -t 28800 -con 3 -m' % os.path.basename(__file__))
-            print('# To check all Oozie job status')
+            print('\n# To check all Oozie job status')
             print('python %s -c all' % os.path.basename(__file__))
-            print('# To check specific Oozie job status')
+            print('\n# To check specific Oozie job status')
             print('python %s -c T1Security' % os.path.basename(__file__))
+            print('\n# To check partitions for specific table')
+            print('python %s -p --database dp --table t_router_hourly' % os.path.basename(__file__))
+            print('\n# To check partitions for all table in sepcific database')
+            print('python %s -p --database dp' % os.path.basename(__file__))
+            print('\n# To check partitions for all database')
+            print('python %s -p' % os.path.basename(__file__))
+            print('\n# To repair partitions for specific table (other usage same as -p)')
+            print('python %s -r --database dp_beta --table t_device_hourly' % os.path.basename(__file__))
+
             exit(0)
         return parser.parse_args()
 
@@ -732,49 +665,54 @@ if __name__ == "__main__":
     if main_job.site:
         if main_job.site not in ("production", "beta", "test"):
             print('Please assign site as "production", "beta" or "test".')
-        else:
-            if main_job.site == "test":
-                if main_job.build_name:
-                    build_folder, build_version = DT.get_build(build_name=main_job.build_name, mode="test")
-                else:
-                    build_folder, build_version = DT.get_build(mode="test")
-                DT.config_env(main_job.site, build_folder, build_version, suffix=main_job.suffix,
-                              concurrency=main_job.concurrency, timeout=main_job.timeout, memory=main_job.memory)
-                print('Testing build %s is ready to go' % build_version)
-                print('Need to create database metadata')
-                print('Need to msck repair')
-                print('Need to set oozie jobs start and end time')
-                DT.disable_stunnel()
+            exit()
+        if main_job.site == "test":
+            if main_job.build_name:
+                build_folder, build_version = DT.get_build(build_name=main_job.build_name, mode="test")
             else:
-                if main_job.new_deploy:
-                    build_folder, build_version = DT.get_build()
-                    DT.add_cronjob(main_job.site, build_folder)
-                    DT.config_env(main_job.site, build_folder, build_version)
-                    all_jobs, flag_list = DT.get_job_list(main_job.site, build_folder)
-                    DT.set_job_time(main_job.site, build_folder, all_jobs, flag_list)
-                    DT.deploy(main_job.site, build_folder)
-                elif main_job.change_build:
-                    build_folder, build_version = DT.get_build()
-                    DT.config_env(main_job.site, build_folder, build_version)
-                    all_jobs, flag_list = DT.get_job_list(main_job.site, build_folder)
-                    previous_jobs = DT.wait_and_suspend_all_jobs(DT.get_job_info("all"))
-                    DT.set_job_time(main_job.site, build_folder, all_jobs, flag_list)
-                    DT.deploy(main_job.site, build_folder, suspend_jobs=previous_jobs, change_build=True)
-                elif main_job.repair:
-                    DT.repair_partition(main_job.site, main_job.repair)
-                else:
-                    print('Please using one of -N, -C and -r <database> after "-s production" and "-s beta"')
+                build_folder, build_version = DT.get_build(mode="test")
+            DT.config_env(main_job.site, build_folder, build_version, suffix=main_job.suffix,
+                          concurrency=main_job.concurrency, timeout=main_job.timeout, memory=main_job.memory)
+            print('Testing build %s is ready to go' % build_version)
+            print('Need to create database metadata')
+            print('Need to msck repair')
+            print('Need to set oozie jobs start and end time')
+            DT.disable_stunnel()
+        else:
+            if main_job.new_deploy:
+                build_folder, build_version = DT.get_build()
+                DT.add_cronjob(main_job.site, build_folder)
+                DT.config_env(main_job.site, build_folder, build_version)
+                all_jobs, flag_list = DT.get_job_list(main_job.site, build_folder)
+                DT.set_job_time(main_job.site, build_folder, all_jobs, flag_list)
+                DT.deploy(main_job.site, build_folder)
+            elif main_job.change_build:
+                build_folder, build_version = DT.get_build()
+                DT.config_env(main_job.site, build_folder, build_version)
+                all_jobs, flag_list = DT.get_job_list(main_job.site, build_folder)
+                previous_jobs = DT.wait_and_suspend_all_jobs(DT.get_job_info("all"))
+                DT.set_job_time(main_job.site, build_folder, all_jobs, flag_list)
+                DT.deploy(main_job.site, build_folder, suspend_jobs=previous_jobs, change_build=True)
+            else:
+                print('Please using one of -N and -C after "-s production" and "-s beta"')
+    elif main_job.repair_partition:
+        if main_job.database and main_job.table:
+            DT.repair_partition(database=main_job.database, table=main_job.table)
+        elif main_job.database:
+            DT.repair_partition(database=main_job.database)
+        else:
+            DT.repair_partition()
     elif main_job.check_job:
         DT.check_job_status(main_job.check_job, DT.get_job_info(main_job.check_job))
     elif main_job.check_partition:
+        if main_job.source not in ["flag", "list"]:
+            print('Please using "--src flag" or "--src list" to select source for check partitions')
+            exit()
         if main_job.database and main_job.table:
-            # DT.get_missing_partitions_from_cmd(database=main_job.database, table=main_job.table)
-            DT.get_missing_partitions_from_flag(database=main_job.database, table=main_job.table)
+            DT.get_missing_partitions(database=main_job.database, table=main_job.table, source=main_job.source)
         elif main_job.database:
-            # DT.get_missing_partitions_from_cmd(database=main_job.database)
-            DT.get_missing_partitions_from_flag(database=main_job.database, table=main_job.table)
+            DT.get_missing_partitions(database=main_job.database, source=main_job.source)
         else:
-            # DT.get_missing_partitions_from_cmd()
-            DT.get_missing_partitions_from_flag(database=main_job.database, table=main_job.table)
+            DT.get_missing_partitions(source=main_job.source)
     else:
-        print('Please using -s <site> or -c <job>')
+        print('Please using -s <site>, -c <job>, -p or -r')
