@@ -14,7 +14,7 @@ class DeployTool(object):
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
     TOOL_VERSION = "20180504"
-    FLAG = {'datalake': {'akamai_rgom': 'Application/shnprj_spn/hive/datalake.db/f_akamai_rgom',
+    FLAGS = {'datalake': {'akamai_rgom': 'Application/shnprj_spn/hive/datalake.db/f_akamai_rgom',
                          'akamai_web': 'Application/shnprj_spn/hive/datalake.db/f_akamai_web'},
             'dp': {'e_ddi_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ddi_hourly',
                    'e_ncie_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ncie_hourly',
@@ -46,12 +46,12 @@ class DeployTool(object):
                    't_cam_collection_weekly': 'Application/shnprj_spn/hive/dp.db/f_cam_collection_weekly',
                    't_router_collection_weekly': 'Application/shnprj_spn/hive/dp.db/f_router_collection_weekly',
                    't_rule_stats_weekly': 'Application/shnprj_spn/hive/dp.db/f_rule_stats_weekly'},
-            'trs_src': {'akamai_malicious_20171218': 'trs_src/f_akamai_malicious_20171218',
+             'trs_src': {'akamai_malicious_20171218': 'trs_src/f_akamai_malicious_20171218',
                         'ddi_001_20171218': 'trs_src/f_ddi_001_20171218',
                         'ips_20171218': 'trs_src/f_ips_20171218',
                         'ncie_001_20171218': 'trs_src/f_ncie_001_20171218',
                         'router_security_20171218': 'trs_src/f_router_security_20171218'},
-            'pm_src': {'t_dpi_config_stats_by_brand_weekly':
+             'pm_src': {'t_dpi_config_stats_by_brand_weekly':
                            'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_by_brand_weekly',
                        't_dpi_config_stats_by_country_weekly':
                            'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_by_country_weekly',
@@ -64,7 +64,7 @@ class DeployTool(object):
                        't_ips_stat_daily_70d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=7d',
                        't_ips_stat_daily_90d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=90d',
                        },
-            'dp_beta': {'e_routerinfo_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_routerinfo_hourly',
+             'dp_beta': {'e_routerinfo_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_routerinfo_hourly',
                         'e_routerstat_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_routerstat_hourly',
                         't_tmis_cam_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_tmis_cam_hourly',
                         't_cam_bfld_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_bfld_hourly',
@@ -93,7 +93,7 @@ class DeployTool(object):
                         't_router_collection_weekly':
                             'Application/shnprj_spn/hive/dp_beta.db/f_router_collection_weekly',
                         't_rule_stats_weekly': 'Application/shnprj_spn/hive/dp_beta.db/f_rule_stats_weekly'}
-            }
+             }
 
     @staticmethod
     def run_command(command, show_command=True, throw_error=True):
@@ -114,25 +114,25 @@ class DeployTool(object):
             return result[0]
 
     @classmethod
-    def get_job_list_from_build(cls, data_site, folder):
+    def get_job_list_from_build(cls, data_site, build_path):
         # data_site : for adjusting reference data path and database suffix
-        # folder : build folder for specific reference data path
+        # build_path : build path for specific reference data path
         # output : [["hourly",[jobs]],["daily",[jobs]],["weekly",[jobs]]], {'oozie job name' : 'flag path'}
-        output_path = "output/data-pipeline-aws"
+        output_element = "output/data-pipeline-aws"
         if data_site == "beta":
-            output_path = output_path + "-beta"
-        output_path = folder + "/" + output_path
+            output_element = output_element + "-beta"
+        output_path = build_path + "/" + output_element
         flags = dict()
-        hourly = list()
-        daily = list()
-        weekly = list()
+        hourly_jobs = list()
+        daily_jobs = list()
+        weekly_jobs = list()
         flag = ""
         # system monitor jobs has no f_flag, add to mapping list with empty directly
         system_jobs = cls.run_command("ls -d %s/oozie/System*" % output_path).split()
         for job in system_jobs:
             job = job.split('/')[-1]
             flags[job] = ''
-            daily.append(job)
+            daily_jobs.append(job)
         table_jobs = cls.run_command("ls -d %s/oozie/T*" % output_path).split()
         for job_path in table_jobs:
             job = job_path.split('/')[-1]
@@ -182,35 +182,35 @@ class DeployTool(object):
                     database = database + ".db"
             flags[job] = '%s%s/%s' % (flag_path_prefix, database, flag)
             if "hours(1)" in frequency:
-                hourly.append(job)
+                hourly_jobs.append(job)
             elif "days(1)" in frequency:
-                daily.append(job)
+                daily_jobs.append(job)
             elif "days(7)" in frequency:
-                weekly.append(job)
+                weekly_jobs.append(job)
             else:
                 raise Exception('[Error] frequency out of excepted: %s' % frequency)
-        return [["hourly", hourly], ["daily", daily], ["weekly", weekly]], flags
+        return [["hourly", hourly_jobs], ["daily", daily_jobs], ["weekly", weekly_jobs]], flags
 
     @classmethod
-    def get_build(cls, mode="verified", build_name=""):
+    def get_build(cls, mode="verified", version=""):
         # mode(string) : for switch build source folder
-        # build_name(string) : for get build with specific version
+        # version(string) : for get build with specific version
         # output : build_folder(string), build_version(string)
         if mode == "test":
-            s3_build_folder = cls.AWS_TESTING_BUILD_PATH
+            s3_build_path = cls.AWS_TESTING_BUILD_PATH
         else:
-            s3_build_folder = cls.AWS_VERIFIED_BUILD_PATH
+            s3_build_path = cls.AWS_VERIFIED_BUILD_PATH
 
-        if not build_name:
+        if not version:
             build_file = cls.run_command("aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | sort | tail -1 | awk '{print $4}'"
-                                         % s3_build_folder)[:-1]
+                                         % s3_build_path)[:-1]
         else:
             build_file = cls.run_command(
                 "aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | grep '%s' | sort | tail -1 | awk '{print $4}'"
-                % (s3_build_folder, build_name))[:-1]
+                % (s3_build_path, version))[:-1]
         if not build_file:
             raise Exception('[Error] No available build to deploy')
-        cls.run_command("aws s3 cp %s/%s /home/hadoop/" % (s3_build_folder, build_file))
+        cls.run_command("aws s3 cp %s/%s /home/hadoop/" % (s3_build_path, build_file))
         cls.run_command("tar -C /home/hadoop/ -zxvf /home/hadoop/%s" % build_file)
         return "/home/hadoop/%s" % build_file.split('.tar')[0], build_file.split('.tar')[0].split('1.0.')[1]
 
@@ -285,25 +285,25 @@ class DeployTool(object):
         cls.export_app_time(site, job_time_list, folder)
 
     @staticmethod
-    def export_app_time(site, job_time_list, folder):
+    def export_app_time(site, job_time_list, build_path):
         # site(string) : for switch output folder as production/beta
         # job_time_list(list) : contains each job name, start time and end time
         # folder : build folder
         # export oozie job start and end time to app-time.conf
         if site == "production":
-            output_path = "data-pipeline-aws"
+            path_element = "data-pipeline-aws"
         else:
-            output_path = "data-pipeline-aws-beta"
-        deploy_folder = "%s/output/%s/op-utils" % (folder, output_path)
-        job_time_file = open("%s/app-time.conf" % deploy_folder, "w")
+            path_element = "data-pipeline-aws-beta"
+        output_path = "%s/output/%s/op-utils" % (build_path, path_element)
+        job_time_file = open("%s/app-time.conf" % output_path, "w")
         for line in job_time_list:
             job_time_file.write(line + "\n")
         job_time_file.close()
 
     @classmethod
-    def get_next_start_time(cls, site, folder, flags, jobs):
+    def get_next_start_time(cls, site, build_path, flags, jobs):
         # site(string): for switch search latest flag s3 path ,and output path
-        # folder(string): build folder
+        # build_path(string): build path
         # flags(dict): oozie job name and flag path mapping table. ex: 'T1Device': '<path_without_bucket>'
         # jobs(list): oozie job frequency and oozie job name mapping table
         # output : oozie next job time(list)
@@ -311,10 +311,10 @@ class DeployTool(object):
         job_time_list = []
         if site == "production":
             site_s3_path = cls.AWS_PROD_S3_PATH
-            output_path = "data-pipeline-aws"
+            reference_path = "data-pipeline-aws"
         else:
             site_s3_path = cls.AWS_BETA_S3_PATH
-            output_path = "data-pipeline-aws-beta"
+            reference_path = "data-pipeline-aws-beta"
         # oozie job start time executes previous hour/day/week partition
         # if we got flag h=09, next job is h=10, so oozie job start time needs to be configured as 11:00(+2h)
         if jobs[0] == "hourly":
@@ -325,49 +325,49 @@ class DeployTool(object):
             add_time = timedelta(days=8)
         for job in jobs[1]:
             # get oozie job start time minutes from original app-time.conf
-            f_flag_minute = cls.run_command(
+            flag_minute = cls.run_command(
                 "cat %s/output/%s/op-utils/app-time.conf | grep '%s' | grep coordStart | head -1 " % (
-                    folder, output_path, job))[-4:-1]
-            if not re.match('\d{2}Z', f_flag_minute):
-                raise Exception('[Error] Get malformed minute from app-time.conf:', f_flag_minute)
+                    build_path, reference_path, job))[-4:-1]
+            if not re.match('\d{2}Z', flag_minute):
+                raise Exception('[Error] Get malformed minute from app-time.conf:', flag_minute)
 
             # get oozie job start time date from flag path
             if "System" in job:
-                f_flag_day = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+                flag_day = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
             else:
-                f_flag_day = cls.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
+                flag_day = cls.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
                                              (site_s3_path, flags[job]))[-11:-1]
-            if not re.match('\d{4}-\d{2}-\d{2}', f_flag_day):
-                raise Exception('[Error] Get malformed day from s3:', f_flag_day)
+            if not re.match('\d{4}-\d{2}-\d{2}', flag_day):
+                raise Exception('[Error] Get malformed day from s3:', flag_day)
 
             # get oozie job start time hours from flag
             if jobs[0] == "hourly":
                 if "TxExport" in job:
-                    f_flag_hour = cls.run_command("aws s3 ls %s/%s/pdd=%s/ | tail -1 | awk '{print $4}'" %
-                                                  (site_s3_path, flags[job], f_flag_day))[4:6]
+                    flag_hour = cls.run_command("aws s3 ls %s/%s/pdd=%s/ | tail -1 | awk '{print $4}'" %
+                                                  (site_s3_path, flags[job], flag_day))[4:6]
                 else:
-                    f_flag_hour = cls.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
-                                                  (site_s3_path, flags[job], f_flag_day))[2:4]
-                if not re.match('\d{2}', f_flag_hour):
-                    raise Exception('[Error] Get malformed hour from s3:', f_flag_hour)
+                    flag_hour = cls.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
+                                                  (site_s3_path, flags[job], flag_day))[2:4]
+                if not re.match('\d{2}', flag_hour):
+                    raise Exception('[Error] Get malformed hour from s3:', flag_hour)
             elif "System" in job:
-                f_flag_hour = "02"
+                flag_hour = "02"
             else:
-                f_flag_hour = "00"
-            print('Last f_flag date: %s, hour: %s' % (f_flag_day, f_flag_hour))
-            job_start_time = datetime.strptime(f_flag_day + f_flag_hour, '%Y-%m-%d%H') + add_time
+                flag_hour = "00"
+            print('Last f_flag date: %s, hour: %s' % (flag_day, flag_hour))
+            job_start_time = datetime.strptime(flag_day + flag_hour, '%Y-%m-%d%H') + add_time
             job_end_time = job_start_time + timedelta(days=36524)
             job_time_list.append(
-                "%s:    coordStart=%s:%s" % (job, job_start_time.strftime('%Y-%m-%dT%H'), f_flag_minute))
+                "%s:    coordStart=%s:%s" % (job, job_start_time.strftime('%Y-%m-%dT%H'), flag_minute))
             print(job_time_list[-1])
             job_time_list.append("%s:    coordEnd=%s:00Z" % (job, job_end_time.strftime('%Y-%m-%dT%H')))
             print(job_time_list[-1])
         return job_time_list
 
     @classmethod
-    def deploy_build(cls, site, folder, suspend_jobs=list(), change_build=False):
+    def deploy_build(cls, site, build_path, suspend_jobs=list(), change_build=False):
         # site(string) : for switch configured environment folder path
-        # folder(string) : build folder
+        # path(string) : build path
         # suspend_jobs(list) : suspended oozie jobs ID list
         # change_build(boolean) : for control deploy flow will enter job recover or not
         # if deploy failed, suspended jobs will be resumed, otherwise will be killed
@@ -375,7 +375,7 @@ class DeployTool(object):
             target_folder = "data-pipeline-aws"
         else:
             target_folder = "data-pipeline-aws-beta"
-        deploy_folder = "%s/output/%s/op-utils" % (folder, target_folder)
+        deploy_folder = "%s/output/%s/op-utils" % (build_path, target_folder)
         try:
             cls.run_command("bash %s/deploy.sh all" % deploy_folder, throw_error=False)
             if site == "production":
@@ -393,21 +393,21 @@ class DeployTool(object):
 
     @classmethod
     def wait_and_suspend_all_jobs(cls, oozie_job_list):
-        counter = 1
+        suspended_jobs_count = 1
         while True:
             for oozie_job in oozie_job_list:
-                cannot_suspend_job = cls.run_command(
+                cannot_suspended_job = cls.run_command(
                     "oozie job -info %s | grep oozie-oozi-C@ | grep 'RUNNING\|SUSPENDED'" %
                     (oozie_job_list[oozie_job][0]), show_command=False)
-                cannot_suspend_status = cls.run_command("oozie job -info %s | grep 'Status' | grep 'SUSPENDED'" %
+                cannot_suspended_status = cls.run_command("oozie job -info %s | grep 'Status' | grep 'SUSPENDED'" %
                                                         (oozie_job_list[oozie_job][0]), show_command=False)
-                if not (cannot_suspend_job or cannot_suspend_status):
-                    print('=== Suspending %s (%d/%d) ===' % (oozie_job, counter, len(oozie_job_list)))
+                if not (cannot_suspended_job or cannot_suspended_status):
+                    print('=== Suspending %s (%d/%d) ===' % (oozie_job, suspended_jobs_count, len(oozie_job_list)))
                     cls.run_command("oozie job -suspend %s" % oozie_job_list[oozie_job][0])
-                    counter += 1
-                if counter > len(oozie_job_list):
+                    suspended_jobs_count += 1
+                if suspended_jobs_count > len(oozie_job_list):
                     break
-            if counter > len(oozie_job_list):
+            if suspended_jobs_count > len(oozie_job_list):
                 break
         return oozie_job_list
 
@@ -430,39 +430,39 @@ class DeployTool(object):
             cls.run_command("oozie job -resume %s" % oozie_job_list[oozie_job][0])
 
     @classmethod
-    def get_job_info(cls, target):
+    def get_job_info(cls, job_name):
         print('\nCurrent status of Oozie job:')
-        if target == "all":
-            target = ""
-        info = cls.run_command(
+        if job_name == "all":
+            job_name = ""
+        query_info = cls.run_command(
             "oozie jobs info -jobtype coordinator -len 5000|grep '%s.*RUNNING\|%s.*PREP\|%s.*SUSPEND'|sort -k8" %
-            (target, target, target), show_command=False)[:-1].rstrip('\n').split('\n')
+            (job_name, job_name, job_name), show_command=False)[:-1].rstrip('\n').split('\n')
         print("JobID\t\t\t\t     Next Materialized    App Name")
-        app_info = {}
-        for each in info:
-            result = re.findall('(.*-oozie-oozi-C)[ ]*(%s.*)\.[\S ]*.*GMT    ([0-9: -]*).*    ' % target, each)
+        oozie_job_info = {}
+        for each_job in query_info:
+            result = re.findall('(.*-oozie-oozi-C)[ ]*(%s.*)\.[\S ]*.*GMT    ([0-9: -]*).*    ' % job_name, each_job)
             if len(result) > 0:
                 print(result[0][0], result[0][2], result[0][1])
-                app_info.update({result[0][1]: [result[0][0], result[0][2]]})
-        print('Total jobs: %s' % len(app_info))
+                oozie_job_info.update({result[0][1]: [result[0][0], result[0][2]]})
+        print('Total jobs: %s' % len(oozie_job_info))
         print('\nCurrent time: %s' % datetime.now())
-        return app_info
+        return oozie_job_info
 
     @classmethod
-    def check_job_status(cls, oozie_job, oozie_job_list):
+    def check_job_status(cls, job_name, oozie_job_list):
         jobs_to_hide = '\|SUCCEEDED\|READY'
-        if oozie_job == "all":
-            counter = 1
-            for oozie_job in oozie_job_list:
-                print('\n=== Job Checking(%d/%d) ===' % (counter, len(oozie_job_list)))
+        if job_name == "all":
+            jobs_count = 1
+            for job_name in oozie_job_list:
+                print('\n=== Job Checking(%d/%d) ===' % (jobs_count, len(oozie_job_list)))
                 print(cls.run_command("oozie job -info %s -len 5000|grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" %
-                                      (oozie_job_list[oozie_job][0], jobs_to_hide), show_command=False))
-                counter += 1
+                                      (oozie_job_list[job_name][0], jobs_to_hide), show_command=False))
+                jobs_count += 1
         else:
-            if oozie_job in oozie_job_list:
+            if job_name in oozie_job_list:
                 print('=== Job Checking ===')
                 print(cls.run_command("oozie job -info %s |grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" %
-                                      (oozie_job_list[oozie_job][0], jobs_to_hide), show_command=False))
+                                      (oozie_job_list[job_name][0], jobs_to_hide), show_command=False))
             else:
                 print('Job not found in Oozie job list')
 
@@ -485,29 +485,29 @@ class DeployTool(object):
 
     @classmethod
     def disable_stunnel(cls):
-        current_job = cls.run_command("ps -ef | grep [s]tunnel | awk '{print $2}'")
-        if current_job:
+        stunnel_pid = cls.run_command("ps -ef | grep [s]tunnel | awk '{print $2}'")
+        if stunnel_pid:
             cls.run_command("ps -ef | grep [s]tunnel | awk '{print $2}' | xargs sudo kill -9", throw_error=False)
 
     @classmethod
     def check_database_table(cls, database, table):
-        if database != "all" and database not in cls.FLAG.keys():
+        if database != "all" and database not in cls.FLAGS.keys():
             raise Exception('[Error] Invalid database name')
-        elif table and table not in cls.FLAG[database].keys():
+        elif table and table not in cls.FLAGS[database].keys():
             raise Exception('[Error] Invalid table name')
 
     @classmethod
     def repair_partition(cls, database="all", table=""):
         cls.check_database_table(database, table)
         if database == "all":
-            for database in cls.FLAG.keys():
-                for table in cls.FLAG[database].keys():
+            for database in cls.FLAGS.keys():
+                for table in cls.FLAGS[database].keys():
                     # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
                     cls.clean_fake_folder(database, table)
                     print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
                         database, table))
         elif not table:
-            for table in cls.FLAG[database].keys():
+            for table in cls.FLAGS[database].keys():
                 # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
                 cls.clean_fake_folder(database, table)
                 print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
@@ -521,9 +521,9 @@ class DeployTool(object):
     @classmethod
     def clean_fake_folder(cls, database, table):
         if database in ["dp", "dp_beta", "pm_src"]:
-            s3_folder = cls.FLAG[database][table].replace('f_', 't_')
+            s3_folder = cls.FLAGS[database][table].replace('f_', 't_')
         elif database == "trs_src":
-            s3_folder = cls.FLAG[database][table].replace('f_', '')
+            s3_folder = cls.FLAGS[database][table].replace('f_', '')
         else:
             return 0
         if database != "dp_beta":
@@ -574,21 +574,21 @@ class DeployTool(object):
     def check_missing_flags(cls, database, table):
         check_time = cls.START_TIME
         if "daily" in table:
-            time_unit = timedelta(days=1)
+            stepping_time = timedelta(days=1)
         elif "weekly" in table:
-            time_unit = timedelta(days=7)
+            stepping_time = timedelta(days=7)
             while check_time.weekday() != 6:
                 check_time += timedelta(days=1)
         else:
-            time_unit = timedelta(hours=1)
+            stepping_time = timedelta(hours=1)
         missing_partitions = list()
-        target_s3 = cls.AWS_PROD_S3_PATH
+        s3_path = cls.AWS_PROD_S3_PATH
         if database == "dp_beta":
-            target_s3 = cls.AWS_BETA_S3_PATH
+            s3_path = cls.AWS_BETA_S3_PATH
         partition_list = cls.run_command('aws s3 ls %s/%s/ --recursive' %
-                                         (target_s3, cls.FLAG[database][table]))
+                                         (s3_path, cls.FLAGS[database][table]))
         while check_time < datetime.now() - timedelta(days=1):
-            if time_unit == timedelta(hours=1):
+            if stepping_time == timedelta(hours=1):
                 if check_time.strftime('d=%Y-%m-%d/h=%H_') not in partition_list and \
                         check_time.strftime('pdd=%Y-%m-%d/phh=%H_') not in partition_list and \
                         check_time.strftime('dt=%Y-%m-%d-%H_') not in partition_list:
@@ -598,7 +598,7 @@ class DeployTool(object):
                         check_time.strftime('pdd=%Y-%m-%d_') not in partition_list and \
                         check_time.strftime('dt=%Y-%m-%d_') not in partition_list:
                     missing_partitions.append(check_time.strftime('date=%Y-%m-%d'))
-            check_time += time_unit
+            check_time += stepping_time
         return missing_partitions
 
     @classmethod
@@ -606,14 +606,14 @@ class DeployTool(object):
         cls.check_database_table(database, table)
         all_missing_partitions = dict()
         if database == "all":
-            for database in cls.FLAG.keys():
-                for table in cls.FLAG[database].keys():
+            for database in cls.FLAGS.keys():
+                for table in cls.FLAGS[database].keys():
                     if source == "flag":
                         all_missing_partitions[database + '.' + table] = cls.check_missing_flags(database, table)
                     else:
                         all_missing_partitions[database + '.' + table] = cls.check_missing_partitions(database, table)
         elif not table:
-            for table in cls.FLAG[database].keys():
+            for table in cls.FLAGS[database].keys():
                 if source == "flag":
                     all_missing_partitions[database + '.' + table] = cls.check_missing_flags(database, table)
                 else:
@@ -692,7 +692,6 @@ class DeployTool(object):
             print('python %s -r --database dp' % os.path.basename(__file__))
             print('\n# To repair partitions for all database')
             print('python %s -r' % os.path.basename(__file__))
-
             exit(0)
         return parser.parse_args()
 
@@ -706,7 +705,7 @@ if __name__ == "__main__":
             exit()
         if main_job.site == "test":
             if main_job.build_name:
-                build_folder, build_version = DT.get_build(build_name=main_job.build_name, mode="test")
+                build_folder, build_version = DT.get_build(version=main_job.build_name, mode="test")
             else:
                 build_folder, build_version = DT.get_build(mode="test")
             DT.config_env(main_job.site, build_folder, build_version, suffix=main_job.suffix,
