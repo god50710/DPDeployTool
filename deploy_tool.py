@@ -13,7 +13,7 @@ class DeployTool(object):
     AWS_VERIFIED_BUILD_PATH = "s3://eric-staging-us-west-2/build"
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
-    TOOL_VERSION = "20180502"
+    TOOL_VERSION = "20180504"
     FLAG = {'datalake': {'akamai_rgom': 'Application/shnprj_spn/hive/datalake.db/f_akamai_rgom',
                          'akamai_web': 'Application/shnprj_spn/hive/datalake.db/f_akamai_web'},
             'dp': {'e_ddi_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ddi_hourly',
@@ -646,14 +646,20 @@ class DeployTool(object):
             print('python %s -c all' % os.path.basename(__file__))
             print('\n# To check specific Oozie job status')
             print('python %s -c T1Security' % os.path.basename(__file__))
-            print('\n# To check partitions for specific table')
+            print('\n# To check partitions for specific table by show partitions')
+            print('python %s -p --database dp --table t_router_hourly --src list' % os.path.basename(__file__))
+            print('\n# To check partitions for specific table by f_ flag')
             print('python %s -p --database dp --table t_router_hourly' % os.path.basename(__file__))
             print('\n# To check partitions for all table in sepcific database')
             print('python %s -p --database dp' % os.path.basename(__file__))
             print('\n# To check partitions for all database')
             print('python %s -p' % os.path.basename(__file__))
-            print('\n# To repair partitions for specific table (other usage same as -p)')
+            print('\n# To repair partitions for specific table')
             print('python %s -r --database dp_beta --table t_device_hourly' % os.path.basename(__file__))
+            print('\n# To repair partitions for all table in sepcific database')
+            print('python %s -r --database dp' % os.path.basename(__file__))
+            print('\n# To repair partitions for all database')
+            print('python %s -r' % os.path.basename(__file__))
 
             exit(0)
         return parser.parse_args()
