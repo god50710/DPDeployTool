@@ -336,7 +336,7 @@ class DeployTool(object):
                 flag_day = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
             else:
                 flag_day = cls.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
-                                             (site_s3_path, flags[job]))[-11:-1]
+                                           (site_s3_path, flags[job]))[-11:-1]
             if not re.match('\d{4}-\d{2}-\d{2}', flag_day):
                 raise Exception('[Error] Get malformed day from s3:', flag_day)
 
@@ -393,14 +393,21 @@ class DeployTool(object):
 
     @classmethod
     def wait_and_suspend_all_jobs(cls, oozie_job_list):
+        # oozie_job_list(dict) : {oozie_job_id:[next_start_time, oozie_job_name]}
+        # output : oozie_job_list(dict), all jobs has need suspended
         suspended_jobs_count = 1
+        # scan all job in job list until all jobs has been suspended
         while True:
             for oozie_job in oozie_job_list:
+                # judge single oozie job status is running or suspended
                 cannot_suspended_job = cls.run_command(
                     "oozie job -info %s | grep oozie-oozi-C@ | grep 'RUNNING\|SUSPENDED'" %
                     (oozie_job_list[oozie_job][0]), show_command=False)
+                # judge whole oozie jos status is suspended
                 cannot_suspended_status = cls.run_command("oozie job -info %s | grep 'Status' | grep 'SUSPENDED'" %
                                                         (oozie_job_list[oozie_job][0]), show_command=False)
+                # if no running single jobs and whole job not be suspended yet, suspend it
+                # suspend a running oozie job won't suspend yarn process, yarn still processing until finish
                 if not (cannot_suspended_job or cannot_suspended_status):
                     print('=== Suspending %s (%d/%d) ===' % (oozie_job, suspended_jobs_count, len(oozie_job_list)))
                     cls.run_command("oozie job -suspend %s" % oozie_job_list[oozie_job][0])
@@ -413,43 +420,52 @@ class DeployTool(object):
 
     @classmethod
     def kill_all_job(cls, oozie_job_list):
+        # oozie_job_list(dict) : {oozie_job_id:[next_start_time, oozie_job_name]}
         print('=== Kill All Jobs (Count: %s) ===' % len(oozie_job_list))
         for oozie_job in oozie_job_list:
             cls.run_command("oozie job -kill %s" % oozie_job_list[oozie_job][0])
 
     @classmethod
     def suspend_all_job(cls, oozie_job_list):
+        # oozie_job_list(dict) : {oozie_job_id:[next_start_time, oozie_job_name]}
         print('=== Suspend All Jobs ===')
         for oozie_job in oozie_job_list:
             cls.run_command("oozie job -suspend %s" % oozie_job_list[oozie_job][0])
 
     @classmethod
     def resume_all_job(cls, oozie_job_list):
+        # oozie_job_list(dict) : {oozie_job_id:[next_start_time, oozie_job_name]}
         print('=== Resume All Jobs ===')
         for oozie_job in oozie_job_list:
             cls.run_command("oozie job -resume %s" % oozie_job_list[oozie_job][0])
 
     @classmethod
-    def get_job_info(cls, job_name):
+    def get_job_list(cls, job_name):
+        # job_name(string) : oozie job name, ex: T1Device
+        # output : oozie_job_list(dict) : {oozie_job_id:[next_start_time, oozie_job_name]}
+        # get running/prepare/suspend jobs list
         print('\nCurrent status of Oozie job:')
         if job_name == "all":
             job_name = ""
-        query_info = cls.run_command(
+        oozie_job_info = cls.run_command(
             "oozie jobs info -jobtype coordinator -len 5000|grep '%s.*RUNNING\|%s.*PREP\|%s.*SUSPEND'|sort -k8" %
             (job_name, job_name, job_name), show_command=False)[:-1].rstrip('\n').split('\n')
         print("JobID\t\t\t\t     Next Materialized    App Name")
-        oozie_job_info = {}
-        for each_job in query_info:
+        oozie_job_list = {}
+        for each_job in oozie_job_info:
             result = re.findall('(.*-oozie-oozi-C)[ ]*(%s.*)\.[\S ]*.*GMT    ([0-9: -]*).*    ' % job_name, each_job)
             if len(result) > 0:
                 print(result[0][0], result[0][2], result[0][1])
-                oozie_job_info.update({result[0][1]: [result[0][0], result[0][2]]})
-        print('Total jobs: %s' % len(oozie_job_info))
+                oozie_job_list.update({result[0][1]: [result[0][0], result[0][2]]})
+        print('Total jobs: %s' % len(oozie_job_list))
         print('\nCurrent time: %s' % datetime.now())
-        return oozie_job_info
+        return oozie_job_list
 
     @classmethod
     def check_job_status(cls, job_name, oozie_job_list):
+        # job_name(string) : oozie job name, ex: T1Device
+        # oozie_job_list(dict) : {oozie_job_id:[next_start_time, oozie_job_name]}
+        # get each job status and focus on waiting, suspend, killed jobs
         jobs_to_hide = '\|SUCCEEDED\|READY'
         if job_name == "all":
             jobs_count = 1
@@ -467,15 +483,22 @@ class DeployTool(object):
                 print('Job not found in Oozie job list')
 
     @classmethod
-    def add_cronjob(cls, site, folder):
+    def add_cronjob(cls, site, path):
+        # site(string) : for cronjob site parameter
+        # path(string) : build path for getting update signature tool
+        # only using for new production/beta site deploy
+        # these 2 site needs update signature and send notification when geoip update finish
         cronjob_file = "/home/hadoop/cron_temp"
         cls.run_command("crontab -l > %s" % cronjob_file)
         signature_cronjob = cls.run_command("cat %s | grep 'update_signature/bg_executor.sh'" % cronjob_file)
         geoip_cronjob = cls.run_command("cat %s | grep 'update_geoip/geoip_bg_executor.sh'" % cronjob_file)
+        # before run this method, cronjob has not update signature cronjob
         if not signature_cronjob:
-            cls.run_command("cp -r %s/QA/update_signature /home/hadoop/" % folder)
+            cls.run_command("cp -r %s/QA/update_signature /home/hadoop/" % path)
             cls.run_command("echo '0 * * * * /home/hadoop/update_signature/bg_executor.sh %s' >> %s " %
                             (site, cronjob_file))
+        # before run this method, cronjob already has geoip update job
+        # just switch to another version that sends notification
         if geoip_cronjob:
             cls.run_command("sed -i '/geoip_bg_executor.sh/d' %s" % cronjob_file)
             cls.run_command("echo '0 * * * * /trs/update_geoip/geoip_bg_executor_with_mail.sh %s' >> %s " %
@@ -485,12 +508,17 @@ class DeployTool(object):
 
     @classmethod
     def disable_stunnel(cls):
+        # search and kill stunned pid
+        # using test site to avoid send notification
         stunnel_pid = cls.run_command("ps -ef | grep [s]tunnel | awk '{print $2}'")
         if stunnel_pid:
             cls.run_command("ps -ef | grep [s]tunnel | awk '{print $2}' | xargs sudo kill -9", throw_error=False)
 
     @classmethod
     def check_database_table(cls, database, table):
+        # database(string) : database name
+        # table(string) : table name
+        # check database and table name exists in FLAGS or not
         if database != "all" and database not in cls.FLAGS.keys():
             raise Exception('[Error] Invalid database name')
         elif table and table not in cls.FLAGS[database].keys():
@@ -498,58 +526,81 @@ class DeployTool(object):
 
     @classmethod
     def repair_partition(cls, database="all", table=""):
+        # database(string) : database name
+        # table(string) : table name
+        # clean *_$folder$ on table parquet file path and repair partitions
+
         cls.check_database_table(database, table)
+        # repair all databases and all tables
         if database == "all":
             for database in cls.FLAGS.keys():
                 for table in cls.FLAGS[database].keys():
-                    # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
                     cls.clean_fake_folder(database, table)
+                    # print command, OPS will check and execute manually
+                    # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
                     print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
                         database, table))
+        # repair all tables in specific database
         elif not table:
             for table in cls.FLAGS[database].keys():
-                # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
                 cls.clean_fake_folder(database, table)
+                # print command, OPS will check and execute manually
+                # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
                 print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
                     database, table))
+        # repair specific table
         else:
-            # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
             cls.clean_fake_folder(database, table)
+            # print command, OPS will check and execute manually
+            # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
             print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
                   (database, table))
 
     @classmethod
     def clean_fake_folder(cls, database, table):
+        # database(string) : database name
+        # table(string) : table name
+        # clean *_$folder$ on table parquet file path
+        # in dp, dp_beta and pm_src, table name : t_<table_name>, flag name : f_<table_name>
         if database in ["dp", "dp_beta", "pm_src"]:
             s3_folder = cls.FLAGS[database][table].replace('f_', 't_')
+        # in trs_src, table_name = <table_name>, flag name = f_<table_name>
         elif database == "trs_src":
             s3_folder = cls.FLAGS[database][table].replace('f_', '')
+        # skip datalake because parquet file does not exists on our bucket
         else:
             return 0
         if database != "dp_beta":
             bucket = cls.AWS_PROD_S3_PATH
         else:
             bucket = cls.AWS_BETA_S3_PATH
-        #   cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (bucket, s3_folder))
+        # print command, OPS will check and execute manually
+        # cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (bucket, s3_folder))
         print("aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (bucket, s3_folder))
 
     @classmethod
     def check_missing_partitions(cls, database, table):
+        # database(string) : database name
+        # table(string) : table name
+        # output : missing_partitions(list) [datetime]
         check_time = cls.START_TIME
         if "daily" in table:
-            time_unit = timedelta(days=1)
+            stepping_time = timedelta(days=1)
         elif "weekly" in table:
-            time_unit = timedelta(days=7)
+            stepping_time = timedelta(days=7)
+            # adjust check time as Sunday
             while check_time.weekday() != 6:
                 check_time += timedelta(days=1)
         else:
-            time_unit = timedelta(hours=1)
+            stepping_time = timedelta(hours=1)
         missing_partitions = list()
         partition_list = cls.run_command(
             'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "show partitions %s.%s;"'
             % (database, table))
+        # partition has 3 different formats
+        # consider daily partition always less then one period than today, so we check daily job start from yesterday
         while check_time < datetime.now() - timedelta(days=1):
-            if time_unit == timedelta(hours=1):
+            if stepping_time == timedelta(hours=1):
                 if check_time.strftime('d=%Y-%m-%d/h=%H') not in partition_list and \
                         check_time.strftime('pdd=%Y-%m-%d/phh=%H') not in partition_list and \
                         check_time.strftime('dt=%Y-%m-%d-%H') not in partition_list:
@@ -559,9 +610,10 @@ class DeployTool(object):
                         check_time.strftime('pdd=%Y-%m-%d') not in partition_list and \
                         check_time.strftime('dt=%Y-%m-%d') not in partition_list:
                     missing_partitions.append(check_time.strftime('date=%Y-%m-%d'))
-            check_time += time_unit
+            check_time += stepping_time
         return missing_partitions
 
+    # comment non-using method
     # @classmethod
     # def find_current_build(cls):
     #     current_build = cls.run_command("find /home/hadoop/SHN-Data-Pipeline-* -maxdepth 0 -type d | sort | tail -1 ")
@@ -572,6 +624,9 @@ class DeployTool(object):
 
     @classmethod
     def check_missing_flags(cls, database, table):
+        # database(string) : database name
+        # table(string) : table name
+        # output : missing_partitions(list) [datetime]
         check_time = cls.START_TIME
         if "daily" in table:
             stepping_time = timedelta(days=1)
@@ -585,8 +640,9 @@ class DeployTool(object):
         s3_path = cls.AWS_PROD_S3_PATH
         if database == "dp_beta":
             s3_path = cls.AWS_BETA_S3_PATH
-        partition_list = cls.run_command('aws s3 ls %s/%s/ --recursive' %
-                                         (s3_path, cls.FLAGS[database][table]))
+        partition_list = cls.run_command('aws s3 ls %s/%s/ --recursive' % (s3_path, cls.FLAGS[database][table]))
+        # partition has 3 different formats
+        # consider daily partition always less then one period than today, so we check daily job start from yesterday
         while check_time < datetime.now() - timedelta(days=1):
             if stepping_time == timedelta(hours=1):
                 if check_time.strftime('d=%Y-%m-%d/h=%H_') not in partition_list and \
@@ -603,6 +659,10 @@ class DeployTool(object):
 
     @classmethod
     def get_missing_partitions(cls, database="all", table="", source="flag"):
+        # database(string) : database name 
+        # table(string) : table name
+        # source(string) : for switch to check from flag or partition list
+        # output : missing_partitions(list) [datetime]
         cls.check_database_table(database, table)
         all_missing_partitions = dict()
         if database == "all":
@@ -623,6 +683,8 @@ class DeployTool(object):
                 all_missing_partitions[database + '.' + table] = cls.check_missing_flags(database, table)
             else:
                 all_missing_partitions[database + '.' + table] = cls.check_missing_partitions(database, table)
+        # print all missing partitions when item less than 50
+        # print head and tail when item greater than 50
         for item in all_missing_partitions.keys():
             if all_missing_partitions[item]:
                 print(item + ' has %s missing partitions:' % len(all_missing_partitions[item]))
@@ -727,7 +789,7 @@ if __name__ == "__main__":
                 build_folder, build_version = DT.get_build()
                 DT.config_env(main_job.site, build_folder, build_version)
                 all_jobs, flag_list = DT.get_job_list_from_build(main_job.site, build_folder)
-                previous_jobs = DT.wait_and_suspend_all_jobs(DT.get_job_info("all"))
+                previous_jobs = DT.wait_and_suspend_all_jobs(DT.get_job_list("all"))
                 DT.set_job_time(main_job.site, build_folder, all_jobs, flag_list)
                 DT.deploy_build(main_job.site, build_folder, suspend_jobs=previous_jobs, change_build=True)
             else:
@@ -740,7 +802,7 @@ if __name__ == "__main__":
         else:
             DT.repair_partition()
     elif main_job.check_job:
-        DT.check_job_status(main_job.check_job, DT.get_job_info(main_job.check_job))
+        DT.check_job_status(main_job.check_job, DT.get_job_list(main_job.check_job))
     elif main_job.check_partition:
         if main_job.source not in ["flag", "list"]:
             print('Please using "--src flag" or "--src list" to select source for check partitions')
