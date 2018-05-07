@@ -1,5 +1,5 @@
-import argparse
 import os
+import argparse
 import re
 import subprocess
 import sys
@@ -15,84 +15,84 @@ class DeployTool(object):
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
     TOOL_VERSION = "20180504"
     FLAGS = {'datalake': {'akamai_rgom': 'Application/shnprj_spn/hive/datalake.db/f_akamai_rgom',
-                         'akamai_web': 'Application/shnprj_spn/hive/datalake.db/f_akamai_web'},
-            'dp': {'e_ddi_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ddi_hourly',
-                   'e_ncie_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ncie_hourly',
-                   'e_routerinfo_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_routerinfo_hourly',
-                   'e_routerstat_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_routerstat_hourly',
-                   'e_tmis_cam_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_tmis_cam_hourly',
-                   't_cam_bfld_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_bfld_hourly',
-                   't_cam_info_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_info_hourly',
-                   't_cam_security_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_security_hourly',
-                   't_cam_session_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_session_hourly',
-                   't_cam_stat_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_stat_hourly',
-                   't_cam_trs_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_trs_hourly',
-                   't_device_hourly': 'Application/shnprj_spn/hive/dp.db/f_device_hourly',
-                   #  't_device_session_hourly': 'Application/shnprj_spn/hive/dp.db/f_device_session_hourly',
-                   't_router_hourly': 'Application/shnprj_spn/hive/dp.db/f_router_hourly',
-                   't_router_security_hourly': 'Application/shnprj_spn/hive/dp.db/f_router_security_hourly',
-                   't_security_hourly': 'Application/shnprj_spn/hive/dp.db/f_security_hourly',
-                   't_cam_rule_daily': 'Application/shnprj_spn/hive/dp.db/f_cam_rule_daily',
-                   't_rule_daily': 'Application/shnprj_spn/hive/dp.db/f_rule_daily',
-                   't_traffic_daily': 'Application/shnprj_spn/hive/dp.db/f_traffic_daily',
-                   't_cam_collection_daily': 'Application/shnprj_spn/hive/dp.db/f_cam_collection_daily',
-                   't_cam_ips_hit_rule_collection_daily':
-                       'Application/shnprj_spn/hive/dp.db/f_cam_ips_hit_rule_collection_daily',
-                   't_device_collection_daily': 'Application/shnprj_spn/hive/dp.db/f_device_collection_daily',
-                   't_router_device_daily': 'Application/shnprj_spn/hive/dp.db/f_router_device_daily',
-                   't_ips_hit_rule_collection_daily':
-                       'Application/shnprj_spn/hive/dp.db/f_ips_hit_rule_collection_daily',
-                   't_traffic_stats_daily': 'Application/shnprj_spn/hive/dp.db/f_traffic_stats_daily',
-                   't_cam_collection_weekly': 'Application/shnprj_spn/hive/dp.db/f_cam_collection_weekly',
-                   't_router_collection_weekly': 'Application/shnprj_spn/hive/dp.db/f_router_collection_weekly',
-                   't_rule_stats_weekly': 'Application/shnprj_spn/hive/dp.db/f_rule_stats_weekly'},
+                          'akamai_web': 'Application/shnprj_spn/hive/datalake.db/f_akamai_web'},
+             'dp': {'e_ddi_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ddi_hourly',
+                    'e_ncie_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ncie_hourly',
+                    'e_routerinfo_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_routerinfo_hourly',
+                    'e_routerstat_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_routerstat_hourly',
+                    'e_tmis_cam_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_tmis_cam_hourly',
+                    't_cam_bfld_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_bfld_hourly',
+                    't_cam_info_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_info_hourly',
+                    't_cam_security_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_security_hourly',
+                    't_cam_session_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_session_hourly',
+                    't_cam_stat_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_stat_hourly',
+                    't_cam_trs_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_trs_hourly',
+                    't_device_hourly': 'Application/shnprj_spn/hive/dp.db/f_device_hourly',
+                    #  't_device_session_hourly': 'Application/shnprj_spn/hive/dp.db/f_device_session_hourly',
+                    't_router_hourly': 'Application/shnprj_spn/hive/dp.db/f_router_hourly',
+                    't_router_security_hourly': 'Application/shnprj_spn/hive/dp.db/f_router_security_hourly',
+                    't_security_hourly': 'Application/shnprj_spn/hive/dp.db/f_security_hourly',
+                    't_cam_rule_daily': 'Application/shnprj_spn/hive/dp.db/f_cam_rule_daily',
+                    't_rule_daily': 'Application/shnprj_spn/hive/dp.db/f_rule_daily',
+                    't_traffic_daily': 'Application/shnprj_spn/hive/dp.db/f_traffic_daily',
+                    't_cam_collection_daily': 'Application/shnprj_spn/hive/dp.db/f_cam_collection_daily',
+                    't_cam_ips_hit_rule_collection_daily':
+                        'Application/shnprj_spn/hive/dp.db/f_cam_ips_hit_rule_collection_daily',
+                    't_device_collection_daily': 'Application/shnprj_spn/hive/dp.db/f_device_collection_daily',
+                    't_router_device_daily': 'Application/shnprj_spn/hive/dp.db/f_router_device_daily',
+                    't_ips_hit_rule_collection_daily':
+                        'Application/shnprj_spn/hive/dp.db/f_ips_hit_rule_collection_daily',
+                    't_traffic_stats_daily': 'Application/shnprj_spn/hive/dp.db/f_traffic_stats_daily',
+                    't_cam_collection_weekly': 'Application/shnprj_spn/hive/dp.db/f_cam_collection_weekly',
+                    't_router_collection_weekly': 'Application/shnprj_spn/hive/dp.db/f_router_collection_weekly',
+                    't_rule_stats_weekly': 'Application/shnprj_spn/hive/dp.db/f_rule_stats_weekly'},
              'trs_src': {'akamai_malicious_20171218': 'trs_src/f_akamai_malicious_20171218',
-                        'ddi_001_20171218': 'trs_src/f_ddi_001_20171218',
-                        'ips_20171218': 'trs_src/f_ips_20171218',
-                        'ncie_001_20171218': 'trs_src/f_ncie_001_20171218',
-                        'router_security_20171218': 'trs_src/f_router_security_20171218'},
+                         'ddi_001_20171218': 'trs_src/f_ddi_001_20171218',
+                         'ips_20171218': 'trs_src/f_ips_20171218',
+                         'ncie_001_20171218': 'trs_src/f_ncie_001_20171218',
+                         'router_security_20171218': 'trs_src/f_router_security_20171218'},
              'pm_src': {'t_dpi_config_stats_by_brand_weekly':
-                           'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_by_brand_weekly',
-                       't_dpi_config_stats_by_country_weekly':
-                           'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_by_country_weekly',
-                       't_dpi_config_stats_raw_weekly':
-                           'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_raw_weekly',
-                       't_ips_hourly': 'Application/shnprj_spn/hive/pm_src.db/f_ips_hourly',
-                       't_ips_stat_daily_180d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=180d',
-                       't_ips_stat_daily_1d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=1d',
-                       't_ips_stat_daily_30d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=30d',
-                       't_ips_stat_daily_70d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=7d',
-                       't_ips_stat_daily_90d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=90d',
-                       },
+                            'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_by_brand_weekly',
+                        't_dpi_config_stats_by_country_weekly':
+                            'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_by_country_weekly',
+                        't_dpi_config_stats_raw_weekly':
+                            'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_raw_weekly',
+                        't_ips_hourly': 'Application/shnprj_spn/hive/pm_src.db/f_ips_hourly',
+                        't_ips_stat_daily_180d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=180d',
+                        't_ips_stat_daily_1d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=1d',
+                        't_ips_stat_daily_30d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=30d',
+                        't_ips_stat_daily_70d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=7d',
+                        't_ips_stat_daily_90d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=90d',
+                        },
              'dp_beta': {'e_routerinfo_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_routerinfo_hourly',
-                        'e_routerstat_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_routerstat_hourly',
-                        't_tmis_cam_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_tmis_cam_hourly',
-                        't_cam_bfld_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_bfld_hourly',
-                        't_cam_info_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_info_hourly',
-                        't_cam_security_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_security_hourly',
-                        't_cam_session_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_session_hourly',
-                        't_cam_stat_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_stat_hourly',
-                        't_cam_trs_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_trs_hourly',
-                        't_device_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_device_hourly',
-                        't_device_session_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_device_session_hourly',
-                        't_router_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_router_hourly',
-                        't_router_security_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_router_security_hourly',
-                        't_security_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_security_hourly',
-                        't_cam_rule_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_rule_daily',
-                        't_rule_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_rule_daily',
-                        't_traffic_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_traffic_daily',
-                        't_cam_collection_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_collection_daily',
-                        't_cam_ips_hit_rule_collection_daily':
-                            'Application/shnprj_spn/hive/dp_beta.db/f_cam_ips_hit_rule_collection_daily',
-                        't_device_collection_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_device_collection_daily',
-                        't_router_device_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_router_device_daily',
-                        't_ips_hit_rule_collection_daily':
-                            'Application/shnprj_spn/hive/dp_beta.db/f_ips_hit_rule_collection_daily',
-                        't_traffic_stats_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_traffic_stats_daily',
-                        't_cam_collection_weekly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_collection_weekly',
-                        't_router_collection_weekly':
-                            'Application/shnprj_spn/hive/dp_beta.db/f_router_collection_weekly',
-                        't_rule_stats_weekly': 'Application/shnprj_spn/hive/dp_beta.db/f_rule_stats_weekly'}
+                         'e_routerstat_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_routerstat_hourly',
+                         't_tmis_cam_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_tmis_cam_hourly',
+                         't_cam_bfld_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_bfld_hourly',
+                         't_cam_info_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_info_hourly',
+                         't_cam_security_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_security_hourly',
+                         't_cam_session_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_session_hourly',
+                         't_cam_stat_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_stat_hourly',
+                         't_cam_trs_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_trs_hourly',
+                         't_device_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_device_hourly',
+                         't_device_session_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_device_session_hourly',
+                         't_router_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_router_hourly',
+                         't_router_security_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_router_security_hourly',
+                         't_security_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_security_hourly',
+                         't_cam_rule_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_rule_daily',
+                         't_rule_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_rule_daily',
+                         't_traffic_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_traffic_daily',
+                         't_cam_collection_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_collection_daily',
+                         't_cam_ips_hit_rule_collection_daily':
+                             'Application/shnprj_spn/hive/dp_beta.db/f_cam_ips_hit_rule_collection_daily',
+                         't_device_collection_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_device_collection_daily',
+                         't_router_device_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_router_device_daily',
+                         't_ips_hit_rule_collection_daily':
+                             'Application/shnprj_spn/hive/dp_beta.db/f_ips_hit_rule_collection_daily',
+                         't_traffic_stats_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_traffic_stats_daily',
+                         't_cam_collection_weekly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_collection_weekly',
+                         't_router_collection_weekly':
+                             'Application/shnprj_spn/hive/dp_beta.db/f_router_collection_weekly',
+                         't_rule_stats_weekly': 'Application/shnprj_spn/hive/dp_beta.db/f_rule_stats_weekly'}
              }
 
     @staticmethod
@@ -104,14 +104,13 @@ class DeployTool(object):
         # print stderr when stderr is not empty
         if show_command:
             print(command)
-        o = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        result = o.communicate()
-        if result[1] != "":
-            print(result)
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = process.communicate()
+        if process.returncode != 0:
+            print(result[1])
             if throw_error:
                 raise Exception('[Error] Run command returns stderr')
-        else:
-            return result[0]
+        return result[0]
 
     @classmethod
     def get_job_list_from_build(cls, data_site, build_path):
@@ -344,10 +343,10 @@ class DeployTool(object):
             if jobs[0] == "hourly":
                 if "TxExport" in job:
                     flag_hour = cls.run_command("aws s3 ls %s/%s/pdd=%s/ | tail -1 | awk '{print $4}'" %
-                                                  (site_s3_path, flags[job], flag_day))[4:6]
+                                                (site_s3_path, flags[job], flag_day))[4:6]
                 else:
                     flag_hour = cls.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
-                                                  (site_s3_path, flags[job], flag_day))[2:4]
+                                                (site_s3_path, flags[job], flag_day))[2:4]
                 if not re.match('\d{2}', flag_hour):
                     raise Exception('[Error] Get malformed hour from s3:', flag_hour)
             elif "System" in job:
@@ -380,8 +379,8 @@ class DeployTool(object):
             cls.run_command("bash %s/deploy.sh all" % deploy_folder, throw_error=False)
             if site == "production":
                 cls.run_command("sed -i '/DeviceSession/d' %s/run-jobs.sh" % deploy_folder)
-            #  self.run_command("bash %s/run-jobs.sh" % deploy_folder)
-            print("bash %s/run-jobs.sh" % deploy_folder)
+            cls.run_command("bash %s/run-jobs.sh" % deploy_folder)
+            # print("bash %s/run-jobs.sh" % deploy_folder)
         except Exception:
             if change_build:
                 print('[Error] Deploy failed, resume previous jobs')
@@ -405,7 +404,7 @@ class DeployTool(object):
                     (oozie_job_list[oozie_job][0]), show_command=False)
                 # judge whole oozie jos status is suspended
                 cannot_suspended_status = cls.run_command("oozie job -info %s | grep 'Status' | grep 'SUSPENDED'" %
-                                                        (oozie_job_list[oozie_job][0]), show_command=False)
+                                                          (oozie_job_list[oozie_job][0]), show_command=False)
                 # if no running single jobs and whole job not be suspended yet, suspend it
                 # suspend a running oozie job won't suspend yarn process, yarn still processing until finish
                 if not (cannot_suspended_job or cannot_suspended_status):
@@ -490,8 +489,10 @@ class DeployTool(object):
         # these 2 site needs update signature and send notification when geoip update finish
         cronjob_file = "/home/hadoop/cron_temp"
         cls.run_command("crontab -l > %s" % cronjob_file)
-        signature_cronjob = cls.run_command("cat %s | grep 'update_signature/bg_executor.sh'" % cronjob_file)
-        geoip_cronjob = cls.run_command("cat %s | grep 'update_geoip/geoip_bg_executor.sh'" % cronjob_file)
+        signature_cronjob = cls.run_command("cat %s | grep 'update_signature/bg_executor.sh'" % cronjob_file,
+                                            throw_error=False)
+        geoip_cronjob = cls.run_command("cat %s | grep 'update_geoip/geoip_bg_executor.sh'" % cronjob_file,
+                                        throw_error=False)
         # before run this method, cronjob has not update signature cronjob
         if not signature_cronjob:
             cls.run_command("cp -r %s/QA/update_signature /home/hadoop/" % path)
