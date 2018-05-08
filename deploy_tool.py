@@ -66,7 +66,7 @@ class DeployTool(object):
                         },
              'dp_beta': {'e_routerinfo_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_routerinfo_hourly',
                          'e_routerstat_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_routerstat_hourly',
-                         't_tmis_cam_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_tmis_cam_hourly',
+                         'e_tmis_cam_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_tmis_cam_hourly',
                          't_cam_bfld_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_bfld_hourly',
                          't_cam_info_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_info_hourly',
                          't_cam_security_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_security_hourly',
@@ -538,23 +538,23 @@ class DeployTool(object):
                 for table in cls.FLAGS[database].keys():
                     cls.clean_fake_folder(database, table)
                     # print command, OPS will check and execute manually
-                    # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
-                    print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
+                    # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' %(database, table))
+                    print('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' % (
                         database, table))
         # repair all tables in specific database
         elif not table:
             for table in cls.FLAGS[database].keys():
                 cls.clean_fake_folder(database, table)
                 # print command, OPS will check and execute manually
-                # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
-                print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
+                # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' %(database, table))
+                print('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' % (
                     database, table))
         # repair specific table
         else:
             cls.clean_fake_folder(database, table)
             # print command, OPS will check and execute manually
-            # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
-            print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+            # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' %(database, table))
+            print('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' %
                   (database, table))
 
     @classmethod
@@ -598,11 +598,11 @@ class DeployTool(object):
         if "t_ips_stat_daily" in table:
             days = table.split('_')[-1]
             partition_list = cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" '
-                                             '--silent=true -e "show partitions %s.%s partition(period=\'%s\');"'
+                                             '-e "show partitions %s.%s partition(period=\'%s\');"'
                                              % (database, "t_ips_stat_daily", days))
         else:
             partition_list = cls.run_command(
-                'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "show partitions %s.%s;"'
+                'beeline -u "jdbc:hive2://localhost:10000/" -e "show partitions %s.%s;"'
                 % (database, table))
         # partition has 3 different formats
         # consider daily partition always less then one period than today, so we check daily job start from yesterday
