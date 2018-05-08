@@ -13,7 +13,7 @@ class DeployTool(object):
     AWS_VERIFIED_BUILD_PATH = "s3://eric-staging-us-west-2/build"
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
-    TOOL_VERSION = "20180504"
+    TOOL_VERSION = "20180508"
     FLAGS = {'datalake': {'akamai_rgom': 'Application/shnprj_spn/hive/datalake.db/f_akamai_rgom',
                           'akamai_web': 'Application/shnprj_spn/hive/datalake.db/f_akamai_web'},
              'dp': {'e_ddi_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ddi_hourly',
@@ -61,7 +61,7 @@ class DeployTool(object):
                         't_ips_stat_daily_180d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=180d',
                         't_ips_stat_daily_1d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=1d',
                         't_ips_stat_daily_30d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=30d',
-                        't_ips_stat_daily_70d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=7d',
+                        't_ips_stat_daily_7d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=7d',
                         't_ips_stat_daily_90d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=90d',
                         },
              'dp_beta': {'e_routerinfo_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_routerinfo_hourly',
@@ -97,9 +97,9 @@ class DeployTool(object):
 
     @staticmethod
     def run_command(command, show_command=True, throw_error=True):
-        # cmd : command we want to execute on shell
-        # show_command(boolean) : display command
-        # throw_error(boolean) : throw Exception when stderr is not empty
+        # cmd(string) : command we want to execute on shell
+        # show_command(boolean) : controller for display command
+        # throw_error(boolean) : controller for throw Exception when return code is not 0
         # output : stdout(string)
         # print stderr when stderr is not empty
         if show_command:
@@ -114,8 +114,8 @@ class DeployTool(object):
 
     @classmethod
     def get_job_list_from_build(cls, data_site, build_path):
-        # data_site : for adjusting reference data path and database suffix
-        # build_path : build path for specific reference data path
+        # data_site(string) : for adjusting reference data path and database suffix
+        # build_path(string) : build path for specific reference data path
         # output : [["hourly",[jobs]],["daily",[jobs]],["weekly",[jobs]]], {'oozie job name' : 'flag path'}
         output_element = "output/data-pipeline-aws"
         if data_site == "beta":
@@ -482,9 +482,9 @@ class DeployTool(object):
                 print('Job not found in Oozie job list')
 
     @classmethod
-    def add_cronjob(cls, site, path):
+    def add_cronjob(cls, site, build_path):
         # site(string) : for cronjob site parameter
-        # path(string) : build path for getting update signature tool
+        # build_path(string) : build path for getting update signature tool
         # only using for new production/beta site deploy
         # these 2 site needs update signature and send notification when geoip update finish
         cronjob_file = "/home/hadoop/cron_temp"
@@ -495,7 +495,7 @@ class DeployTool(object):
                                         throw_error=False)
         # before run this method, cronjob has not update signature cronjob
         if not signature_cronjob:
-            cls.run_command("cp -r %s/QA/update_signature /home/hadoop/" % path)
+            cls.run_command("cp -r %s/QA/update_signature /home/hadoop/" % build_path)
             cls.run_command("echo '0 * * * * /home/hadoop/update_signature/bg_executor.sh %s' >> %s " %
                             (site, cronjob_file))
         # before run this method, cronjob already has geoip update job
@@ -595,9 +595,15 @@ class DeployTool(object):
         else:
             stepping_time = timedelta(hours=1)
         missing_partitions = list()
-        partition_list = cls.run_command(
-            'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "show partitions %s.%s;"'
-            % (database, table))
+        if "t_ips_stat_daily" in table:
+            days = table.split('_')[-1]
+            partition_list = cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" '
+                                             '--silent=true -e "show partitions %s.%s partition(period=\'%s\');"'
+                                             % (database, "t_ips_stat_daily", days))
+        else:
+            partition_list = cls.run_command(
+                'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "show partitions %s.%s;"'
+                % (database, table))
         # partition has 3 different formats
         # consider daily partition always less then one period than today, so we check daily job start from yesterday
         while check_time < datetime.now() - timedelta(days=1):
