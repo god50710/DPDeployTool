@@ -538,9 +538,14 @@ class DeployTool(object):
                 for table in cls.FLAGS[database].keys():
                     cls.clean_fake_folder(database, table)
                     # print command, OPS will check and execute manually
-                    # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' %(database, table))
-                    print('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' % (
-                        database, table))
+                    if "t_ips_stat_daily" in table:
+                        # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' % (database,"t_ips_stat_daily"))
+                        print('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' %
+                              (database, "t_ips_stat_daily"))
+                    else:
+                        # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' %(database, table))
+                        print('beeline -u "jdbc:hive2://localhost:10000/" -e "msck repair table %s.%s;"' %
+                              (database, table))
         # repair all tables in specific database
         elif not table:
             for table in cls.FLAGS[database].keys():
@@ -666,7 +671,7 @@ class DeployTool(object):
 
     @classmethod
     def get_missing_partitions(cls, database="all", table="", source="flag"):
-        # database(string) : database name 
+        # database(string) : database name
         # table(string) : table name
         # source(string) : for switch to check from flag or partition list
         # output : missing_partitions(list) [datetime]

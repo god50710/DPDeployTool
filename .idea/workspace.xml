@@ -16,8 +16,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="882">
-              <caret line="72" column="35" selection-end-line="824" />
+            <state relative-caret-position="662">
+              <caret line="552" column="52" selection-end-line="829" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -64,6 +64,7 @@
       <find>deploy</find>
       <find>path</find>
       <find>silent</find>
+      <find>repair</find>
     </findStrings>
     <replaceStrings>
       <replace>'t_</replace>
@@ -84,8 +85,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="7">
-    <option name="x" value="-1443" />
-    <option name="y" value="66" />
+    <option name="x" value="350" />
+    <option name="y" value="342" />
     <option name="width" value="1278" />
     <option name="height" value="760" />
   </component>
@@ -203,16 +204,16 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1928" y="-8" width="1936" height="1096" extended-state="7" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="7" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4945055" visible="true" weight="0.16041666" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49425286" visible="true" weight="0.16041666" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50654763" side_tool="true" visible="true" weight="0.072375126" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50654763" side_tool="true" visible="true" weight="0.07545165" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.7952381" weight="0.31208792" />
-      <window_info id="Structure" order="1" sideWeight="0.50549453" side_tool="true" visible="true" weight="0.16041666" />
+      <window_info id="Structure" order="1" sideWeight="0.50574714" side_tool="true" visible="true" weight="0.16041666" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
@@ -520,8 +521,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="882">
-          <caret line="72" column="35" selection-end-line="824" />
+        <state relative-caret-position="662">
+          <caret line="552" column="52" selection-end-line="829" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
