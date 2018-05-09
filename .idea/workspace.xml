@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1a5c9656-1468-4f51-be86-49f2f9d7ed4e" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/deploy_tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/deploy_tool.py" afterDir="false" />
-    </list>
+    <list default="true" id="1a5c9656-1468-4f51-be86-49f2f9d7ed4e" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -18,7 +15,7 @@
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="287">
-              <caret line="734" column="67" selection-end-line="830" />
+              <caret line="542" column="86" selection-start-line="542" selection-start-column="86" selection-end-line="542" selection-end-column="86" />
             </state>
           </provider>
         </entry>
@@ -521,7 +518,7 @@
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="287">
-          <caret line="734" column="67" selection-end-line="830" />
+          <caret line="542" column="86" selection-start-line="542" selection-start-column="86" selection-end-line="542" selection-end-column="86" />
         </state>
       </provider>
     </entry>
