@@ -401,10 +401,11 @@ class DeployTool(object):
                 # judge single oozie job status is running or suspended
                 cannot_suspended_job = cls.run_command(
                     "oozie job -info %s | grep oozie-oozi-C@ | grep 'RUNNING\|SUSPENDED'" %
-                    (oozie_job_list[oozie_job][0]), show_command=False)
+                    (oozie_job_list[oozie_job][0]), throw_error=False, show_command=False)
                 # judge whole oozie jos status is suspended
                 cannot_suspended_status = cls.run_command("oozie job -info %s | grep 'Status' | grep 'SUSPENDED'" %
-                                                          (oozie_job_list[oozie_job][0]), show_command=False)
+                                                          (oozie_job_list[oozie_job][0]), throw_error=False,
+                                                          show_command=False)
                 # if no running single jobs and whole job not be suspended yet, suspend it
                 # suspend a running oozie job won't suspend yarn process, yarn still processing until finish
                 if not (cannot_suspended_job or cannot_suspended_status):
