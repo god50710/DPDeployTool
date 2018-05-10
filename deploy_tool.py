@@ -13,7 +13,7 @@ class DeployTool(object):
     AWS_VERIFIED_BUILD_PATH = "s3://eric-staging-us-west-2/build"
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
-    TOOL_VERSION = "20180508"
+    TOOL_VERSION = "20180510"
     FLAGS = {'datalake': {'akamai_rgom': 'Application/shnprj_spn/hive/datalake.db/f_akamai_rgom',
                           'akamai_web': 'Application/shnprj_spn/hive/datalake.db/f_akamai_web'},
              'dp': {'e_ddi_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ddi_hourly',
@@ -214,17 +214,17 @@ class DeployTool(object):
         return "/home/hadoop/%s" % build_file.split('.tar')[0], build_file.split('.tar')[0].split('1.0.')[1]
 
     @classmethod
-    def config_env(cls, site, folder, version, suffix="function", concurrency=1, timeout=180, memory=True):
-        # site(string) : for judge to configure as production, beta or test site
+    def config_env(cls, data_site, folder, version, suffix="function", concurrency=1, timeout=180, memory=True):
+        # data_site(string) : for judge to configure as production, beta or test site
         # folder(string) : target build folder that will be configured
         # version(string) : for adding oozie job name suffix name to identify easier
-        if site == "production":
+        if data_site == "production":
             prod_env_path = "%s/output/data-pipeline-aws/op-utils/env" % folder
             cls.run_command("cp %s/aws-production.sh %s/$(whoami)\@$(hostname).sh" %
                             (prod_env_path, prod_env_path))
             cls.run_command("echo 'OOZIE_APP_EXT=.AWS_Production%s' >> %s/$(whoami)\@$(hostname).sh" %
                             (version, prod_env_path))
-        elif site == "beta":
+        elif data_site == "beta":
             # beta site running on a low-end site, needs to remove memory limitation
             beta_env_path = "%s/output/data-pipeline-aws-beta/op-utils/env" % folder
             beta_oozie_jobs_path = "%s/output/data-pipeline-aws-beta/oozie/*/job.properties" % folder
@@ -238,7 +238,7 @@ class DeployTool(object):
             cls.run_command("sed -i 's/ --driver-memory 12G --executor-memory 12G//g' %s" % beta_script_path)
             cls.run_command("sed -i '/SET hive.tez.java.opts=-Xmx10240m;/d' %s" % beta_hql_path)
             cls.run_command("sed -i '/SET hive.tez.container.size=12288;/d' %s" % beta_hql_path)
-        elif site == "test":
+        elif data_site == "test":
             test_env_path = "%s/output/data-pipeline-aws/op-utils/env" % folder
             test_oozie_path = "%s/output/data-pipeline-aws/oozie" % folder
             test_script_path = "%s/output/data-pipeline-aws/script/hql_external_partition.sh" % folder
@@ -267,8 +267,8 @@ class DeployTool(object):
                             (version, test_env_path))
 
     @classmethod
-    def set_job_time(cls, site, folder, jobs, flags):
-        # site(string) : transport to methods
+    def set_job_time(cls, data_site, folder, jobs, flags):
+        # data_site(string) : transport to methods
         # folder(string)  : transport to methods
         # jobs(list) : transport to methods, [0]=hourly, [1]=daily, [2]=weekly
         # flags(dict) : transport to methods
@@ -276,20 +276,20 @@ class DeployTool(object):
 
         job_time_list = list()
         job_time_list.append("#hourly jobs")
-        job_time_list.extend(cls.get_next_start_time(site, folder, flags, jobs[0]))
+        job_time_list.extend(cls.get_next_start_time(data_site, folder, flags, jobs[0]))
         job_time_list.append("#daily jobs")
-        job_time_list.extend(cls.get_next_start_time(site, folder, flags, jobs[1]))
+        job_time_list.extend(cls.get_next_start_time(data_site, folder, flags, jobs[1]))
         job_time_list.append("#weekly jobs")
-        job_time_list.extend(cls.get_next_start_time(site, folder, flags, jobs[2]))
-        cls.export_app_time(site, job_time_list, folder)
+        job_time_list.extend(cls.get_next_start_time(data_site, folder, flags, jobs[2]))
+        cls.export_app_time(data_site, job_time_list, folder)
 
     @staticmethod
-    def export_app_time(site, job_time_list, build_path):
-        # site(string) : for switch output folder as production/beta
+    def export_app_time(data_site, job_time_list, build_path):
+        # data_site(string) : for switch output folder as production/beta
         # job_time_list(list) : contains each job name, start time and end time
         # folder : build folder
         # export oozie job start and end time to app-time.conf
-        if site == "production":
+        if data_site == "production":
             path_element = "data-pipeline-aws"
         else:
             path_element = "data-pipeline-aws-beta"
@@ -300,15 +300,15 @@ class DeployTool(object):
         job_time_file.close()
 
     @classmethod
-    def get_next_start_time(cls, site, build_path, flags, jobs):
-        # site(string): for switch search latest flag s3 path ,and output path
+    def get_next_start_time(cls, data_site, build_path, flags, jobs):
+        # data_site(string): for switch search latest flag s3 path ,and output path
         # build_path(string): build path
         # flags(dict): oozie job name and flag path mapping table. ex: 'T1Device': '<path_without_bucket>'
         # jobs(list): oozie job frequency and oozie job name mapping table
         # output : oozie next job time(list)
         # [0][1]=hourly jobs, [1][1]=daily jobs, [2][1]=weekly jobs
         job_time_list = []
-        if site == "production":
+        if data_site == "production":
             site_s3_path = cls.AWS_PROD_S3_PATH
             reference_path = "data-pipeline-aws"
         else:
@@ -364,20 +364,20 @@ class DeployTool(object):
         return job_time_list
 
     @classmethod
-    def deploy_build(cls, site, build_path, suspend_jobs=list(), change_build=False):
-        # site(string) : for switch configured environment folder path
+    def deploy_build(cls, data_site, build_path, suspend_jobs=list(), change_build=False):
+        # data_site(string) : for switch configured environment folder path
         # path(string) : build path
         # suspend_jobs(list) : suspended oozie jobs ID list
         # change_build(boolean) : for control deploy flow will enter job recover or not
         # if deploy failed, suspended jobs will be resumed, otherwise will be killed
-        if site == "production":
+        if data_site == "production":
             target_folder = "data-pipeline-aws"
         else:
             target_folder = "data-pipeline-aws-beta"
         deploy_folder = "%s/output/%s/op-utils" % (build_path, target_folder)
         try:
             cls.run_command("bash %s/deploy.sh all" % deploy_folder, throw_error=False)
-            if site == "production":
+            if data_site == "production":
                 cls.run_command("sed -i '/DeviceSession/d' %s/run-jobs.sh" % deploy_folder)
             cls.run_command("bash %s/run-jobs.sh" % deploy_folder)
             # print("bash %s/run-jobs.sh" % deploy_folder)
@@ -483,8 +483,8 @@ class DeployTool(object):
                 print('Job not found in Oozie job list')
 
     @classmethod
-    def add_cronjob(cls, site, build_path):
-        # site(string) : for cronjob site parameter
+    def add_cronjob(cls, data_site, build_path):
+        # data_site(string) : for cronjob site parameter
         # build_path(string) : build path for getting update signature tool
         # only using for new production/beta site deploy
         # these 2 site needs update signature and send notification when geoip update finish
@@ -498,20 +498,20 @@ class DeployTool(object):
         if not signature_cronjob:
             cls.run_command("cp -r %s/QA/update_signature /home/hadoop/" % build_path)
             cls.run_command("echo '0 * * * * /home/hadoop/update_signature/bg_executor.sh %s' >> %s " %
-                            (site, cronjob_file))
+                            (data_site, cronjob_file))
         # before run this method, cronjob already has geoip update job
         # just switch to another version that sends notification
         if geoip_cronjob:
             cls.run_command("sed -i '/geoip_bg_executor.sh/d' %s" % cronjob_file)
             cls.run_command("echo '0 * * * * /trs/update_geoip/geoip_bg_executor_with_mail.sh %s' >> %s " %
-                            (site, cronjob_file))
+                            (data_site, cronjob_file))
         cls.run_command("crontab %s" % cronjob_file)
         cls.run_command("rm %s" % cronjob_file)
 
     @classmethod
     def disable_stunnel(cls):
         # search and kill stunned pid
-        # using test site to avoid send notification
+        # using test data site to avoid send notification
         stunnel_pid = cls.run_command("ps -ef | grep [s]tunnel | awk '{print $2}'")
         if stunnel_pid:
             cls.run_command("ps -ef | grep [s]tunnel | awk '{print $2}' | xargs sudo kill -9", throw_error=False)
@@ -720,7 +720,7 @@ class DeployTool(object):
     def command_parser(cls):
         parser = argparse.ArgumentParser()
         action_group = parser.add_argument_group('Actions')
-        action_group.add_argument("-s", dest="site", help="Choose deploy target site")
+        action_group.add_argument("-s", dest="data_site", help="Choose deploy target data site")
         action_group.add_argument("-c", dest="check_job", help="Check Oozie job status")
         action_group.add_argument("-p", action="store_true", dest="check_partition", help="Check missing partition")
         action_group.add_argument("-r", action="store_true", dest="repair_partition", help="Repair partitions")
@@ -731,7 +731,7 @@ class DeployTool(object):
         site_group = parser.add_mutually_exclusive_group()
         site_group.add_argument("-N", action="store_true", dest="new_deploy", help="Execute a new deploy on EMR")
         site_group.add_argument("-C", action="store_true", dest="change_build", help="Execute change build on EMR")
-        test_env_group = parser.add_argument_group('Parameters for test site environment')
+        test_env_group = parser.add_argument_group('Parameters for test data site environment')
         test_env_group.add_argument("-b", dest="build_name", help="Specify build name")
         test_env_group.add_argument("-t", type=int, dest="timeout", default="180", help="Set oozie job timeout")
         test_env_group.add_argument("--suffix", dest="suffix", default="function",
@@ -743,12 +743,20 @@ class DeployTool(object):
             print('\nQuick Start:')
             print('# Verified build location: %s' % cls.AWS_VERIFIED_BUILD_PATH)
             print('# Testing build location: %s' % cls.AWS_TESTING_BUILD_PATH)
-            print('\n# To deploy on a new EMR as Production Site')
+            print('\n# To deploy on a new EMR as Production data site')
             print('python %s -s production -N' % os.path.basename(__file__))
-            print('\n# To change build on Beta Site')
+            print('\n# To deploy on a new EMR as Beta data site')
+            print('python %s -s beta -N' % os.path.basename(__file__))
+            print('\n# To change build on Production data site')
+            print('python %s -s production -C' % os.path.basename(__file__))
+            print('\n# To change build on Beta  data site')
             print('python %s -s beta -C' % os.path.basename(__file__))
             print('\n# To prepare testing build on current site')
+            print('\n# build_version=280, database_name=eric_test, timeout=28800, concurrency=3, remove memory limit')
             print('python %s -s test -b 280 -suffix eric_test -t 28800 -con 3 -m' % os.path.basename(__file__))
+            print('\n# To prepare testing build on current site with default value')
+            print('\n# build_version=latest, database_name=dp_function, timeout=180, concurrency=1, keep memory limit')
+            print('python %s -s test' % os.path.basename(__file__))
             print('\n# To check all Oozie job status')
             print('python %s -c all' % os.path.basename(__file__))
             print('\n# To check specific Oozie job status')
@@ -761,12 +769,16 @@ class DeployTool(object):
             print('python %s -p --database dp' % os.path.basename(__file__))
             print('\n# To check partitions for all database')
             print('python %s -p' % os.path.basename(__file__))
-            print('\n# To repair partitions for specific table')
-            print('python %s -r --database dp_beta --table t_device_hourly' % os.path.basename(__file__))
-            print('\n# To repair partitions for all table in sepcific database')
+            print('\n# To repair partitions for specific table(only show commands)')
+            print('python %s -r --database dp --table t_device_hourly' % os.path.basename(__file__))
+            print('\n# To repair partitions for all table in sepcific database(only show commands)')
             print('python %s -r --database dp' % os.path.basename(__file__))
-            print('\n# To repair partitions for all database')
+            print('\n# To repair partitions for all database(only show commands)')
             print('python %s -r' % os.path.basename(__file__))
+            print('\n# To repair partitions and clean fake folder on Beta data site(only show commands)')
+            print('python %s -r --database dp_beta' % os.path.basename(__file__))
+            print('\n# To repair partitions and clean fake folder on Beta data site specific table(only show commands)')
+            print('python %s -r --database dp_beta --table t_router_hourly' % os.path.basename(__file__))
             exit(0)
         return parser.parse_args()
 
@@ -774,16 +786,16 @@ class DeployTool(object):
 if __name__ == "__main__":
     DT = DeployTool()
     main_job = DT.command_parser()
-    if main_job.site:
-        if main_job.site not in ("production", "beta", "test"):
-            print('Please assign site as "production", "beta" or "test".')
+    if main_job.data_site:
+        if main_job.data_site not in ("production", "beta", "test"):
+            print('Please assign data site as "production", "beta" or "test".')
             exit()
-        if main_job.site == "test":
+        if main_job.data_site == "test":
             if main_job.build_name:
                 build_folder, build_version = DT.get_build(version=main_job.build_name, mode="test")
             else:
                 build_folder, build_version = DT.get_build(mode="test")
-            DT.config_env(main_job.site, build_folder, build_version, suffix=main_job.suffix,
+            DT.config_env(main_job.data_site, build_folder, build_version, suffix=main_job.suffix,
                           concurrency=main_job.concurrency, timeout=main_job.timeout, memory=main_job.memory)
             print('Testing build %s is ready to go' % build_version)
             print('Need to create database metadata')
@@ -793,18 +805,18 @@ if __name__ == "__main__":
         else:
             if main_job.new_deploy:
                 build_folder, build_version = DT.get_build()
-                DT.add_cronjob(main_job.site, build_folder)
-                DT.config_env(main_job.site, build_folder, build_version)
+                DT.add_cronjob(main_job.data_site, build_folder)
+                DT.config_env(main_job.data_site, build_folder, build_version)
                 all_jobs, flag_list = DT.get_job_list_from_build(main_job.site, build_folder)
-                DT.set_job_time(main_job.site, build_folder, all_jobs, flag_list)
-                DT.deploy_build(main_job.site, build_folder)
+                DT.set_job_time(main_job.data_site, build_folder, all_jobs, flag_list)
+                DT.deploy_build(main_job.data_site, build_folder)
             elif main_job.change_build:
                 build_folder, build_version = DT.get_build()
-                DT.config_env(main_job.site, build_folder, build_version)
+                DT.config_env(main_job.data_site, build_folder, build_version)
                 all_jobs, flag_list = DT.get_job_list_from_build(main_job.site, build_folder)
                 previous_jobs = DT.wait_and_suspend_all_jobs(DT.get_job_list("all"))
-                DT.set_job_time(main_job.site, build_folder, all_jobs, flag_list)
-                DT.deploy_build(main_job.site, build_folder, suspend_jobs=previous_jobs, change_build=True)
+                DT.set_job_time(main_job.data_site, build_folder, all_jobs, flag_list)
+                DT.deploy_build(main_job.data_site, build_folder, suspend_jobs=previous_jobs, change_build=True)
             else:
                 print('Please using one of -N and -C after "-s production" and "-s beta"')
     elif main_job.repair_partition:
@@ -827,4 +839,4 @@ if __name__ == "__main__":
         else:
             DT.get_missing_partitions(source=main_job.source)
     else:
-        print('Please using -s <site>, -c <job>, -p or -r')
+        print('Please using -s <data_site>, -c <job>, -p or -r')
