@@ -267,13 +267,17 @@ class DeployTool(object):
                             (version, test_env_path))
 
     @classmethod
+    def create_bucket(cls, suffix="function"):
+        if "dp-%s" % suffix not in cls.run_command("aws s3 ls"):
+            cls.run_command("aws s3 mb s3://dp-%s" % suffix)
+
+    @classmethod
     def set_job_time(cls, data_site, folder, jobs, flags):
         # data_site(string) : transport to methods
         # folder(string)  : transport to methods
         # jobs(list) : transport to methods, [0]=hourly, [1]=daily, [2]=weekly
         # flags(dict) : transport to methods
         # control flow for get oozie job start, end time list and export to config file
-
         job_time_list = list()
         job_time_list.append("#hourly jobs")
         job_time_list.extend(cls.get_next_start_time(data_site, folder, flags, jobs[0]))
@@ -795,6 +799,7 @@ if __name__ == "__main__":
                 build_folder, build_version = DT.get_build(version=main_job.build_name, mode="test")
             else:
                 build_folder, build_version = DT.get_build(mode="test")
+            DT.create_bucket(suffix=main_job.suffix)
             DT.config_env(main_job.data_site, build_folder, build_version, suffix=main_job.suffix,
                           concurrency=main_job.concurrency, timeout=main_job.timeout, memory=main_job.memory)
             print('Testing build %s is ready to go' % build_version)
@@ -807,13 +812,13 @@ if __name__ == "__main__":
                 build_folder, build_version = DT.get_build()
                 DT.add_cronjob(main_job.data_site, build_folder)
                 DT.config_env(main_job.data_site, build_folder, build_version)
-                all_jobs, flag_list = DT.get_job_list_from_build(main_job.site, build_folder)
+                all_jobs, flag_list = DT.get_job_list_from_build(main_job.data_site, build_folder)
                 DT.set_job_time(main_job.data_site, build_folder, all_jobs, flag_list)
                 DT.deploy_build(main_job.data_site, build_folder)
             elif main_job.change_build:
                 build_folder, build_version = DT.get_build()
                 DT.config_env(main_job.data_site, build_folder, build_version)
-                all_jobs, flag_list = DT.get_job_list_from_build(main_job.site, build_folder)
+                all_jobs, flag_list = DT.get_job_list_from_build(main_job.data_site, build_folder)
                 previous_jobs = DT.wait_and_suspend_all_jobs(DT.get_job_list("all"))
                 DT.set_job_time(main_job.data_site, build_folder, all_jobs, flag_list)
                 DT.deploy_build(main_job.data_site, build_folder, suspend_jobs=previous_jobs, change_build=True)
