@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1a5c9656-1468-4f51-be86-49f2f9d7ed4e" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/deploy_tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/deploy_tool.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -17,8 +16,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="398">
-              <caret line="768" column="130" selection-start-line="768" selection-start-column="130" selection-end-line="768" selection-end-column="130" />
+            <state relative-caret-position="546">
+              <caret line="355" column="98" selection-start-line="355" selection-start-column="98" selection-end-line="355" selection-end-column="98" />
             </state>
           </provider>
         </entry>
@@ -34,7 +33,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>DeviceStats</find>
       <find>previous</find>
       <find>exit</find>
       <find>beta</find>
@@ -46,7 +44,6 @@
       <find>version</find>
       <find>pass</find>
       <find>beeline</find>
-      <find>%h</find>
       <find>result</find>
       <find>conf</find>
       <find>get_job_list</find>
@@ -64,6 +61,8 @@
       <find>date</find>
       <find>command</find>
       <find>dp_</find>
+      <find>today</find>
+      <find>%h</find>
     </findStrings>
     <replaceStrings>
       <replace>'t_</replace>
@@ -83,7 +82,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-8" />
     <option name="y" value="-8" />
     <option name="width" value="1696" />
@@ -203,7 +202,7 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49107143" visible="true" weight="0.1046875" />
@@ -520,8 +519,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="398">
-          <caret line="768" column="130" selection-start-line="768" selection-start-column="130" selection-end-line="768" selection-end-column="130" />
+        <state relative-caret-position="546">
+          <caret line="355" column="98" selection-start-line="355" selection-start-column="98" selection-end-line="355" selection-end-column="98" />
         </state>
       </provider>
     </entry>

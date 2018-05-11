@@ -338,8 +338,12 @@ class DeployTool(object):
             if "System" in job:
                 flag_day = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
             else:
-                flag_day = cls.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
-                                           (site_s3_path, flags[job]))[-11:-1]
+                # if oozie job is a new job cause no flag, setting now time as next start time
+                if not cls.run_command("aws s3 ls %s/%s/" % (site_s3_path, flags[job])):
+                    flag_day = datetime.now().strftime('%Y-%m-%d')
+                else:
+                    flag_day = cls.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
+                                               (site_s3_path, flags[job]))[-11:-1]
             if not re.match('\d{4}-\d{2}-\d{2}', flag_day):
                 raise Exception('[Error] Get malformed day from s3:', flag_day)
 
@@ -349,8 +353,12 @@ class DeployTool(object):
                     flag_hour = cls.run_command("aws s3 ls %s/%s/pdd=%s/ | tail -1 | awk '{print $4}'" %
                                                 (site_s3_path, flags[job], flag_day))[4:6]
                 else:
-                    flag_hour = cls.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
-                                                (site_s3_path, flags[job], flag_day))[2:4]
+                    # if oozie job is a new job cause no flag, setting now time as next start time
+                    if not cls.run_command("aws s3 ls %s/%s/" % (site_s3_path, flags[job])):
+                        flag_hour = datetime.now().strftime('%H')
+                    else :
+                        flag_hour = cls.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
+                                                    (site_s3_path, flags[job], flag_day))[2:4]
                 if not re.match('\d{2}', flag_hour):
                     raise Exception('[Error] Get malformed hour from s3:', flag_hour)
             elif "System" in job:
