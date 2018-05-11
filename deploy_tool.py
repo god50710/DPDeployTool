@@ -731,8 +731,9 @@ class DeployTool(object):
                     print('\t' + all_missing_partitions[item][-1])
         return all_missing_partitions
 
+
     @classmethod
-    def fill_dependency(cls):
+    def rerun_failed_jobs(cls):
         pass
 
     @classmethod
