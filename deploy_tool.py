@@ -544,11 +544,15 @@ class DeployTool(object):
                     cls.clean_fake_folder(database, table)
                     # print command, OPS will check and execute manually
                     if "t_ips_stat_daily" in table:
-                        cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (database,"t_ips_stat_daily"))
+                        cls.run_command(
+                            'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                            (database, "t_ips_stat_daily"))
                         # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
                         #      (database, "t_ips_stat_daily"))
                     else:
-                        cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
+                        cls.run_command(
+                            'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                            (database, table))
                         # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
                         #      (database, table))
         # repair all tables in specific database
@@ -556,14 +560,17 @@ class DeployTool(object):
             for table in cls.FLAGS[database].keys():
                 cls.clean_fake_folder(database, table)
                 # print command, OPS will check and execute manually
-                cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
+                cls.run_command(
+                    'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
+                    database, table))
                 # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
                 #    database, table))
         # repair specific table
         else:
             cls.clean_fake_folder(database, table)
             # print command, OPS will check and execute manually
-            cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
+            cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                            (database, table))
             # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
             #      (database, table))
 
