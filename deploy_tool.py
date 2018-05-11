@@ -544,28 +544,28 @@ class DeployTool(object):
                     cls.clean_fake_folder(database, table)
                     # print command, OPS will check and execute manually
                     if "t_ips_stat_daily" in table:
-                        # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (database,"t_ips_stat_daily"))
-                        print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                              (database, "t_ips_stat_daily"))
+                        cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (database,"t_ips_stat_daily"))
+                        # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                        #      (database, "t_ips_stat_daily"))
                     else:
-                        # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
-                        print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                              (database, table))
+                        cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
+                        # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                        #      (database, table))
         # repair all tables in specific database
         elif not table:
             for table in cls.FLAGS[database].keys():
                 cls.clean_fake_folder(database, table)
                 # print command, OPS will check and execute manually
-                # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
-                print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
-                    database, table))
+                cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
+                # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
+                #    database, table))
         # repair specific table
         else:
             cls.clean_fake_folder(database, table)
             # print command, OPS will check and execute manually
-            # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
-            print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                  (database, table))
+            cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %(database, table))
+            # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+            #      (database, table))
 
     @classmethod
     def clean_fake_folder(cls, database, table):
@@ -586,8 +586,8 @@ class DeployTool(object):
         else:
             bucket = cls.AWS_BETA_S3_PATH
         # print command, OPS will check and execute manually
-        # cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (bucket, s3_folder))
-        print("aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (bucket, s3_folder))
+        cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (bucket, s3_folder))
+        # print("aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (bucket, s3_folder))
 
     @classmethod
     def check_missing_partitions(cls, database, table):
@@ -769,20 +769,21 @@ class DeployTool(object):
             print('python %s -p --database dp --table t_router_hourly --src list' % os.path.basename(__file__))
             print('\n# To check partitions for specific table by f_ flag')
             print('python %s -p --database dp --table t_router_hourly' % os.path.basename(__file__))
-            print('\n# To check partitions for all table in sepcific database')
+            print('\n# To check partitions for all table in specific database')
             print('python %s -p --database dp' % os.path.basename(__file__))
             print('\n# To check partitions for all database')
             print('python %s -p' % os.path.basename(__file__))
-            print('\n# To repair partitions for specific table(only show commands)')
+            print('\n# To repair partitions for specific table')
             print('python %s -r --database dp --table t_device_hourly' % os.path.basename(__file__))
-            print('\n# To repair partitions for all table in sepcific database(only show commands)')
+            print('\n# To repair partitions for all table in specific database')
             print('python %s -r --database dp' % os.path.basename(__file__))
-            print('\n# To repair partitions for all database(only show commands)')
+            print('\n# To repair partitions for all database')
             print('python %s -r' % os.path.basename(__file__))
-            print('\n# To repair partitions and clean fake folder on Beta data site(only show commands)')
-            print('python %s -r --database dp_beta' % os.path.basename(__file__))
-            print('\n# To repair partitions and clean fake folder on Beta data site specific table(only show commands)')
+            print('\n# Notification : repair dp_beta on production account before staging and beta')
+            print('\n# To repair partitions and clean fake folder on Beta data site specific table')
             print('python %s -r --database dp_beta --table t_router_hourly' % os.path.basename(__file__))
+            print('\n# To repair partitions and clean fake folder on Beta data site')
+            print('python %s -r --database dp_beta' % os.path.basename(__file__))
             exit(0)
         return parser.parse_args()
 
