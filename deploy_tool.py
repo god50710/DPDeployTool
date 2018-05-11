@@ -562,7 +562,7 @@ class DeployTool(object):
                 # print command, OPS will check and execute manually
                 cls.run_command(
                     'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
-                    database, table))
+                        database, table))
                 # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
                 #    database, table))
         # repair specific table
@@ -763,10 +763,12 @@ class DeployTool(object):
             print('\n# To change build on Beta  data site')
             print('python %s -s beta -C' % os.path.basename(__file__))
             print('\n# To prepare testing build on current site')
-            print('\n# build_version=280, database_name=eric_test, timeout=28800, concurrency=3, remove memory limit')
-            print('python %s -s test -b 280 -suffix eric_test -t 28800 -con 3 -m' % os.path.basename(__file__))
+            print(
+                '\n# build_version=1.0.280, database_name=dp_erictest, bucket=s3://dp-erictest, timeout=28800 minutes, job concurrency=3, remove memory limit')
+            print('python %s -s test -b 280 --suffix erictest -t 28800 --con 3 -m' % os.path.basename(__file__))
             print('\n# To prepare testing build on current site with default value')
-            print('\n# build_version=latest, database_name=dp_function, timeout=180, concurrency=1, keep memory limit')
+            print(
+                '\n# build_version=latest version in testing build folder, database_name=dp_function, bucket=s3://dp-function, timeout=180 minutes, job concurrency=1, keep memory limit')
             print('python %s -s test' % os.path.basename(__file__))
             print('\n# To check all Oozie job status')
             print('python %s -c all' % os.path.basename(__file__))

@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1a5c9656-1468-4f51-be86-49f2f9d7ed4e" name="Default" comment="" />
+    <list default="true" id="1a5c9656-1468-4f51-be86-49f2f9d7ed4e" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/deploy_tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/deploy_tool.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -14,8 +17,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1953">
-              <caret line="437" lean-forward="true" selection-start-line="437" selection-end-line="437" />
+            <state relative-caret-position="398">
+              <caret line="768" column="130" selection-start-line="768" selection-start-column="130" selection-end-line="768" selection-end-column="130" />
             </state>
           </provider>
         </entry>
@@ -31,8 +34,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>get_b</find>
-      <find>re</find>
       <find>DeviceStats</find>
       <find>previous</find>
       <find>exit</find>
@@ -61,6 +62,8 @@
       <find>grep</find>
       <find>site</find>
       <find>date</find>
+      <find>command</find>
+      <find>dp_</find>
     </findStrings>
     <replaceStrings>
       <replace>'t_</replace>
@@ -517,8 +520,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1953">
-          <caret line="437" lean-forward="true" selection-start-line="437" selection-end-line="437" />
+        <state relative-caret-position="398">
+          <caret line="768" column="130" selection-start-line="768" selection-start-column="130" selection-end-line="768" selection-end-column="130" />
         </state>
       </provider>
     </entry>
