@@ -479,20 +479,25 @@ class DeployTool(object):
         # oozie_job_list(dict) : {oozie_job_id:[next_start_time, oozie_job_name]}
         # get each job status and focus on waiting, suspend, killed jobs
         jobs_to_hide = '\|SUCCEEDED\|READY'
+        job_status_all = ''
         if job_name == "all":
             jobs_count = 1
             for job_name in oozie_job_list:
                 print('\n=== Job Checking(%d/%d) ===' % (jobs_count, len(oozie_job_list)))
-                print(cls.run_command("oozie job -info %s -len 5000|grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" %
-                                      (oozie_job_list[job_name][0], jobs_to_hide), show_command=False))
+                job_status = cls.run_command("oozie job -info %s -len 5000|grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" %
+                                      (oozie_job_list[job_name][0], jobs_to_hide), show_command=False)
+                print(job_status)
+                job_status_all += job_status
                 jobs_count += 1
         else:
             if job_name in oozie_job_list:
                 print('=== Job Checking ===')
-                print(cls.run_command("oozie job -info %s |grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" %
-                                      (oozie_job_list[job_name][0], jobs_to_hide), show_command=False))
+                job_status_all = cls.run_command("oozie job -info %s |grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" %
+                                      (oozie_job_list[job_name][0], jobs_to_hide), show_command=False)
+                print(job_status_all)
             else:
                 print('Job not found in Oozie job list')
+        return job_status_all
 
     @classmethod
     def add_cronjob(cls, data_site, build_path):
@@ -733,8 +738,17 @@ class DeployTool(object):
 
 
     @classmethod
-    def rerun_failed_jobs(cls):
-        pass
+    def rerun_failed_jobs(cls, job_status):
+        job_status_line = job_status.split('\n')[6:-1]
+        job_list = [x.split()[:2] for x in job_status_line]
+        # print(job_status_line)
+        # print(job_list)
+        for job in job_list:
+            if job[1] == 'KILLED' or job[1] == 'TIMEDOUT':
+                job_id, action_id = job[0].split('@')
+                # print(job_id, action_id)
+                print(cls.run_command('oozie job -rerun %s -action %s' %(job_id, action_id)))
+        # pass
 
     @classmethod
     def command_parser(cls):
@@ -864,3 +878,4 @@ if __name__ == "__main__":
             DT.get_missing_partitions(source=main_job.source)
     else:
         print('Please using -s <data_site>, -c <job>, -p or -r')
+    DT.rerun_failed_jobs(DT.check_job_status(main_job.check_job, DT.get_job_list(main_job.check_job)))
