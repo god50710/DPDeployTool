@@ -13,7 +13,7 @@ class DeployTool(object):
     AWS_VERIFIED_BUILD_PATH = "s3://eric-staging-us-west-2/build"
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
-    TOOL_VERSION = "20180510"
+    TOOL_VERSION = "20180515"
     FLAGS = {'datalake': {'akamai_rgom': 'Application/shnprj_spn/hive/datalake.db/f_akamai_rgom',
                           'akamai_web': 'Application/shnprj_spn/hive/datalake.db/f_akamai_web'},
              'dp': {'e_ddi_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ddi_hourly',
@@ -356,7 +356,7 @@ class DeployTool(object):
                     # if oozie job is a new job cause no flag, setting now time as next start time
                     if not cls.run_command("aws s3 ls %s/%s/" % (site_s3_path, flags[job])):
                         flag_hour = datetime.now().strftime('%H')
-                    else :
+                    else:
                         flag_hour = cls.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
                                                     (site_s3_path, flags[job], flag_day))[2:4]
                 if not re.match('\d{2}', flag_hour):
@@ -479,25 +479,26 @@ class DeployTool(object):
         # oozie_job_list(dict) : {oozie_job_id:[next_start_time, oozie_job_name]}
         # get each job status and focus on waiting, suspend, killed jobs
         jobs_to_hide = '\|SUCCEEDED\|READY'
-        job_status_all = ''
+        all_job_status = ''
         if job_name == "all":
             jobs_count = 1
             for job_name in oozie_job_list:
                 print('\n=== Job Checking(%d/%d) ===' % (jobs_count, len(oozie_job_list)))
-                job_status = cls.run_command("oozie job -info %s -len 5000|grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" %
-                                      (oozie_job_list[job_name][0], jobs_to_hide), show_command=False)
+                job_status = cls.run_command(
+                    "oozie job -info %s -len 5000|grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" %
+                    (oozie_job_list[job_name][0], jobs_to_hide), show_command=False)
                 print(job_status)
-                job_status_all += job_status
+                all_job_status += job_status
                 jobs_count += 1
         else:
             if job_name in oozie_job_list:
                 print('=== Job Checking ===')
-                job_status_all = cls.run_command("oozie job -info %s |grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" %
-                                      (oozie_job_list[job_name][0], jobs_to_hide), show_command=False)
-                print(job_status_all)
+                all_job_status = cls.run_command("oozie job -info %s |grep -v '\-\-\|Pause Time\|App Path\|Job ID%s'" %
+                                                 (oozie_job_list[job_name][0], jobs_to_hide), show_command=False)
+                print(all_job_status)
             else:
                 print('Job not found in Oozie job list')
-        return job_status_all
+        return all_job_status
 
     @classmethod
     def add_cronjob(cls, data_site, build_path):
@@ -736,19 +737,14 @@ class DeployTool(object):
                     print('\t' + all_missing_partitions[item][-1])
         return all_missing_partitions
 
-
     @classmethod
-    def rerun_failed_jobs(cls, job_status):
-        job_status_line = job_status.split('\n')[6:-1]
-        job_list = [x.split()[:2] for x in job_status_line]
-        # print(job_status_line)
-        # print(job_list)
+    def rerun_failed_jobs(cls, all_job_status):
+        # all_job_status(string) : just like "python deploy_tool.py -c all" result
+        job_list = [x.split()[:2] for x in (all_job_status.split('\n')[6:-1])]
         for job in job_list:
             if job[1] == 'KILLED' or job[1] == 'TIMEDOUT':
                 job_id, action_id = job[0].split('@')
-                # print(job_id, action_id)
-                print(cls.run_command('oozie job -rerun %s -action %s' %(job_id, action_id)))
-        # pass
+                cls.run_command('oozie job -rerun %s -action %s' % (job_id, action_id))
 
     @classmethod
     def command_parser(cls):
@@ -758,6 +754,7 @@ class DeployTool(object):
         action_group.add_argument("-c", dest="check_job", help="Check Oozie job status")
         action_group.add_argument("-p", action="store_true", dest="check_partition", help="Check missing partition")
         action_group.add_argument("-r", action="store_true", dest="repair_partition", help="Repair partitions")
+        action_group.add_argument("-R", action="store_true", dest="rerun", help="Rerun all KILLED/TIMEDOUT jobs")
         partition_group = parser.add_argument_group('Parameters for check missing partition')
         partition_group.add_argument("--database", dest="database", help="Database name")
         partition_group.add_argument("--table", dest="table", help="Table name")
@@ -777,6 +774,8 @@ class DeployTool(object):
             print('\nQuick Start:')
             print('# Verified build location: %s' % cls.AWS_VERIFIED_BUILD_PATH)
             print('# Testing build location: %s' % cls.AWS_TESTING_BUILD_PATH)
+            print('\n# To rerun all TIMEDOUT/KILLED jobs')
+            print('python %s -R' % os.path.basename(__file__))
             print('\n# To deploy on a new EMR as Production data site')
             print('python %s -s production -N' % os.path.basename(__file__))
             print('\n# To deploy on a new EMR as Beta data site')
@@ -876,6 +875,7 @@ if __name__ == "__main__":
             DT.get_missing_partitions(database=main_job.database, source=main_job.source)
         else:
             DT.get_missing_partitions(source=main_job.source)
+    elif main_job.rerun:
+        DT.rerun_failed_jobs(DT.check_job_status("all", DT.get_job_list("all")))
     else:
-        print('Please using -s <data_site>, -c <job>, -p or -r')
-    DT.rerun_failed_jobs(DT.check_job_status(main_job.check_job, DT.get_job_list(main_job.check_job)))
+        print('Please using -s <data_site>, -c <job>, -p, -r or -R')
