@@ -214,7 +214,7 @@ class DeployTool(object):
         return "/home/hadoop/%s" % build_file.split('.tar')[0], build_file.split('.tar')[0].split('1.0.')[1]
 
     @classmethod
-    def config_env(cls, data_site, folder, version, suffix="function", concurrency=1, timeout=180):
+    def config_env(cls, data_site, folder, version, suffix="function", concurrency=1, timeout=28800):
         # data_site(string) : for judge to configure as production, beta or test site
         # folder(string) : target build folder that will be configured
         # version(string) : for adding oozie job name suffix name to identify easier
@@ -775,7 +775,7 @@ class DeployTool(object):
             print('\n# build_version=1.0.280, database_name=dp_erictest, bucket=s3://dp-erictest, timeout=28800 minutes, job concurrency=3')
             print('python %s -s test -b 280 --suffix erictest -t 28800 --con 3' % os.path.basename(__file__))
             print('\n# To prepare testing build on current site with default value')
-            print('\n# build_version=latest version in testing build folder, database_name=dp_function, bucket=s3://dp-function, timeout=180 minutes, job concurrency=1')
+            print('\n# build_version=latest version in testing build folder, database_name=dp_function, bucket=s3://dp-function, timeout=28800 minutes, job concurrency=1')
             print('python %s -s test' % os.path.basename(__file__))
             print('\n# To check all Oozie job status')
             print('python %s -c all' % os.path.basename(__file__))
