@@ -13,7 +13,7 @@ class DeployTool(object):
     AWS_VERIFIED_BUILD_PATH = "s3://eric-staging-us-west-2/build"
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
-    TOOL_VERSION = "20180515"
+    TOOL_VERSION = "20180521"
     FLAGS = {'datalake': {'akamai_rgom': 'Application/shnprj_spn/hive/datalake.db/f_akamai_rgom',
                           'akamai_web': 'Application/shnprj_spn/hive/datalake.db/f_akamai_web'},
              'dp': {'e_ddi_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ddi_hourly',
@@ -214,7 +214,7 @@ class DeployTool(object):
         return "/home/hadoop/%s" % build_file.split('.tar')[0], build_file.split('.tar')[0].split('1.0.')[1]
 
     @classmethod
-    def config_env(cls, data_site, folder, version, suffix="function", concurrency=1, timeout=180, memory=True):
+    def config_env(cls, data_site, folder, version, suffix="function", concurrency=1, timeout=180):
         # data_site(string) : for judge to configure as production, beta or test site
         # folder(string) : target build folder that will be configured
         # version(string) : for adding oozie job name suffix name to identify easier
@@ -228,21 +228,14 @@ class DeployTool(object):
             # beta site running on a low-end site, needs to remove memory limitation
             beta_env_path = "%s/output/data-pipeline-aws-beta/op-utils/env" % folder
             beta_oozie_jobs_path = "%s/output/data-pipeline-aws-beta/oozie/*/job.properties" % folder
-            beta_script_path = "%s/output/data-pipeline-aws-beta/script/hql_external_partition.sh" % folder
-            beta_hql_path = "%s/output/data-pipeline-aws-beta/hql/*.hql" % folder
             cls.run_command(
                 "cp %s/aws-production-beta-data.sh %s/$(whoami)\@$(hostname).sh" % (beta_env_path, beta_env_path))
             cls.run_command("echo 'OOZIE_APP_EXT=.AWS_Beta%s' >> %s/$(whoami)\@$(hostname).sh" %
                             (version, beta_env_path))
             cls.run_command("sed -i 's/^cntLowerbound=.*$/cntLowerbound=0/g' %s" % beta_oozie_jobs_path)
-            cls.run_command("sed -i 's/ --driver-memory 12G --executor-memory 12G//g' %s" % beta_script_path)
-            cls.run_command("sed -i '/SET hive.tez.java.opts=-Xmx10240m;/d' %s" % beta_hql_path)
-            cls.run_command("sed -i '/SET hive.tez.container.size=12288;/d' %s" % beta_hql_path)
         elif data_site == "test":
             test_env_path = "%s/output/data-pipeline-aws/op-utils/env" % folder
             test_oozie_path = "%s/output/data-pipeline-aws/oozie" % folder
-            test_script_path = "%s/output/data-pipeline-aws/script/hql_external_partition.sh" % folder
-            test_hql_path = "%s/output/data-pipeline-aws/hql/*.hql" % folder
             test_env_make_path = "%s/src" % folder
             # test site needs remake source for adjust timeout, oozie job concurrency and import specific database name
             cls.run_command("cd %s; make clean" % test_env_make_path)
@@ -251,11 +244,6 @@ class DeployTool(object):
                 cls.run_command("cd %s; sed -i 's/180/%s/g' data-pipeline/oozie/common.properties" %
                                 (test_env_make_path, timeout))
             cls.run_command("cd %s; make %s-db" % (test_env_make_path, suffix))
-            # default has memory limitation on T0 spark shell and part of T1 hql files
-            if not memory:
-                cls.run_command("sed -i 's/ --driver-memory 12G --executor-memory 12G//g' %s" % test_script_path)
-                cls.run_command("sed -i '/SET hive.tez.java.opts=-Xmx10240m;/d' %s" % test_hql_path)
-                cls.run_command("sed -i '/SET hive.tez.container.size=12288;/d' %s" % test_hql_path)
             cls.run_command("sed -i 's/concurrency=./concurrency=%i/g' %s/*/job.properties" %
                             (concurrency, test_oozie_path))
             cls.run_command("cp %s/hadoop\@ip-172-31-13-117.sh %s/$(whoami)\@$(hostname).sh" %
@@ -768,7 +756,6 @@ class DeployTool(object):
         test_env_group.add_argument("--suffix", dest="suffix", default="function",
                                     help='Set database/s3 bucket name suffix')
         test_env_group.add_argument("--con", type=int, dest="concurrency", default=1, help="Set oozie jobs concurrency")
-        test_env_group.add_argument("-m", action="store_false", dest="memory", help="Remove hql memory limits")
         if len(sys.argv) == 1:
             parser.print_help()
             print('\nQuick Start:')
@@ -785,12 +772,10 @@ class DeployTool(object):
             print('\n# To change build on Beta  data site')
             print('python %s -s beta -C' % os.path.basename(__file__))
             print('\n# To prepare testing build on current site')
-            print(
-                '\n# build_version=1.0.280, database_name=dp_erictest, bucket=s3://dp-erictest, timeout=28800 minutes, job concurrency=3, remove memory limit')
-            print('python %s -s test -b 280 --suffix erictest -t 28800 --con 3 -m' % os.path.basename(__file__))
+            print('\n# build_version=1.0.280, database_name=dp_erictest, bucket=s3://dp-erictest, timeout=28800 minutes, job concurrency=3')
+            print('python %s -s test -b 280 --suffix erictest -t 28800 --con 3' % os.path.basename(__file__))
             print('\n# To prepare testing build on current site with default value')
-            print(
-                '\n# build_version=latest version in testing build folder, database_name=dp_function, bucket=s3://dp-function, timeout=180 minutes, job concurrency=1, keep memory limit')
+            print('\n# build_version=latest version in testing build folder, database_name=dp_function, bucket=s3://dp-function, timeout=180 minutes, job concurrency=1')
             print('python %s -s test' % os.path.basename(__file__))
             print('\n# To check all Oozie job status')
             print('python %s -c all' % os.path.basename(__file__))
@@ -833,7 +818,7 @@ if __name__ == "__main__":
                 build_folder, build_version = DT.get_build(mode="test")
             DT.create_bucket(suffix=main_job.suffix)
             DT.config_env(main_job.data_site, build_folder, build_version, suffix=main_job.suffix,
-                          concurrency=main_job.concurrency, timeout=main_job.timeout, memory=main_job.memory)
+                          concurrency=main_job.concurrency, timeout=main_job.timeout)
             print('Testing build %s is ready to go' % build_version)
             print('Need to create database metadata')
             print('Need to msck repair')
