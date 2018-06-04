@@ -17,7 +17,8 @@ class DeployTool(object):
     AWS_VERIFIED_BUILD_PATH = "s3://eric-staging-us-west-2/build"
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
-    TOOL_VERSION = "20180531"
+    DISPLAY_COUNT=50
+    TOOL_VERSION = "20180604"
     FLAGS = {'dp_shn': {'t_device_best_recognition_hourly': '/f_device_best_recognition_hourly',
                         't_device_collection_hourly': '/f_device_collection_hourly',
                         't_device_session_stat_hourly': '/f_device_session_stat_hourly',
@@ -157,29 +158,31 @@ class DeployTool(object):
         if data_site == "production":
             prod_env_path = "%s/output/dp2/set-env.sh" % folder
             cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s " % prod_env_path)
-            cls.run_command("echo 'OOZIE_APP_EXT=.AWS_Production%s' >> %s" % (version, prod_env_path))
+            cls.run_command("sed -i '7a OOZIE_APP_EXT=.AWS_Production%s' %s" % (version, prod_env_path))
         elif data_site == "beta":
             beta_env_path = "%s/output/dp2-beta/set-env.sh" % folder
             cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s " % beta_env_path)
-            cls.run_command("echo 'OOZIE_APP_EXT=.AWS_Beta%s' >> %s" % (version, beta_env_path))
+            cls.run_command("sed -i '7a OOZIE_APP_EXT=.AWS_Beta%s' %s" % (version, beta_env_path))
         elif data_site == "test":
-            test_env_path = "%s/output/data-pipeline-aws/op-utils/env" % folder
-            test_oozie_path = "%s/output/data-pipeline-aws/oozie" % folder
+            test_env_path = "%s/output/dp2/set-env.sh" % folder
+            test_oozie_folder = "%s/output/data-pipeline-aws/oozie" % folder
             # default timeout is 180 minutes
             if timeout != 180:
                 test_env_path = "%s/output/dp2/set-env.sh" % folder
                 cls.run_command("sed -i 's/180/%s/g' %s" % (timeout, test_env_path))
             cls.run_command("sed -i 's/concurrency=./concurrency=%i/g' %s/*/job.properties" %
-                            (concurrency, test_oozie_path))
+                            (concurrency, test_oozie_folder))
             cls.run_command("sed -i '/export DB_PREFIX/d' %s" % test_env_path)
-            cls.run_command("echo 'export DB_PREFIX=%s' >> %s" % (prefix, test_env_path))
+            cls.run_command("sed -i '6a export DB_PREFIX=%s' %s" % (prefix, test_env_path))
             cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s " % test_env_path)
-            cls.run_command("echo 'OOZIE_APP_EXT=.AWS_Test%s' >> %s" % (version, test_env_path))
+            cls.run_command("sed -i '7a OOZIE_APP_EXT=.AWS_Test%s' %s" % (version, test_env_path))
 
     @classmethod
-    def create_bucket(cls, suffix="function"):
-        if "dp-%s" % suffix not in cls.run_command("aws s3 ls"):
-            cls.run_command("aws s3 mb s3://dp-%s" % suffix)
+    def create_bucket(cls, prefix="function"):
+        if "%s-dp-shn" % prefix not in cls.run_command("aws s3 ls"):
+            cls.run_command("aws s3 mb s3://%s-dp-shn" % prefix)
+            cls.run_command("aws s3 mb s3://%s-dp-cam" % prefix)
+            cls.run_command("aws s3 mb s3://%s-dp-sig" % prefix)
 
     @classmethod
     def set_job_time(cls, data_site, folder, jobs, flags):
@@ -285,8 +288,6 @@ class DeployTool(object):
         deploy_folder = "%s/output/%s/op-utils" % (build_path, target_folder)
         try:
             cls.run_command("bash %s/deploy.sh all" % deploy_folder, throw_error=False)
-            # if data_site == "production":
-            #    cls.run_command("sed -i '/DeviceSession/d' %s/run-jobs.sh" % deploy_folder)
             cls.run_command("bash %s/run-jobs.sh" % deploy_folder)
             # print("bash %s/run-jobs.sh" % deploy_folder)
         except Exception:
@@ -454,35 +455,36 @@ class DeployTool(object):
                     cls.clean_fake_folder(database, table)
                     # print command, OPS will check and execute manually
                     if "t_ips_stat_daily" in table:
-                        # cls.run_command(
-                        #    'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                        #    (database, "t_ips_stat_daily"))
-                        print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                              (database, "t_ips_stat_daily"))
+                        cls.run_command(
+                            'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                            (database, "t_ips_stat_daily"))
+                    # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                    #      (database, "t_ips_stat_daily"))
                     else:
-                        # cls.run_command(
-                        #    'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                        #    (database, table))
-                        print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                              (database, table))
+                        cls.run_command(
+                            'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                            (database, table))
+                    # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                    #      (database, table))
         # repair all tables in specific database
         elif not table:
             for table in cls.FLAGS[database].keys():
                 cls.clean_fake_folder(database, table)
                 # print command, OPS will check and execute manually
-                # cls.run_command(
-                #    'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
-                # database, table))
-                print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
-                    database, table))
+                cls.run_command(
+                    'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                    (database, table))
+                # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
+                #    database, table))
             # repair specific table
             else:
                 cls.clean_fake_folder(database, table)
                 # print command, OPS will check and execute manually
-                # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                #            (database, table))
-                print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                      (database, table))
+                cls.run_command(
+                    'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                    (database, table))
+                # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                #      (database, table))
 
     @classmethod
     def clean_fake_folder(cls, database, table):
@@ -502,11 +504,10 @@ class DeployTool(object):
         else:
             aws_shn_path = cls.AWS_BETA_SHN_PATH
             aws_cam_path = cls.AWS_PROD_CAM_PATH
-        # print command, OPS will check and execute manually
-        # cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (aws_shn_path, s3_folder))
-        # cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (aws_cam_path, s3_folder))
-        print("aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_shn_path, s3_folder))
-        print("aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_cam_path, s3_folder))
+        cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (aws_shn_path, s3_folder))
+        cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (aws_cam_path, s3_folder))
+        # print("aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_shn_path, s3_folder))
+        # print("aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_cam_path, s3_folder))
 
     @classmethod
     def check_missing_partitions(cls, database, table):
@@ -517,10 +518,9 @@ class DeployTool(object):
         stepping_time = timedelta(hours=1)
         missing_partitions = list()
         partition_list = cls.run_command(
-            'beeline -u "jdbc:hive2://localhost:10000/" -e "show partitions %s.%s;"'
-            % (database, table))
-        # consider daily partition always less then one period than today, so we check daily job start from yesterday
-        while check_time < datetime.now() - timedelta(days=1):
+            'beeline -u "jdbc:hive2://localhost:10000/" -e "show partitions %s.%s;"' % (database, table))
+        # consider hourly partition may generating when user query at same hour, so end time will be set at 2 hours before
+        while check_time < datetime.now() - timedelta(hours=2):
             if check_time.strftime('d=%Y-%m-%d/h=%H') not in partition_list:
                 missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
             check_time += stepping_time
@@ -544,7 +544,7 @@ class DeployTool(object):
             s3_path = cls.AWS_BETA_CAM_PATH
         partition_list = cls.run_command('aws s3 ls %s/%s/ --recursive' % (s3_path, cls.FLAGS[database][table]))
         # consider hourly partition may generating when user query at same hour, so end time will be set at 2 hours before
-        while check_time < datetime.now() - timedelta(hour=2):
+        while check_time < datetime.now() - timedelta(hours=2):
             if check_time.strftime('d=%Y-%m-%d/h=%H_') not in partition_list:
                 missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
             check_time += stepping_time
@@ -581,7 +581,7 @@ class DeployTool(object):
         for item in all_missing_partitions.keys():
             if all_missing_partitions[item]:
                 print(item + ' has %s missing partitions:' % len(all_missing_partitions[item]))
-                if len(all_missing_partitions[item]) < 50:
+                if len(all_missing_partitions[item]) < cls.DISPLAY_COUNT:
                     for each in all_missing_partitions[item]:
                         print('\t' + each)
                 else:
@@ -694,7 +694,7 @@ if __name__ == "__main__":
                 build_folder, build_version = DT.get_build(version=main_job.build_name, mode="test")
             else:
                 build_folder, build_version = DT.get_build(mode="test")
-            DT.create_bucket(suffix=main_job.suffix)
+            DT.create_bucket(prefix=main_job.prefix)
             DT.config_env(main_job.data_site, build_folder, build_version, prefix=main_job.prefix,
                           concurrency=main_job.concurrency, timeout=main_job.timeout)
             print('Testing build %s is ready to go' % build_version)
