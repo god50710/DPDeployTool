@@ -410,7 +410,7 @@ class DeployTool(object):
                                         throw_error=False)
         # before run this method, cronjob has not update signature cronjob
         if not signature_cronjob:
-            cls.run_command("cp -r %s/QA/update_signature /home/hadoop/" % build_path)
+            cls.run_command("cp -r %s/QA/dp2/update_signature /home/hadoop/" % build_path)
             cls.run_command("echo '0 * * * * /home/hadoop/update_signature/bg_executor.sh %s' >> %s " %
                             (data_site, cronjob_file))
         # before run this method, cronjob already has geoip update job
