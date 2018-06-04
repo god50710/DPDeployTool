@@ -8,91 +8,62 @@ from datetime import datetime, timedelta
 
 class DeployTool(object):
     START_TIME = datetime(2018, 1, 1)
-    AWS_PROD_S3_PATH = "s3://trs-production-us-west-2"
-    AWS_BETA_S3_PATH = "s3://trs-production-beta-data-us-west-2"
+    AWS_PROD_SHN_PATH = "s3://dp-shn-us-west-2/dp_shn/"
+    AWS_PROD_CAM_PATH = "s3://dp-cam-us-west-2/dp_cam/"
+    AWS_PROD_SIG_PATH = "s3://dp-sig-us-west-2/dp_sig/"
+    AWS_BETA_SHN_PATH = "s3://dp-beta-shn-us-west-2/dp_beta_shn/"
+    AWS_BETA_CAM_PATH = "s3://dp-beta-cam-us-west-2/dp_beta_cam/"
+    AWS_BETA_SIG_PATH = "s3://dp-beta-sig-us-west-2/dp_beta_sig/"
     AWS_VERIFIED_BUILD_PATH = "s3://eric-staging-us-west-2/build"
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
-    TOOL_VERSION = "20180521"
-    FLAGS = {'datalake': {'akamai_rgom': 'Application/shnprj_spn/hive/datalake.db/f_akamai_rgom',
-                          'akamai_web': 'Application/shnprj_spn/hive/datalake.db/f_akamai_web'},
-             'dp': {'e_ddi_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ddi_hourly',
-                    'e_ncie_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_ncie_hourly',
-                    'e_routerinfo_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_routerinfo_hourly',
-                    'e_routerstat_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_routerstat_hourly',
-                    'e_tmis_cam_001_parquet': 'Application/shnprj_spn/hive/dp.db/f_tmis_cam_hourly',
-                    't_cam_bfld_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_bfld_hourly',
-                    't_cam_info_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_info_hourly',
-                    't_cam_security_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_security_hourly',
-                    't_cam_session_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_session_hourly',
-                    't_cam_stat_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_stat_hourly',
-                    't_cam_trs_hourly': 'Application/shnprj_spn/hive/dp.db/f_cam_trs_hourly',
-                    't_device_hourly': 'Application/shnprj_spn/hive/dp.db/f_device_hourly',
-                    #  't_device_session_hourly': 'Application/shnprj_spn/hive/dp.db/f_device_session_hourly',
-                    't_router_hourly': 'Application/shnprj_spn/hive/dp.db/f_router_hourly',
-                    't_router_security_hourly': 'Application/shnprj_spn/hive/dp.db/f_router_security_hourly',
-                    't_security_hourly': 'Application/shnprj_spn/hive/dp.db/f_security_hourly',
-                    't_cam_rule_daily': 'Application/shnprj_spn/hive/dp.db/f_cam_rule_daily',
-                    't_rule_daily': 'Application/shnprj_spn/hive/dp.db/f_rule_daily',
-                    't_traffic_daily': 'Application/shnprj_spn/hive/dp.db/f_traffic_daily',
-                    't_cam_collection_daily': 'Application/shnprj_spn/hive/dp.db/f_cam_collection_daily',
-                    't_cam_ips_hit_rule_collection_daily':
-                        'Application/shnprj_spn/hive/dp.db/f_cam_ips_hit_rule_collection_daily',
-                    't_device_collection_daily': 'Application/shnprj_spn/hive/dp.db/f_device_collection_daily',
-                    't_router_device_daily': 'Application/shnprj_spn/hive/dp.db/f_router_device_daily',
-                    't_ips_hit_rule_collection_daily':
-                        'Application/shnprj_spn/hive/dp.db/f_ips_hit_rule_collection_daily',
-                    't_traffic_stats_daily': 'Application/shnprj_spn/hive/dp.db/f_traffic_stats_daily',
-                    't_cam_collection_weekly': 'Application/shnprj_spn/hive/dp.db/f_cam_collection_weekly',
-                    't_router_collection_weekly': 'Application/shnprj_spn/hive/dp.db/f_router_collection_weekly',
-                    't_rule_stats_weekly': 'Application/shnprj_spn/hive/dp.db/f_rule_stats_weekly'},
-             'trs_src': {'akamai_malicious_20171218': 'trs_src/f_akamai_malicious_20171218',
-                         'ddi_001_20171218': 'trs_src/f_ddi_001_20171218',
-                         'ips_20171218': 'trs_src/f_ips_20171218',
-                         'ncie_001_20171218': 'trs_src/f_ncie_001_20171218',
-                         'router_security_20171218': 'trs_src/f_router_security_20171218'},
-             'pm_src': {'t_dpi_config_stats_by_brand_weekly':
-                            'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_by_brand_weekly',
-                        't_dpi_config_stats_by_country_weekly':
-                            'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_by_country_weekly',
-                        't_dpi_config_stats_raw_weekly':
-                            'Application/shnprj_spn/hive/pm_src.db/f_dpi_config_stats_raw_weekly',
-                        't_ips_hourly': 'Application/shnprj_spn/hive/pm_src.db/f_ips_hourly',
-                        't_ips_stat_daily_180d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=180d',
-                        't_ips_stat_daily_1d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=1d',
-                        't_ips_stat_daily_30d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=30d',
-                        't_ips_stat_daily_7d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=7d',
-                        't_ips_stat_daily_90d': 'Application/shnprj_spn/hive/pm_src.db/f_ips_stat_daily/period=90d',
-                        },
-             'dp_beta': {'e_routerinfo_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_routerinfo_hourly',
-                         'e_routerstat_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_routerstat_hourly',
-                         'e_tmis_cam_001_parquet': 'Application/shnprj_spn/hive/dp_beta.db/f_tmis_cam_hourly',
-                         't_cam_bfld_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_bfld_hourly',
-                         't_cam_info_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_info_hourly',
-                         't_cam_security_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_security_hourly',
-                         't_cam_session_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_session_hourly',
-                         't_cam_stat_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_stat_hourly',
-                         't_cam_trs_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_trs_hourly',
-                         't_device_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_device_hourly',
-                         't_device_session_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_device_session_hourly',
-                         't_router_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_router_hourly',
-                         't_router_security_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_router_security_hourly',
-                         't_security_hourly': 'Application/shnprj_spn/hive/dp_beta.db/f_security_hourly',
-                         't_cam_rule_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_rule_daily',
-                         't_rule_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_rule_daily',
-                         't_traffic_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_traffic_daily',
-                         't_cam_collection_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_collection_daily',
-                         't_cam_ips_hit_rule_collection_daily':
-                             'Application/shnprj_spn/hive/dp_beta.db/f_cam_ips_hit_rule_collection_daily',
-                         't_device_collection_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_device_collection_daily',
-                         't_router_device_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_router_device_daily',
-                         't_ips_hit_rule_collection_daily':
-                             'Application/shnprj_spn/hive/dp_beta.db/f_ips_hit_rule_collection_daily',
-                         't_traffic_stats_daily': 'Application/shnprj_spn/hive/dp_beta.db/f_traffic_stats_daily',
-                         't_cam_collection_weekly': 'Application/shnprj_spn/hive/dp_beta.db/f_cam_collection_weekly',
-                         't_router_collection_weekly':
-                             'Application/shnprj_spn/hive/dp_beta.db/f_router_collection_weekly',
-                         't_rule_stats_weekly': 'Application/shnprj_spn/hive/dp_beta.db/f_rule_stats_weekly'}
+    TOOL_VERSION = "20180531"
+    FLAGS = {'dp_shn': {'t_device_best_recognition_hourly': '/f_device_best_recognition_hourly',
+                        't_device_collection_hourly': '/f_device_collection_hourly',
+                        't_device_session_stat_hourly': '/f_device_session_stat_hourly',
+                        't_device_traffic_stat_hourly': '/f_device_traffic_stat_hourly',
+                        't_device_wrs_hits_stat_hourly': '/f_device_wrs_hits_stat_hourly',
+                        't_ips_hit_rule_collection_hourly': '/f_ips_hit_rule_collection_hourly',
+                        't_router_collection_hourly': '/f_router_collection_hourly',
+                        't_router_device_activity_daily': '/f_router_device_activity_daily',
+                        't_routerinfo_normalized_hourly': '/f_routerinfo_normalized_hourly',
+                        't_router_security_event_filtered_hourly': '/f_router_security_event_filtered_hourly',
+                        't_router_security_event_raw_hourly': '/f_router_security_event_raw_hourly',
+                        't_routerstat_normalized_hourly': '/f_routerstat_normalized_hourly',
+                        't_rule_hit_stat_hourly': '/f_rule_hit_stat_hourly',
+                        't_security_event_filtered_hourly': '/f_security_event_filtered_hourly',
+                        't_security_event_raw_hourly': '/f_security_event_raw_hourly'},
+             'dp_cam': {'t_cam_bfld_stat_hourly': '/f_cam_bfld_stat_hourly',
+                        't_cam_collection_hourly': '/f_cam_collection_hourly',
+                        't_cam_feedback_normalized_hourly': '/f_cam_feedback_normalized_hourly',
+                        't_cam_ips_hit_rule_collection_hourly': '/f_cam_ips_hit_rule_collection_hourly',
+                        't_cam_security_event_filtered_hourly': '/f_cam_security_event_filtered_hourly',
+                        't_cam_security_event_raw_hourly': '/f_cam_security_event_raw_hourly',
+                        't_cam_session_info_hourly': '/f_cam_session_info_hourly',
+                        't_cam_trs_stat_hourly': '/f_cam_trs_stat_hourly'},
+             'dp_shn_beta': {'t_device_best_recognition_hourly': '/f_device_best_recognition_hourly',
+                             't_device_collection_hourly': '/f_device_collection_hourly',
+                             't_device_session_stat_hourly': '/f_device_session_stat_hourly',
+                             't_device_traffic_stat_hourly': '/f_device_traffic_stat_hourly',
+                             't_device_wrs_hits_stat_hourly': '/f_device_wrs_hits_stat_hourly',
+                             't_ips_hit_rule_collection_hourly': '/f_ips_hit_rule_collection_hourly',
+                             't_router_collection_hourly': '/f_router_collection_hourly',
+                             't_router_device_activity_daily': '/f_router_device_activity_daily',
+                             't_routerinfo_normalized_hourly': '/f_routerinfo_normalized_hourly',
+                             't_router_security_event_filtered_hourly': '/f_router_security_event_filtered_hourly',
+                             't_router_security_event_raw_hourly': '/f_router_security_event_raw_hourly',
+                             't_routerstat_normalized_hourly': '/f_routerstat_normalized_hourly',
+                             't_rule_hit_stat_hourly': '/f_rule_hit_stat_hourly',
+                             't_security_event_filtered_hourly': '/f_security_event_filtered_hourly',
+                             't_security_event_raw_hourly': '/f_security_event_raw_hourly'},
+             'dp_cam_beta': {'t_cam_bfld_stat_hourly': '/f_cam_bfld_stat_hourly',
+                             't_cam_collection_hourly': '/f_cam_collection_hourly',
+                             't_cam_feedback_normalized_hourly': '/f_cam_feedback_normalized_hourly',
+                             't_cam_ips_hit_rule_collection_hourly': '/f_cam_ips_hit_rule_collection_hourly',
+                             't_cam_security_event_filtered_hourly': '/f_cam_security_event_filtered_hourly',
+                             't_cam_security_event_raw_hourly': '/f_cam_security_event_raw_hourly',
+                             't_cam_session_info_hourly': '/f_cam_session_info_hourly',
+                             't_cam_trs_stat_hourly': '/f_cam_trs_stat_hourly'}
              }
 
     @staticmethod
@@ -117,21 +88,13 @@ class DeployTool(object):
         # data_site(string) : for adjusting reference data path and database suffix
         # build_path(string) : build path for specific reference data path
         # output : [["hourly",[jobs]],["daily",[jobs]],["weekly",[jobs]]], {'oozie job name' : 'flag path'}
-        output_element = "output/data-pipeline-aws"
+        output_element = "dp2"
         if data_site == "beta":
             output_element = output_element + "-beta"
         output_path = build_path + "/" + output_element
         flags = dict()
         hourly_jobs = list()
-        daily_jobs = list()
-        weekly_jobs = list()
         flag = ""
-        # system monitor jobs has no f_flag, add to mapping list with empty directly
-        system_jobs = cls.run_command("ls -d %s/oozie/System*" % output_path).split()
-        for job in system_jobs:
-            job = job.split('/')[-1]
-            flags[job] = ''
-            daily_jobs.append(job)
         table_jobs = cls.run_command("ls -d %s/oozie/T*" % output_path).split()
         for job_path in table_jobs:
             job = job_path.split('/')[-1]
@@ -144,51 +107,24 @@ class DeployTool(object):
                     break
             if not flag:
                 raise Exception('[Error] Flag is empty')
-            database = "dp"
-            if "T0Datalake" in job:
-                dataset_path = "%s/datasets/datalake.xml" % output_path
-                database = "datalake"
-            elif "T0" in job:
-                dataset_path = "%s/datasets/dp-t0.xml" % output_path
-            elif "T1" in job:
-                dataset_path = "%s/datasets/dp-t1.xml" % output_path
-            elif "T2" in job:
-                dataset_path = "%s/datasets/dp-t2.xml" % output_path
-            elif "TxExport" in job:
-                dataset_path = "%s/datasets/trs_src.xml" % output_path
-                database = "trs_src"
-            elif "TxPmSrc" in job:
-                dataset_path = "%s/datasets/pm_src.xml" % output_path
-                database = "pm_src"
+            if "Cam" in job:
+                dataset_path = "%s/datasets/cam.xml" % output_path
+                database = "dp_cam"
             else:
-                raise Exception('[Error] dataset selection failed')
-            if "1d" in flag:
-                flag = "f_ips_stat_daily/period=1d"
-            elif "7d" in flag:
-                flag = "f_ips_stat_daily/period=7d"
-            elif "30d" in flag:
-                flag = "f_ips_stat_daily/period=30d"
-            elif "90d" in flag:
-                flag = "f_ips_stat_daily/period=90d"
-            elif "180d" in flag:
-                flag = "f_ips_stat_daily/period=180d"
+                dataset_path = "%s/datasets/shn.xml" % output_path
+                database = "dp_shn"
             flag_path_prefix = cls.run_command("grep '%s' %s | grep 'uri-template'" %
                                                (flag, dataset_path)).split('${nameNode}/')[1].split('${')[0]
-            if database != "trs_src":
-                if data_site == "beta":
-                    database = database + "_beta.db"
-                else:
-                    database = database + ".db"
+            if data_site == "beta":
+                database = database + "_beta"
+            else:
+                database = database
             flags[job] = '%s%s/%s' % (flag_path_prefix, database, flag)
             if "hours(1)" in frequency:
                 hourly_jobs.append(job)
-            elif "days(1)" in frequency:
-                daily_jobs.append(job)
-            elif "days(7)" in frequency:
-                weekly_jobs.append(job)
             else:
                 raise Exception('[Error] frequency out of excepted: %s' % frequency)
-        return [["hourly", hourly_jobs], ["daily", daily_jobs], ["weekly", weekly_jobs]], flags
+        return [["hourly", hourly_jobs]], flags
 
     @classmethod
     def get_build(cls, mode="verified", version=""):
@@ -214,45 +150,31 @@ class DeployTool(object):
         return "/home/hadoop/%s" % build_file.split('.tar')[0], build_file.split('.tar')[0].split('1.0.')[1]
 
     @classmethod
-    def config_env(cls, data_site, folder, version, suffix="function", concurrency=1, timeout=28800):
+    def config_env(cls, data_site, folder, version, prefix="function", concurrency=1, timeout=28800):
         # data_site(string) : for judge to configure as production, beta or test site
         # folder(string) : target build folder that will be configured
         # version(string) : for adding oozie job name suffix name to identify easier
         if data_site == "production":
-            prod_env_path = "%s/output/data-pipeline-aws/op-utils/env" % folder
-            cls.run_command("cp %s/aws-production.sh %s/$(whoami)\@$(hostname).sh" %
-                            (prod_env_path, prod_env_path))
-            cls.run_command("echo 'OOZIE_APP_EXT=.AWS_Production%s' >> %s/$(whoami)\@$(hostname).sh" %
-                            (version, prod_env_path))
+            prod_env_path = "%s/output/dp2/set-env.sh" % folder
+            cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s " % prod_env_path)
+            cls.run_command("echo 'OOZIE_APP_EXT=.AWS_Production%s' >> %s" % (version, prod_env_path))
         elif data_site == "beta":
-            # beta site running on a low-end site, needs to remove memory limitation
-            beta_env_path = "%s/output/data-pipeline-aws-beta/op-utils/env" % folder
-            beta_oozie_jobs_path = "%s/output/data-pipeline-aws-beta/oozie/*/job.properties" % folder
-            cls.run_command(
-                "cp %s/aws-production-beta-data.sh %s/$(whoami)\@$(hostname).sh" % (beta_env_path, beta_env_path))
-            cls.run_command("echo 'OOZIE_APP_EXT=.AWS_Beta%s' >> %s/$(whoami)\@$(hostname).sh" %
-                            (version, beta_env_path))
-            cls.run_command("sed -i 's/^cntLowerbound=.*$/cntLowerbound=0/g' %s" % beta_oozie_jobs_path)
+            beta_env_path = "%s/output/dp2-beta/set-env.sh" % folder
+            cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s " % beta_env_path)
+            cls.run_command("echo 'OOZIE_APP_EXT=.AWS_Beta%s' >> %s" % (version, beta_env_path))
         elif data_site == "test":
             test_env_path = "%s/output/data-pipeline-aws/op-utils/env" % folder
             test_oozie_path = "%s/output/data-pipeline-aws/oozie" % folder
-            test_env_make_path = "%s/src" % folder
-            # test site needs remake source for adjust timeout, oozie job concurrency and import specific database name
-            cls.run_command("cd %s; make clean" % test_env_make_path)
             # default timeout is 180 minutes
             if timeout != 180:
-                cls.run_command("cd %s; sed -i 's/180/%s/g' data-pipeline/oozie/common.properties" %
-                                (test_env_make_path, timeout))
-            cls.run_command("cd %s; make %s-db" % (test_env_make_path, suffix))
+                test_env_path = "%s/output/dp2/set-env.sh" % folder
+                cls.run_command("sed -i 's/180/%s/g' %s" % (timeout, test_env_path))
             cls.run_command("sed -i 's/concurrency=./concurrency=%i/g' %s/*/job.properties" %
                             (concurrency, test_oozie_path))
-            cls.run_command("cp %s/hadoop\@ip-172-31-13-117.sh %s/$(whoami)\@$(hostname).sh" %
-                            (test_env_path, test_env_path))
-            cls.run_command("sed -i '/HADOOP_NAME_NODE/d' %s/$(whoami)\@$(hostname).sh" % test_env_path)
-            cls.run_command("echo 'export HADOOP_NAME_NODE=s3://dp-%s' >> %s/$(whoami)\@$(hostname).sh" %
-                            (suffix, test_env_path))
-            cls.run_command("echo 'OOZIE_APP_EXT=.AWS_Test%s' >> %s/$(whoami)\@$(hostname).sh" %
-                            (version, test_env_path))
+            cls.run_command("sed -i '/export DB_PREFIX/d' %s" % test_env_path)
+            cls.run_command("echo 'export DB_PREFIX=%s' >> %s" % (prefix, test_env_path))
+            cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s " % test_env_path)
+            cls.run_command("echo 'OOZIE_APP_EXT=.AWS_Test%s' >> %s" % (version, test_env_path))
 
     @classmethod
     def create_bucket(cls, suffix="function"):
@@ -269,10 +191,6 @@ class DeployTool(object):
         job_time_list = list()
         job_time_list.append("#hourly jobs")
         job_time_list.extend(cls.get_next_start_time(data_site, folder, flags, jobs[0]))
-        job_time_list.append("#daily jobs")
-        job_time_list.extend(cls.get_next_start_time(data_site, folder, flags, jobs[1]))
-        job_time_list.append("#weekly jobs")
-        job_time_list.extend(cls.get_next_start_time(data_site, folder, flags, jobs[2]))
         cls.export_app_time(data_site, job_time_list, folder)
 
     @staticmethod
@@ -282,9 +200,9 @@ class DeployTool(object):
         # folder : build folder
         # export oozie job start and end time to app-time.conf
         if data_site == "production":
-            path_element = "data-pipeline-aws"
+            path_element = "dp2"
         else:
-            path_element = "data-pipeline-aws-beta"
+            path_element = "dp2-beta"
         output_path = "%s/output/%s/op-utils" % (build_path, path_element)
         job_time_file = open("%s/app-time.conf" % output_path, "w")
         for line in job_time_list:
@@ -301,19 +219,16 @@ class DeployTool(object):
         # [0][1]=hourly jobs, [1][1]=daily jobs, [2][1]=weekly jobs
         job_time_list = []
         if data_site == "production":
-            site_s3_path = cls.AWS_PROD_S3_PATH
-            reference_path = "data-pipeline-aws"
+            site_shn_path = cls.AWS_PROD_SHN_PATH
+            site_cam_path = cls.AWS_PROD_CAM_PATH
+            reference_path = "dp2"
         else:
-            site_s3_path = cls.AWS_BETA_S3_PATH
-            reference_path = "data-pipeline-aws-beta"
+            site_shn_path = cls.AWS_BETA_SHN_PATH
+            site_cam_path = cls.AWS_BETA_CAM_PATH
+            reference_path = "dp2-beta"
         # oozie job start time executes previous hour/day/week partition
         # if we got flag h=09, next job is h=10, so oozie job start time needs to be configured as 11:00(+2h)
-        if jobs[0] == "hourly":
-            add_time = timedelta(hours=2)
-        elif jobs[0] == "daily":
-            add_time = timedelta(days=2)
-        else:
-            add_time = timedelta(days=8)
+        add_time = timedelta(hours=2)
         for job in jobs[1]:
             # get oozie job start time minutes from original app-time.conf
             flag_minute = cls.run_command(
@@ -323,36 +238,29 @@ class DeployTool(object):
                 raise Exception('[Error] Get malformed minute from app-time.conf:', flag_minute)
 
             # get oozie job start time date from flag path
-            if "System" in job:
-                flag_day = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+            # if oozie job is a new job cause no flag, setting now time as next start time
+            if "cam" in job:
+                target_path = site_cam_path
             else:
-                # if oozie job is a new job cause no flag, setting now time as next start time
-                if not cls.run_command("aws s3 ls %s/%s/" % (site_s3_path, flags[job])):
-                    flag_day = datetime.now().strftime('%Y-%m-%d')
-                else:
-                    flag_day = cls.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
-                                               (site_s3_path, flags[job]))[-11:-1]
+                target_path = site_shn_path
+            if not cls.run_command("aws s3 ls %s/%s/" % (target_path, flags[job])):
+                flag_day = datetime.now().strftime('%Y-%m-%d')
+            else:
+                flag_day = cls.run_command("aws s3 ls %s/%s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
+                                           (target_path, flags[job]))[-11:-1]
             if not re.match('\d{4}-\d{2}-\d{2}', flag_day):
                 raise Exception('[Error] Get malformed day from s3:', flag_day)
 
             # get oozie job start time hours from flag
-            if jobs[0] == "hourly":
-                if "TxExport" in job:
-                    flag_hour = cls.run_command("aws s3 ls %s/%s/pdd=%s/ | tail -1 | awk '{print $4}'" %
-                                                (site_s3_path, flags[job], flag_day))[4:6]
-                else:
-                    # if oozie job is a new job cause no flag, setting now time as next start time
-                    if not cls.run_command("aws s3 ls %s/%s/" % (site_s3_path, flags[job])):
-                        flag_hour = datetime.now().strftime('%H')
-                    else:
-                        flag_hour = cls.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
-                                                    (site_s3_path, flags[job], flag_day))[2:4]
-                if not re.match('\d{2}', flag_hour):
-                    raise Exception('[Error] Get malformed hour from s3:', flag_hour)
-            elif "System" in job:
-                flag_hour = "02"
+            # if oozie job is a new job cause no flag, setting now time as next start time
+            if not cls.run_command("aws s3 ls %s/%s/" % (target_path, flags[job])):
+                flag_hour = datetime.now().strftime('%H')
             else:
-                flag_hour = "00"
+                flag_hour = cls.run_command("aws s3 ls %s/%s/d=%s/ | tail -1 | awk '{print $4}'" %
+                                            (target_path, flags[job], flag_day))[2:4]
+            if not re.match('\d{2}', flag_hour):
+                raise Exception('[Error] Get malformed hour from s3:', flag_hour)
+
             print('Last f_flag date: %s, hour: %s' % (flag_day, flag_hour))
             job_start_time = datetime.strptime(flag_day + flag_hour, '%Y-%m-%d%H') + add_time
             job_end_time = job_start_time + timedelta(days=36524)
@@ -371,14 +279,14 @@ class DeployTool(object):
         # change_build(boolean) : for control deploy flow will enter job recover or not
         # if deploy failed, suspended jobs will be resumed, otherwise will be killed
         if data_site == "production":
-            target_folder = "data-pipeline-aws"
+            target_folder = "dp2"
         else:
-            target_folder = "data-pipeline-aws-beta"
+            target_folder = "dp2-beta"
         deploy_folder = "%s/output/%s/op-utils" % (build_path, target_folder)
         try:
             cls.run_command("bash %s/deploy.sh all" % deploy_folder, throw_error=False)
-            if data_site == "production":
-                cls.run_command("sed -i '/DeviceSession/d' %s/run-jobs.sh" % deploy_folder)
+            # if data_site == "production":
+            #    cls.run_command("sed -i '/DeviceSession/d' %s/run-jobs.sh" % deploy_folder)
             cls.run_command("bash %s/run-jobs.sh" % deploy_folder)
             # print("bash %s/run-jobs.sh" % deploy_folder)
         except Exception:
@@ -546,57 +454,59 @@ class DeployTool(object):
                     cls.clean_fake_folder(database, table)
                     # print command, OPS will check and execute manually
                     if "t_ips_stat_daily" in table:
-                        cls.run_command(
-                            'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                            (database, "t_ips_stat_daily"))
-                        # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                        #      (database, "t_ips_stat_daily"))
+                        # cls.run_command(
+                        #    'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                        #    (database, "t_ips_stat_daily"))
+                        print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                              (database, "t_ips_stat_daily"))
                     else:
-                        cls.run_command(
-                            'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                            (database, table))
-                        # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                        #      (database, table))
+                        # cls.run_command(
+                        #    'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                        #    (database, table))
+                        print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                              (database, table))
         # repair all tables in specific database
         elif not table:
             for table in cls.FLAGS[database].keys():
                 cls.clean_fake_folder(database, table)
                 # print command, OPS will check and execute manually
-                cls.run_command(
-                    'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
-                        database, table))
-                # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
-                #    database, table))
-        # repair specific table
-        else:
-            cls.clean_fake_folder(database, table)
-            # print command, OPS will check and execute manually
-            cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                            (database, table))
-            # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-            #      (database, table))
+                # cls.run_command(
+                #    'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
+                # database, table))
+                print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
+                    database, table))
+            # repair specific table
+            else:
+                cls.clean_fake_folder(database, table)
+                # print command, OPS will check and execute manually
+                # cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                #            (database, table))
+                print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                      (database, table))
 
     @classmethod
     def clean_fake_folder(cls, database, table):
+
         # database(string) : database name
         # table(string) : table name
         # clean *_$folder$ on table parquet file path
-        # in dp, dp_beta and pm_src, table name : t_<table_name>, flag name : f_<table_name>
-        if database in ["dp", "dp_beta", "pm_src"]:
+        # in dp2 and dp2_beta, table name : t_<table_name>, flag name : f_<table_name>
+        if database in ["dp2", "dp2_beta"]:
             s3_folder = cls.FLAGS[database][table].replace('f_', 't_')
-        # in trs_src, table_name = <table_name>, flag name = f_<table_name>
-        elif database == "trs_src":
-            s3_folder = cls.FLAGS[database][table].replace('f_', '')
         # skip datalake because parquet file does not exists on our bucket
         else:
             return 0
-        if database != "dp_beta":
-            bucket = cls.AWS_PROD_S3_PATH
+        if database != "dp2_beta":
+            aws_shn_path = cls.AWS_PROD_SHN_PATH
+            aws_cam_path = cls.AWS_PROD_CAM_PATH
         else:
-            bucket = cls.AWS_BETA_S3_PATH
+            aws_shn_path = cls.AWS_BETA_SHN_PATH
+            aws_cam_path = cls.AWS_PROD_CAM_PATH
         # print command, OPS will check and execute manually
-        cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (bucket, s3_folder))
-        # print("aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (bucket, s3_folder))
+        # cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (aws_shn_path, s3_folder))
+        # cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (aws_cam_path, s3_folder))
+        print("aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_shn_path, s3_folder))
+        print("aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_cam_path, s3_folder))
 
     @classmethod
     def check_missing_partitions(cls, database, table):
@@ -604,49 +514,17 @@ class DeployTool(object):
         # table(string) : table name
         # output : missing_partitions(list) [datetime]
         check_time = cls.START_TIME
-        if "daily" in table:
-            stepping_time = timedelta(days=1)
-        elif "weekly" in table:
-            stepping_time = timedelta(days=7)
-            # adjust check time as Sunday
-            while check_time.weekday() != 6:
-                check_time += timedelta(days=1)
-        else:
-            stepping_time = timedelta(hours=1)
+        stepping_time = timedelta(hours=1)
         missing_partitions = list()
-        if "t_ips_stat_daily" in table:
-            days = table.split('_')[-1]
-            partition_list = cls.run_command('beeline -u "jdbc:hive2://localhost:10000/" '
-                                             '-e "show partitions %s.%s partition(period=\'%s\');"'
-                                             % (database, "t_ips_stat_daily", days))
-        else:
-            partition_list = cls.run_command(
-                'beeline -u "jdbc:hive2://localhost:10000/" -e "show partitions %s.%s;"'
-                % (database, table))
-        # partition has 3 different formats
+        partition_list = cls.run_command(
+            'beeline -u "jdbc:hive2://localhost:10000/" -e "show partitions %s.%s;"'
+            % (database, table))
         # consider daily partition always less then one period than today, so we check daily job start from yesterday
         while check_time < datetime.now() - timedelta(days=1):
-            if stepping_time == timedelta(hours=1):
-                if check_time.strftime('d=%Y-%m-%d/h=%H') not in partition_list and \
-                        check_time.strftime('pdd=%Y-%m-%d/phh=%H') not in partition_list and \
-                        check_time.strftime('dt=%Y-%m-%d-%H') not in partition_list:
-                    missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
-            else:
-                if check_time.strftime('d=%Y-%m-%d') not in partition_list and \
-                        check_time.strftime('pdd=%Y-%m-%d') not in partition_list and \
-                        check_time.strftime('dt=%Y-%m-%d') not in partition_list:
-                    missing_partitions.append(check_time.strftime('date=%Y-%m-%d'))
+            if check_time.strftime('d=%Y-%m-%d/h=%H') not in partition_list:
+                missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
             check_time += stepping_time
         return missing_partitions
-
-    # comment non-using method
-    # @classmethod
-    # def find_current_build(cls):
-    #     current_build = cls.run_command("find /home/hadoop/SHN-Data-Pipeline-* -maxdepth 0 -type d | sort | tail -1 ")
-    #     if current_build:
-    #         return current_build, current_build.split('1.0.')[1]
-    #     else:
-    #         return cls.get_build()
 
     @classmethod
     def check_missing_flags(cls, database, table):
@@ -654,32 +532,21 @@ class DeployTool(object):
         # table(string) : table name
         # output : missing_partitions(list) [datetime]
         check_time = cls.START_TIME
-        if "daily" in table:
-            stepping_time = timedelta(days=1)
-        elif "weekly" in table:
-            stepping_time = timedelta(days=7)
-            while check_time.weekday() != 6:
-                check_time += timedelta(days=1)
-        else:
-            stepping_time = timedelta(hours=1)
+        stepping_time = timedelta(hours=1)
         missing_partitions = list()
-        s3_path = cls.AWS_PROD_S3_PATH
-        if database == "dp_beta":
-            s3_path = cls.AWS_BETA_S3_PATH
+        if database == "dp_shn":
+            s3_path = cls.AWS_PROD_SHN_PATH
+        elif database == "dp_cam":
+            s3_path = cls.AWS_PROD_CAM_PATH
+        elif database == "dp_shn_beta":
+            s3_path = cls.AWS_BETA_SHN_PATH
+        else:
+            s3_path = cls.AWS_BETA_CAM_PATH
         partition_list = cls.run_command('aws s3 ls %s/%s/ --recursive' % (s3_path, cls.FLAGS[database][table]))
-        # partition has 3 different formats
         # consider daily partition always less then one period than today, so we check daily job start from yesterday
         while check_time < datetime.now() - timedelta(days=1):
-            if stepping_time == timedelta(hours=1):
-                if check_time.strftime('d=%Y-%m-%d/h=%H_') not in partition_list and \
-                        check_time.strftime('pdd=%Y-%m-%d/phh=%H_') not in partition_list and \
-                        check_time.strftime('dt=%Y-%m-%d-%H_') not in partition_list:
-                    missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
-            else:
-                if check_time.strftime('d=%Y-%m-%d_') not in partition_list and \
-                        check_time.strftime('pdd=%Y-%m-%d_') not in partition_list and \
-                        check_time.strftime('dt=%Y-%m-%d_') not in partition_list:
-                    missing_partitions.append(check_time.strftime('date=%Y-%m-%d'))
+            if check_time.strftime('d=%Y-%m-%d/h=%H_') not in partition_list:
+                missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
             check_time += stepping_time
         return missing_partitions
 
@@ -735,6 +602,12 @@ class DeployTool(object):
                 cls.run_command('oozie job -rerun %s -action %s' % (job_id, action_id))
 
     @classmethod
+    def restart_hive_server(cls, suspend_jobs):
+        cls.run_command('sudo stop hive-server2')
+        cls.run_command('sudo start hive-server2')
+        cls.resume_all_job(suspend_jobs)
+
+    @classmethod
     def command_parser(cls):
         parser = argparse.ArgumentParser()
         action_group = parser.add_argument_group('Actions')
@@ -743,6 +616,7 @@ class DeployTool(object):
         action_group.add_argument("-p", action="store_true", dest="check_partition", help="Check missing partition")
         action_group.add_argument("-r", action="store_true", dest="repair_partition", help="Repair partitions")
         action_group.add_argument("-R", action="store_true", dest="rerun", help="Rerun all KILLED/TIMEDOUT jobs")
+        action_group.add_argument("--restart", action="store_true", dest="restart", help="Restart hive server2")
         partition_group = parser.add_argument_group('Parameters for check missing partition')
         partition_group.add_argument("--database", dest="database", help="Database name")
         partition_group.add_argument("--table", dest="table", help="Table name")
@@ -753,8 +627,8 @@ class DeployTool(object):
         test_env_group = parser.add_argument_group('Parameters for test data site environment')
         test_env_group.add_argument("-b", dest="build_name", help="Specify build name")
         test_env_group.add_argument("-t", type=int, dest="timeout", default="180", help="Set oozie job timeout")
-        test_env_group.add_argument("--suffix", dest="suffix", default="function",
-                                    help='Set database/s3 bucket name suffix')
+        test_env_group.add_argument("--prefix", dest="prefix", default="function",
+                                    help='Set database/s3 bucket name prefix')
         test_env_group.add_argument("--con", type=int, dest="concurrency", default=1, help="Set oozie jobs concurrency")
         if len(sys.argv) == 1:
             parser.print_help()
@@ -772,10 +646,12 @@ class DeployTool(object):
             print('\n# To change build on Beta  data site')
             print('python %s -s beta -C' % os.path.basename(__file__))
             print('\n# To prepare testing build on current site')
-            print('\n# build_version=1.0.280, database_name=dp_erictest, bucket=s3://dp-erictest, timeout=28800 minutes, job concurrency=3')
-            print('python %s -s test -b 280 --suffix erictest -t 28800 --con 3' % os.path.basename(__file__))
+            print(
+                '\n# build_version=1.0.280, database_name=eric_shn_dp, bucket=s3://eric-shn-dp, timeout=28800 minutes, job concurrency=3')
+            print('python %s -s test -b 280 --prefix eric -t 28800 --con 3' % os.path.basename(__file__))
             print('\n# To prepare testing build on current site with default value')
-            print('\n# build_version=latest version in testing build folder, database_name=dp_function, bucket=s3://dp-function, timeout=28800 minutes, job concurrency=1')
+            print(
+                '\n# build_version=latest version in testing build folder, database_name=function_shn_dp, bucket=s3://function-shn-dp, timeout=28800 minutes, job concurrency=1')
             print('python %s -s test' % os.path.basename(__file__))
             print('\n# To check all Oozie job status')
             print('python %s -c all' % os.path.basename(__file__))
@@ -800,6 +676,8 @@ class DeployTool(object):
             print('python %s -r --database dp_beta --table t_router_hourly' % os.path.basename(__file__))
             print('\n# To repair partitions and clean fake folder on Beta data site')
             print('python %s -r --database dp_beta' % os.path.basename(__file__))
+            print('\n# To restart ')
+            print('python %s -r --database dp_beta' % os.path.basename(__file__))
             exit(0)
         return parser.parse_args()
 
@@ -817,7 +695,7 @@ if __name__ == "__main__":
             else:
                 build_folder, build_version = DT.get_build(mode="test")
             DT.create_bucket(suffix=main_job.suffix)
-            DT.config_env(main_job.data_site, build_folder, build_version, suffix=main_job.suffix,
+            DT.config_env(main_job.data_site, build_folder, build_version, prefix=main_job.prefix,
                           concurrency=main_job.concurrency, timeout=main_job.timeout)
             print('Testing build %s is ready to go' % build_version)
             print('Need to create database metadata')
@@ -862,5 +740,8 @@ if __name__ == "__main__":
             DT.get_missing_partitions(source=main_job.source)
     elif main_job.rerun:
         DT.rerun_failed_jobs(DT.check_job_status("all", DT.get_job_list("all")))
+    elif main_job.restart:
+        previous_jobs = DT.wait_and_suspend_all_jobs(DT.get_job_list("all"))
+        DT.restart_hive_server(previous_jobs)
     else:
-        print('Please using -s <data_site>, -c <job>, -p, -r or -R')
+        print('Please using -s <data_site>, -c <job>, --restart, -p, -r or -R')

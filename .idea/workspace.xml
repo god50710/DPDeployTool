@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1a5c9656-1468-4f51-be86-49f2f9d7ed4e" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/eric_m_kao.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/eric_m_kao.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/deploy_tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/deploy_tool.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -16,8 +18,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="300">
-              <caret line="848" column="13" lean-forward="true" selection-start-line="848" selection-start-column="13" selection-end-line="848" selection-end-column="13" />
+            <state relative-caret-position="378">
+              <caret line="465" column="117" lean-forward="true" selection-start-line="465" selection-start-column="39" selection-end-line="465" selection-end-column="117" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -85,11 +87,11 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="1">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-8" />
     <option name="y" value="-8" />
-    <option name="width" value="1696" />
-    <option name="height" value="1026" />
+    <option name="width" value="1278" />
+    <option name="height" value="760" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="1" id="Add" />
@@ -205,16 +207,16 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1696" height="1026" extended-state="1" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.48963133" visible="true" weight="0.104166664" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4882943" visible="true" weight="0.104166664" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50654763" side_tool="true" visible="true" weight="0.047200877" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50654763" side_tool="true" visible="true" weight="0.046758767" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.7952381" weight="0.31208792" />
-      <window_info id="Structure" order="1" sideWeight="0.51036865" side_tool="true" visible="true" weight="0.104166664" />
+      <window_info id="Structure" order="1" sideWeight="0.5117057" side_tool="true" visible="true" weight="0.104166664" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
@@ -232,7 +234,14 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="9" />
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/deploy_tool.py</url>
+          <line>399</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="11" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
@@ -522,8 +531,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="848" column="13" lean-forward="true" selection-start-line="848" selection-start-column="13" selection-end-line="848" selection-end-column="13" />
+        <state relative-caret-position="378">
+          <caret line="465" column="117" lean-forward="true" selection-start-line="465" selection-start-column="39" selection-end-line="465" selection-end-column="117" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
