@@ -543,8 +543,8 @@ class DeployTool(object):
         else:
             s3_path = cls.AWS_BETA_CAM_PATH
         partition_list = cls.run_command('aws s3 ls %s/%s/ --recursive' % (s3_path, cls.FLAGS[database][table]))
-        # consider daily partition always less then one period than today, so we check daily job start from yesterday
-        while check_time < datetime.now() - timedelta(days=1):
+        # consider hourly partition may generating when user query at same hour, so end time will be set at 2 hours before
+        while check_time < datetime.now() - timedelta(hour=2):
             if check_time.strftime('d=%Y-%m-%d/h=%H_') not in partition_list:
                 missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
             check_time += stepping_time
