@@ -156,33 +156,32 @@ class DeployTool(object):
         # folder(string) : target build folder that will be configured
         # version(string) : for adding oozie job name suffix name to identify easier
         if data_site == "production":
-            prod_env_path = "%s/output/dp2/set-env.sh" % folder
+            prod_env_path = "%s/output/dp2/op-utils/set-env.sh" % folder
             cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s " % prod_env_path)
             cls.run_command("sed -i '7a OOZIE_APP_EXT=.AWS_Production%s' %s" % (version, prod_env_path))
         elif data_site == "beta":
-            beta_env_path = "%s/output/dp2-beta/set-env.sh" % folder
+            beta_env_path = "%s/output/dp2-beta/op-utils/set-env.sh" % folder
             cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s " % beta_env_path)
             cls.run_command("sed -i '7a OOZIE_APP_EXT=.AWS_Beta%s' %s" % (version, beta_env_path))
         elif data_site == "test":
-            test_env_path = "%s/output/dp2/set-env.sh" % folder
-            test_oozie_folder = "%s/output/data-pipeline-aws/oozie" % folder
+            test_env_path = "%s/output/dp2/op-utils/set-env.sh" % folder
+            test_oozie_folder = "%s/output/dp2/oozie" % folder
             # default timeout is 180 minutes
             if timeout != 180:
-                test_env_path = "%s/output/dp2/set-env.sh" % folder
                 cls.run_command("sed -i 's/180/%s/g' %s" % (timeout, test_env_path))
             cls.run_command("sed -i 's/concurrency=./concurrency=%i/g' %s/*/job.properties" %
                             (concurrency, test_oozie_folder))
             cls.run_command("sed -i '/export DB_PREFIX/d' %s" % test_env_path)
-            cls.run_command("sed -i '6a export DB_PREFIX=%s' %s" % (prefix, test_env_path))
+            cls.run_command("sed -i '6a export DB_PREFIX=%s_' %s" % (prefix, test_env_path))
             cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s " % test_env_path)
-            cls.run_command("sed -i '7a OOZIE_APP_EXT=.AWS_Test%s' %s" % (version, test_env_path))
+            cls.run_command("sed -i '7a export OOZIE_APP_EXT=.AWS_Test%s' %s" % (version, test_env_path))
 
     @classmethod
     def create_bucket(cls, prefix="function"):
         if "%s-dp-shn" % prefix not in cls.run_command("aws s3 ls"):
-            cls.run_command("aws s3 mb s3://%s-dp-shn" % prefix)
-            cls.run_command("aws s3 mb s3://%s-dp-cam" % prefix)
-            cls.run_command("aws s3 mb s3://%s-dp-sig" % prefix)
+            cls.run_command("aws s3 mb s3://%s-dp-shn-us-west-2" % prefix)
+            cls.run_command("aws s3 mb s3://%s-dp-cam-us-west-2" % prefix)
+            cls.run_command("aws s3 mb s3://%s-dp-sig-us-west-2" % prefix)
 
     @classmethod
     def set_job_time(cls, data_site, folder, jobs, flags):
