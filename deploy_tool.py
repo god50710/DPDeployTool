@@ -1,3 +1,4 @@
+import time
 import os
 import argparse
 import re
@@ -10,6 +11,7 @@ class DeployTool(object):
     START_TIME = datetime(2018, 1, 1)
     AWS_PROD_SHN_PATH = "s3://dp-shn-us-west-2/dp_shn/"
     AWS_PROD_CAM_PATH = "s3://dp-cam-us-west-2/dp_cam/"
+    AWS_PROD_MISC_PATH = "s3://dp-misc-us-west-2/dp_cam/"
     AWS_PROD_SIG_PATH = "s3://dp-sig-us-west-2/dp_sig/"
     AWS_BETA_SHN_PATH = "s3://dp-beta-shn-us-west-2/dp_beta_shn/"
     AWS_BETA_CAM_PATH = "s3://dp-beta-cam-us-west-2/dp_beta_cam/"
@@ -17,7 +19,7 @@ class DeployTool(object):
     AWS_VERIFIED_BUILD_PATH = "s3://eric-staging-us-west-2/build"
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
-    DISPLAY_COUNT=50
+    DISPLAY_COUNT = 50
     TOOL_VERSION = "20180604"
     FLAGS = {'dp_shn': {'t_device_best_recognition_hourly': '/f_device_best_recognition_hourly',
                         't_device_collection_hourly': '/f_device_collection_hourly',
@@ -42,6 +44,8 @@ class DeployTool(object):
                         't_cam_security_event_raw_hourly': '/f_cam_security_event_raw_hourly',
                         't_cam_session_info_hourly': '/f_cam_session_info_hourly',
                         't_cam_trs_stat_hourly': '/f_cam_trs_stat_hourly'},
+             'dp_misc': {'t_ddi_001_hourly': '/f_ddi_001_hourly',
+                         't_ncie_001_hourly': '/f_ncie_001_hourly'},
              'dp_shn_beta': {'t_device_best_recognition_hourly': '/f_device_best_recognition_hourly',
                              't_device_collection_hourly': '/f_device_collection_hourly',
                              't_device_session_stat_hourly': '/f_device_session_stat_hourly',
@@ -182,6 +186,7 @@ class DeployTool(object):
             cls.run_command("aws s3 mb s3://%s-dp-shn-us-west-2" % prefix)
             cls.run_command("aws s3 mb s3://%s-dp-cam-us-west-2" % prefix)
             cls.run_command("aws s3 mb s3://%s-dp-sig-us-west-2" % prefix)
+            cls.run_command("aws s3 mb s3://%s-dp-misc-us-west-2" % prefix)
 
     @classmethod
     def set_job_time(cls, data_site, folder, jobs, flags):
@@ -223,6 +228,7 @@ class DeployTool(object):
         if data_site == "production":
             site_shn_path = cls.AWS_PROD_SHN_PATH
             site_cam_path = cls.AWS_PROD_CAM_PATH
+            site_misc_path = cls.AWS_PROD_MISC_PATH
             reference_path = "dp2"
         else:
             site_shn_path = cls.AWS_BETA_SHN_PATH
@@ -243,6 +249,8 @@ class DeployTool(object):
             # if oozie job is a new job cause no flag, setting now time as next start time
             if "cam" in job:
                 target_path = site_cam_path
+            elif data_site == "production" and ("ddi" in job or "ncie" in job):
+                target_path = site_misc_path
             else:
                 target_path = site_shn_path
             if not cls.run_command("aws s3 ls %s/%s/" % (target_path, flags[job])):
@@ -503,6 +511,9 @@ class DeployTool(object):
         else:
             aws_shn_path = cls.AWS_BETA_SHN_PATH
             aws_cam_path = cls.AWS_PROD_CAM_PATH
+            aws_misc_path = cls.AWS_PROD_MISC_PATH
+            cls.run_command(
+                "aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (aws_misc_path, s3_folder))
         cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (aws_shn_path, s3_folder))
         cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (aws_cam_path, s3_folder))
         # print("aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_shn_path, s3_folder))
@@ -604,6 +615,7 @@ class DeployTool(object):
     def restart_hive_server(cls, suspend_jobs):
         cls.run_command('sudo stop hive-server2')
         cls.run_command('sudo start hive-server2')
+        time.sleep(720)
         cls.resume_all_job(suspend_jobs)
 
     @classmethod
