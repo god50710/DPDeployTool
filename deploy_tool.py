@@ -11,7 +11,7 @@ class DeployTool(object):
     START_TIME = datetime(2018, 1, 1)
     AWS_PROD_SHN_PATH = "s3://dp-shn-us-west-2/dp_shn/"
     AWS_PROD_CAM_PATH = "s3://dp-cam-us-west-2/dp_cam/"
-    AWS_PROD_MISC_PATH = "s3://dp-misc-us-west-2/dp_cam/"
+    AWS_PROD_MISC_PATH = "s3://dp-misc-us-west-2/dp_misc/"
     AWS_PROD_SIG_PATH = "s3://dp-sig-us-west-2/dp_sig/"
     AWS_BETA_SHN_PATH = "s3://dp-beta-shn-us-west-2/dp_beta_shn/"
     AWS_BETA_CAM_PATH = "s3://dp-beta-cam-us-west-2/dp_beta_cam/"
@@ -20,7 +20,7 @@ class DeployTool(object):
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
     DISPLAY_COUNT = 50
-    TOOL_VERSION = "20180604"
+    TOOL_VERSION = "20180606"
     FLAGS = {'dp_shn': {'t_device_best_recognition_hourly': '/f_device_best_recognition_hourly',
                         't_device_collection_hourly': '/f_device_collection_hourly',
                         't_device_session_stat_hourly': '/f_device_session_stat_hourly',
