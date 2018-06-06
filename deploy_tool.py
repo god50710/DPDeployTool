@@ -615,6 +615,7 @@ class DeployTool(object):
     def restart_hive_server(cls, suspend_jobs):
         cls.run_command('sudo stop hive-server2')
         cls.run_command('sudo start hive-server2')
+        print('Time wait 720 seconds for hive server restart')
         time.sleep(720)
         cls.resume_all_job(suspend_jobs)
 
