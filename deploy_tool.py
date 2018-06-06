@@ -414,18 +414,17 @@ class DeployTool(object):
         cls.run_command("crontab -l > %s" % cronjob_file)
         signature_cronjob = cls.run_command("cat %s | grep 'update_signature/bg_executor.sh'" % cronjob_file,
                                             throw_error=False)
-        geoip_cronjob = cls.run_command("cat %s | grep 'update_geoip/geoip_bg_executor.sh'" % cronjob_file,
+        geoip_cronjob = cls.run_command("cat %s | grep 'update_geoip/geoip_bg_executor_with_mail.sh'" % cronjob_file,
                                         throw_error=False)
         # before run this method, cronjob has not update signature cronjob
         if not signature_cronjob:
             cls.run_command("cp -r %s/QA/dp2/update_signature /home/hadoop/" % build_path)
             cls.run_command("echo '0 * * * * /home/hadoop/update_signature/bg_executor.sh %s' >> %s " %
                             (data_site, cronjob_file))
-        # before run this method, cronjob already has geoip update job
-        # just switch to another version that sends notification
-        if geoip_cronjob:
-            cls.run_command("sed -i '/geoip_bg_executor.sh/d' %s" % cronjob_file)
-            cls.run_command("echo '0 * * * * /trs/update_geoip/geoip_bg_executor_with_mail.sh %s' >> %s " %
+        # before run this method, cronjob has not update signature cronjob
+        if not geoip_cronjob:
+            cls.run_command("cp -r %s/QA/dp2/update_geoip /home/hadoop/" % build_path)
+            cls.run_command("echo '0 * * * * /home/hadoop/update_geoip/geoip_bg_executor_with_mail.sh %s' >> %s " %
                             (data_site, cronjob_file))
         cls.run_command("crontab %s" % cronjob_file)
         cls.run_command("rm %s" % cronjob_file)
