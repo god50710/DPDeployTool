@@ -16,8 +16,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="126">
-              <caret line="6" column="40" lean-forward="true" selection-start-line="6" selection-start-column="40" selection-end-line="6" selection-end-column="40" />
+            <state relative-caret-position="588">
+              <caret line="388" column="49" selection-start-line="388" selection-start-column="49" selection-end-line="388" selection-end-column="49" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -36,11 +36,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>beta</find>
-      <find>wait_and_suspend_all_jobs</find>
-      <find>set_job</find>
-      <find>scan_f_flag</find>
-      <find>FLAG_MAPPING</find>
       <find>FLAG_MA</find>
       <find>version</find>
       <find>pass</find>
@@ -51,9 +46,7 @@
       <find>trs_src</find>
       <find>cron</find>
       <find>run_command</find>
-      <find>oozie</find>
       <find>False</find>
-      <find>deploy</find>
       <find>path</find>
       <find>silent</find>
       <find>repair</find>
@@ -66,6 +59,13 @@
       <find>%h</find>
       <find>create_bucket</find>
       <find>add_cronjob</find>
+      <find>deploy</find>
+      <find>/dp2/</find>
+      <find>/dp2</find>
+      <find>oozie</find>
+      <find>get_job_list_from_build</find>
+      <find>build_folder</find>
+      <find>add_cron</find>
     </findStrings>
     <replaceStrings>
       <replace>'t_</replace>
@@ -522,8 +522,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="6" column="40" lean-forward="true" selection-start-line="6" selection-start-column="40" selection-end-line="6" selection-end-column="40" />
+        <state relative-caret-position="588">
+          <caret line="388" column="49" selection-start-line="388" selection-start-column="49" selection-end-line="388" selection-end-column="49" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
