@@ -8,67 +8,71 @@ from datetime import datetime, timedelta
 
 
 class DeployTool(object):
-    START_TIME = datetime(2018, 1, 1)
-    AWS_PROD_SHN_PATH = "s3://dp-shn-us-west-2/dp_shn/"
-    AWS_PROD_CAM_PATH = "s3://dp-cam-us-west-2/dp_cam/"
-    AWS_PROD_MISC_PATH = "s3://dp-misc-us-west-2/dp_misc/"
-    AWS_PROD_SIG_PATH = "s3://dp-sig-us-west-2/dp_sig/"
-    AWS_BETA_SHN_PATH = "s3://dp-beta-shn-us-west-2/dp_beta_shn/"
-    AWS_BETA_CAM_PATH = "s3://dp-beta-cam-us-west-2/dp_beta_cam/"
-    AWS_BETA_SIG_PATH = "s3://dp-beta-sig-us-west-2/dp_beta_sig/"
+    START_TIME = datetime(2018, 5, 1)
+    AWS_PROD_SHN_PATH = "s3://dp-shn-us-west-2/dp_shn"
+    AWS_PROD_CAM_PATH = "s3://dp-cam-us-west-2/dp_cam"
+    AWS_PROD_MISC_PATH = "s3://dp-misc-us-west-2/dp_misc"
+    AWS_PROD_SIG_PATH = "s3://dp-sig-us-west-2/dp_sig"
+    AWS_BETA_SHN_PATH = "s3://dp-beta-shn-us-west-2/dp_beta_shn"
+    AWS_BETA_CAM_PATH = "s3://dp-beta-cam-us-west-2/dp_beta_cam"
+    AWS_BETA_SIG_PATH = "s3://dp-beta-sig-us-west-2/dp_beta_sig"
     AWS_VERIFIED_BUILD_PATH = "s3://eric-staging-us-west-2/build"
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
     DISPLAY_COUNT = 50
     TOOL_VERSION = "20180608"
-    FLAGS = {'dp_shn': {'t_device_best_recognition_hourly': '/f_device_best_recognition_hourly',
-                        't_device_collection_hourly': '/f_device_collection_hourly',
-                        't_device_session_stat_hourly': '/f_device_session_stat_hourly',
-                        't_device_traffic_stat_hourly': '/f_device_traffic_stat_hourly',
-                        't_device_wrs_hits_stat_hourly': '/f_device_wrs_hits_stat_hourly',
-                        't_ips_hit_rule_collection_hourly': '/f_ips_hit_rule_collection_hourly',
-                        't_router_collection_hourly': '/f_router_collection_hourly',
-                        't_router_device_activity_daily': '/f_router_device_activity_daily',
-                        't_routerinfo_normalized_hourly': '/f_routerinfo_normalized_hourly',
-                        't_router_security_event_filtered_hourly': '/f_router_security_event_filtered_hourly',
-                        't_router_security_event_raw_hourly': '/f_router_security_event_raw_hourly',
-                        't_routerstat_normalized_hourly': '/f_routerstat_normalized_hourly',
-                        't_rule_hit_stat_hourly': '/f_rule_hit_stat_hourly',
-                        't_security_event_filtered_hourly': '/f_security_event_filtered_hourly',
-                        't_security_event_raw_hourly': '/f_security_event_raw_hourly'},
-             'dp_cam': {'t_cam_bfld_stat_hourly': '/f_cam_bfld_stat_hourly',
-                        't_cam_collection_hourly': '/f_cam_collection_hourly',
-                        't_cam_feedback_normalized_hourly': '/f_cam_feedback_normalized_hourly',
-                        't_cam_ips_hit_rule_collection_hourly': '/f_cam_ips_hit_rule_collection_hourly',
-                        't_cam_security_event_filtered_hourly': '/f_cam_security_event_filtered_hourly',
-                        't_cam_security_event_raw_hourly': '/f_cam_security_event_raw_hourly',
-                        't_cam_session_info_hourly': '/f_cam_session_info_hourly',
-                        't_cam_trs_stat_hourly': '/f_cam_trs_stat_hourly'},
-             'dp_misc': {'t_ddi_001_hourly': '/f_ddi_001_hourly',
-                         't_ncie_001_hourly': '/f_ncie_001_hourly'},
-             'dp_shn_beta': {'t_device_best_recognition_hourly': '/f_device_best_recognition_hourly',
-                             't_device_collection_hourly': '/f_device_collection_hourly',
-                             't_device_session_stat_hourly': '/f_device_session_stat_hourly',
-                             't_device_traffic_stat_hourly': '/f_device_traffic_stat_hourly',
-                             't_device_wrs_hits_stat_hourly': '/f_device_wrs_hits_stat_hourly',
-                             't_ips_hit_rule_collection_hourly': '/f_ips_hit_rule_collection_hourly',
-                             't_router_collection_hourly': '/f_router_collection_hourly',
-                             't_router_device_activity_daily': '/f_router_device_activity_daily',
-                             't_routerinfo_normalized_hourly': '/f_routerinfo_normalized_hourly',
-                             't_router_security_event_filtered_hourly': '/f_router_security_event_filtered_hourly',
-                             't_router_security_event_raw_hourly': '/f_router_security_event_raw_hourly',
-                             't_routerstat_normalized_hourly': '/f_routerstat_normalized_hourly',
-                             't_rule_hit_stat_hourly': '/f_rule_hit_stat_hourly',
-                             't_security_event_filtered_hourly': '/f_security_event_filtered_hourly',
-                             't_security_event_raw_hourly': '/f_security_event_raw_hourly'},
-             'dp_cam_beta': {'t_cam_bfld_stat_hourly': '/f_cam_bfld_stat_hourly',
-                             't_cam_collection_hourly': '/f_cam_collection_hourly',
-                             't_cam_feedback_normalized_hourly': '/f_cam_feedback_normalized_hourly',
-                             't_cam_ips_hit_rule_collection_hourly': '/f_cam_ips_hit_rule_collection_hourly',
-                             't_cam_security_event_filtered_hourly': '/f_cam_security_event_filtered_hourly',
-                             't_cam_security_event_raw_hourly': '/f_cam_security_event_raw_hourly',
-                             't_cam_session_info_hourly': '/f_cam_session_info_hourly',
-                             't_cam_trs_stat_hourly': '/f_cam_trs_stat_hourly'}
+    FLAGS = {'dp_shn': {'t_routerinfo_001_hourly': 'f_routerinfo_001_hourly',
+                        't_routerstat_001_hourly': 'f_routerstat_001_hourly',
+                        't_device_best_recognition_hourly': 'f_device_best_recognition_hourly',
+                        't_device_collection_hourly': 'f_device_collection_hourly',
+                        't_device_session_stat_hourly': 'f_device_session_stat_hourly',
+                        't_device_traffic_stat_hourly': 'f_device_traffic_stat_hourly',
+                        't_device_wrs_hits_stat_hourly': 'f_device_wrs_hits_stat_hourly',
+                        't_ips_hit_rule_collection_hourly': 'f_ips_hit_rule_collection_hourly',
+                        't_router_collection_hourly': 'f_router_collection_hourly',
+                        't_routerinfo_normalized_hourly': 'f_routerinfo_normalized_hourly',
+                        't_router_security_event_filtered_hourly': 'f_router_security_event_filtered_hourly',
+                        't_router_security_event_raw_hourly': 'f_router_security_event_raw_hourly',
+                        't_routerstat_normalized_hourly': 'f_routerstat_normalized_hourly',
+                        't_rule_hit_stat_hourly': 'f_rule_hit_stat_hourly',
+                        't_security_event_filtered_hourly': 'f_security_event_filtered_hourly',
+                        't_security_event_raw_hourly': 'f_security_event_raw_hourly'},
+             'dp_cam': {'t_tmis_cam_001_hourly': 'f_tmis_cam_001_hourly',
+                        't_cam_bfld_stat_hourly': 'f_cam_bfld_stat_hourly',
+                        't_cam_collection_hourly': 'f_cam_collection_hourly',
+                        't_cam_feedback_normalized_hourly': 'f_cam_feedback_normalized_hourly',
+                        't_cam_ips_hit_rule_collection_hourly': 'f_cam_ips_hit_rule_collection_hourly',
+                        't_cam_security_event_filtered_hourly': 'f_cam_security_event_filtered_hourly',
+                        't_cam_security_event_raw_hourly': 'f_cam_security_event_raw_hourly',
+                        't_cam_session_info_hourly': 'f_cam_session_info_hourly',
+                        't_cam_trs_stat_hourly': 'f_cam_trs_stat_hourly'},
+             'dp_misc': {'t_ddi_001_hourly': 'f_ddi_001_hourly',
+                         't_ncie_001_hourly': 'f_ncie_001_hourly'},
+             'dp_beta_shn': {'t_routerinfo_001_hourly': 'f_routerinfo_001_hourly',
+                             't_routerstat_001_hourly': 'f_routerstat_001_hourly',
+                             't_device_best_recognition_hourly': 'f_device_best_recognition_hourly',
+                             't_device_collection_hourly': 'f_device_collection_hourly',
+                             't_device_session_stat_hourly': 'f_device_session_stat_hourly',
+                             't_device_traffic_stat_hourly': 'f_device_traffic_stat_hourly',
+                             't_device_wrs_hits_stat_hourly': 'f_device_wrs_hits_stat_hourly',
+                             't_ips_hit_rule_collection_hourly': 'f_ips_hit_rule_collection_hourly',
+                             't_router_collection_hourly': 'f_router_collection_hourly',
+                             't_routerinfo_normalized_hourly': 'f_routerinfo_normalized_hourly',
+                             't_router_security_event_filtered_hourly': 'f_router_security_event_filtered_hourly',
+                             't_router_security_event_raw_hourly': 'f_router_security_event_raw_hourly',
+                             't_routerstat_normalized_hourly': 'f_routerstat_normalized_hourly',
+                             't_rule_hit_stat_hourly': 'f_rule_hit_stat_hourly',
+                             't_security_event_filtered_hourly': 'f_security_event_filtered_hourly',
+                             't_security_event_raw_hourly': 'f_security_event_raw_hourly'},
+             'dp_beta_cam': {'t_tmis_cam_001_hourly': 'f_tmis_cam_001_hourly',
+                             't_cam_bfld_stat_hourly': 'f_cam_bfld_stat_hourly',
+                             't_cam_collection_hourly': 'f_cam_collection_hourly',
+                             't_cam_feedback_normalized_hourly': 'f_cam_feedback_normalized_hourly',
+                             't_cam_ips_hit_rule_collection_hourly': 'f_cam_ips_hit_rule_collection_hourly',
+                             't_cam_security_event_filtered_hourly': 'f_cam_security_event_filtered_hourly',
+                             't_cam_security_event_raw_hourly': 'f_cam_security_event_raw_hourly',
+                             't_cam_session_info_hourly': 'f_cam_session_info_hourly',
+                             't_cam_trs_stat_hourly': 'f_cam_trs_stat_hourly'}
              }
 
     @staticmethod
@@ -121,7 +125,7 @@ class DeployTool(object):
                     flag_path_prefix = cls.AWS_BETA_CAM_PATH
                 else:
                     flag_path_prefix = cls.AWS_BETA_SHN_PATH
-            flags[job] = '%s%s' % (flag_path_prefix, flag)
+            flags[job] = '%s/%s' % (flag_path_prefix, flag)
             if "hours(1)" in frequency:
                 hourly_jobs.append(job)
             else:
@@ -444,64 +448,40 @@ class DeployTool(object):
             for database in cls.FLAGS.keys():
                 for table in cls.FLAGS[database].keys():
                     cls.clean_fake_folder(database, table)
-                    # print command, OPS will check and execute manually
-                    if "t_ips_stat_daily" in table:
-                        cls.run_command(
-                            'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                            (database, "t_ips_stat_daily"))
-                    # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                    #      (database, "t_ips_stat_daily"))
-                    else:
-                        cls.run_command(
-                            'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                            (database, table))
-                    # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                    #      (database, table))
+                    cls.run_command(
+                        'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                        (database, table))
         # repair all tables in specific database
         elif not table:
             for table in cls.FLAGS[database].keys():
                 cls.clean_fake_folder(database, table)
-                # print command, OPS will check and execute manually
                 cls.run_command(
                     'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
                     (database, table))
-                # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' % (
-                #    database, table))
-            # repair specific table
-            else:
-                cls.clean_fake_folder(database, table)
-                # print command, OPS will check and execute manually
-                cls.run_command(
-                    'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                    (database, table))
-                # print('beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
-                #      (database, table))
+        # repair specific table
+        else:
+            cls.clean_fake_folder(database, table)
+            cls.run_command(
+                'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
+                (database, table))
 
     @classmethod
     def clean_fake_folder(cls, database, table):
-
         # database(string) : database name
         # table(string) : table name
         # clean *_$folder$ on table parquet file path
         # in dp2 and dp2_beta, table name : t_<table_name>, flag name : f_<table_name>
-        if database in ["dp2", "dp2_beta"]:
+        if "dp_beta" in database:
             s3_folder = cls.FLAGS[database][table].replace('f_', 't_')
-        # skip datalake because parquet file does not exists on our bucket
-        else:
-            return 0
-        if database != "dp2_beta":
-            aws_shn_path = cls.AWS_PROD_SHN_PATH
-            aws_cam_path = cls.AWS_PROD_CAM_PATH
-        else:
+            # skip datalake because parquet file does not exists on our bucket
             aws_shn_path = cls.AWS_BETA_SHN_PATH
-            aws_cam_path = cls.AWS_PROD_CAM_PATH
-            aws_misc_path = cls.AWS_PROD_MISC_PATH
+            aws_cam_path = cls.AWS_BETA_CAM_PATH
             cls.run_command(
-                "aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (aws_misc_path, s3_folder))
-        cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (aws_shn_path, s3_folder))
-        cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include'*folder*'" % (aws_cam_path, s3_folder))
-        # print("aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_shn_path, s3_folder))
-        # print("aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_cam_path, s3_folder))
+                "aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_shn_path, s3_folder))
+            cls.run_command(
+                "aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_shn_path, s3_folder))
+            cls.run_command(
+                "aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_cam_path, s3_folder))
 
     @classmethod
     def check_missing_partitions(cls, database, table):
@@ -532,7 +512,9 @@ class DeployTool(object):
             s3_path = cls.AWS_PROD_SHN_PATH
         elif database == "dp_cam":
             s3_path = cls.AWS_PROD_CAM_PATH
-        elif database == "dp_shn_beta":
+        elif database == "dp_misc":
+            s3_path = cls.AWS_PROD_MISC_PATH
+        elif database == "dp_beta_shn":
             s3_path = cls.AWS_BETA_SHN_PATH
         else:
             s3_path = cls.AWS_BETA_CAM_PATH
@@ -672,8 +654,8 @@ class DeployTool(object):
             print('python %s -r --database dp_beta --table t_router_hourly' % os.path.basename(__file__))
             print('\n# To repair partitions and clean fake folder on Beta data site')
             print('python %s -r --database dp_beta' % os.path.basename(__file__))
-            print('\n# To restart ')
-            print('python %s -r --database dp_beta' % os.path.basename(__file__))
+            print('\n# To restart hive server')
+            print('python %s --restart' % os.path.basename(__file__))
             exit(0)
         return parser.parse_args()
 

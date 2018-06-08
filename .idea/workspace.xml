@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1a5c9656-1468-4f51-be86-49f2f9d7ed4e" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/deploy_tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/deploy_tool.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -17,8 +16,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="475">
-              <caret line="353" column="64" lean-forward="true" selection-end-line="743" />
+            <state relative-caret-position="462">
+              <caret line="22" column="29" lean-forward="true" selection-start-line="22" selection-start-column="29" selection-end-line="22" selection-end-column="29" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -37,9 +36,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>pass</find>
-      <find>beeline</find>
-      <find>result</find>
       <find>conf</find>
       <find>trs_src</find>
       <find>cron</find>
@@ -47,7 +43,6 @@
       <find>False</find>
       <find>path</find>
       <find>silent</find>
-      <find>repair</find>
       <find>grep</find>
       <find>site</find>
       <find>date</find>
@@ -67,9 +62,14 @@
       <find>suspend</find>
       <find>get_job_list</find>
       <find>show_susp</find>
+      <find>/f_</find>
+      <find>AWS_PROD_SHN_PATH</find>
+      <find>AWS_BETA_SHN_PATH</find>
+      <find>repair</find>
     </findStrings>
     <replaceStrings>
       <replace>'t_</replace>
+      <replace>f_</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -206,7 +206,7 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1928" y="-8" width="1936" height="1096" extended-state="7" />
+    <frame x="-1928" y="-8" width="1936" height="1096" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.48772678" visible="true" weight="0.104166664" />
@@ -523,8 +523,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="475">
-          <caret line="353" column="64" lean-forward="true" selection-end-line="743" />
+        <state relative-caret-position="462">
+          <caret line="22" column="29" lean-forward="true" selection-start-line="22" selection-start-column="29" selection-end-line="22" selection-end-column="29" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
