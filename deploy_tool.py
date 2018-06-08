@@ -279,8 +279,8 @@ class DeployTool(object):
         try:
             cls.run_command("bash %s/deploy.sh all" % deploy_folder, throw_error=False)
             cls.run_command("sed -i '/t2_router_device_activity_daily_extract/d' %s/run-jobs.sh" % deploy_folder)
-            #  cls.run_command("bash %s/run-jobs.sh" % deploy_folder)
-            print("bash %s/run-jobs.sh" % deploy_folder)
+            cls.run_command("bash %s/run-jobs.sh" % deploy_folder)
+            # print("bash %s/run-jobs.sh" % deploy_folder)
         except Exception:
             if change_build:
                 print('[Error] Deploy failed, resume previous jobs')
@@ -476,8 +476,6 @@ class DeployTool(object):
             # skip datalake because parquet file does not exists on our bucket
             aws_shn_path = cls.AWS_BETA_SHN_PATH
             aws_cam_path = cls.AWS_BETA_CAM_PATH
-            cls.run_command(
-                "aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_shn_path, s3_folder))
             cls.run_command(
                 "aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_shn_path, s3_folder))
             cls.run_command(
@@ -683,7 +681,7 @@ if __name__ == "__main__":
         else:
             if main_job.new_deploy:
                 build_folder, build_version = DT.get_build()
-                # DT.add_cronjob(main_job.data_site, build_folder)
+                DT.add_cronjob(main_job.data_site, build_folder)
                 DT.config_env(main_job.data_site, build_folder, build_version)
                 all_jobs, flag_list = DT.get_job_list_from_build(main_job.data_site, build_folder)
                 DT.set_job_time(main_job.data_site, build_folder, all_jobs, flag_list)
