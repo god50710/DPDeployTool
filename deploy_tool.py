@@ -20,7 +20,7 @@ class DeployTool(object):
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
     DISPLAY_COUNT = 50
-    TOOL_VERSION = "20180606"
+    TOOL_VERSION = "20180608"
     FLAGS = {'dp_shn': {'t_device_best_recognition_hourly': '/f_device_best_recognition_hourly',
                         't_device_collection_hourly': '/f_device_collection_hourly',
                         't_device_session_stat_hourly': '/f_device_session_stat_hourly',
@@ -111,16 +111,16 @@ class DeployTool(object):
                 raise Exception('[Error] Flag is empty')
             if data_site == "production":
                 if "cam" in job:
-                    flag_path_prefix=cls.AWS_PROD_CAM_PATH
+                    flag_path_prefix = cls.AWS_PROD_CAM_PATH
                 elif "ddi" in job or "ncie" in job:
-                    flag_path_prefix=cls.AWS_PROD_MISC_PATH
+                    flag_path_prefix = cls.AWS_PROD_MISC_PATH
                 else:
-                    flag_path_prefix=cls.AWS_PROD_SHN_PATH
-            else :
+                    flag_path_prefix = cls.AWS_PROD_SHN_PATH
+            else:
                 if "cam" in job:
-                    flag_path_prefix=cls.AWS_BETA_CAM_PATH
+                    flag_path_prefix = cls.AWS_BETA_CAM_PATH
                 else:
-                    flag_path_prefix=cls.AWS_BETA_SHN_PATH
+                    flag_path_prefix = cls.AWS_BETA_SHN_PATH
             flags[job] = '%s%s' % (flag_path_prefix, flag)
             if "hours(1)" in frequency:
                 hourly_jobs.append(job)
@@ -239,24 +239,17 @@ class DeployTool(object):
 
             # get oozie job start time date from flag path
             # if oozie job is a new job cause no flag, setting now time as next start time
-            if not cls.run_command("aws s3 ls %s/" % (flags[job])):
+            flag_year = cls.run_command("aws s3 ls %s/ | tail -1 | awk '{print $4}'" % flags[job])[2:6]
+            flag_month = cls.run_command(
+                "aws s3 ls %s/y=%s/ | tail -1 | awk '{print $4}'" % (flags[job], flag_year))[2:4]
+            flag_day = cls.run_command("aws s3 ls %s/y=%s/m=%s/ | tail -1 | awk '{print $4}'" %
+                                       (flags[job], flag_year, flag_month))[2:12]
+            flag_hour = cls.run_command("aws s3 ls %s/y=%s/m=%s/d=%s/ | tail -1 | awk '{print $4}'" %
+                                        (flags[job], flag_year, flag_month, flag_day))[2:4]
+            if not re.match('\d{4}-\d{2}-\d{2}', flag_day) or not re.match('\d{2}', flag_hour):
+                print('[Error] Get malformed time from s3:d=%s, h=%s' % (flag_day, flag_hour))
                 flag_day = datetime.now().strftime('%Y-%m-%d')
-            else:
-                flag_day = cls.run_command("aws s3 ls %s/ | tail -1 | awk '{print $4}' | cut -d'_' -f1" %
-                                           (flags[job]))[-11:-1]
-            if not re.match('\d{4}-\d{2}-\d{2}', flag_day):
-                raise Exception('[Error] Get malformed day from s3:', flag_day)
-
-            # get oozie job start time hours from flag
-            # if oozie job is a new job cause no flag, setting now time as next start time
-            if not cls.run_command("aws s3 ls %s/" % (flags[job])):
                 flag_hour = datetime.now().strftime('%H')
-            else:
-                flag_hour = cls.run_command("aws s3 ls %s/d=%s/ | tail -1 | awk '{print $4}'" %
-                                            (flags[job], flag_day))[2:4]
-            if not re.match('\d{2}', flag_hour):
-                raise Exception('[Error] Get malformed hour from s3:', flag_hour)
-
             print('Last f_flag date: %s, hour: %s' % (flag_day, flag_hour))
             job_start_time = datetime.strptime(flag_day + flag_hour, '%Y-%m-%d%H') + add_time
             job_end_time = job_start_time + timedelta(days=36524)
@@ -280,10 +273,9 @@ class DeployTool(object):
             target_folder = "dp2-beta"
         deploy_folder = "%s/output/%s/op-utils" % (build_path, target_folder)
         try:
+            cls.run_command("bash %s/deploy.sh all" % deploy_folder, throw_error=False)
             cls.run_command("sed -i '/t2_router_device_activity_daily_extract/d' %s/run-jobs.sh" % deploy_folder)
-            # cls.run_command("bash %s/deploy.sh all" % deploy_folder, throw_error=False)
             #  cls.run_command("bash %s/run-jobs.sh" % deploy_folder)
-            print("bash %s/deploy.sh all" % deploy_folder)
             print("bash %s/run-jobs.sh" % deploy_folder)
         except Exception:
             if change_build:
@@ -344,16 +336,21 @@ class DeployTool(object):
             cls.run_command("oozie job -resume %s" % oozie_job_list[oozie_job][0])
 
     @classmethod
-    def get_job_list(cls, job_name):
+    def get_job_list(cls, job_name, show_suspend=True):
         # job_name(string) : oozie job name, ex: T1Device
         # output : oozie_job_list(dict) : {oozie_job_id:[next_start_time, oozie_job_name]}
         # get running/prepare/suspend jobs list
         print('\nCurrent status of Oozie job:')
         if job_name == "all":
             job_name = ""
-        oozie_job_info = cls.run_command(
-            "oozie jobs info -jobtype coordinator -len 5000|grep '%s.*RUNNING\|%s.*PREP\|%s.*SUSPEND'|sort -k8" %
-            (job_name, job_name, job_name), show_command=False)[:-1].rstrip('\n').split('\n')
+        if show_suspend:
+            oozie_job_info = cls.run_command(
+                "oozie jobs info -jobtype coordinator -len 5000|grep '%s.*RUNNING\|%s.*PREP\|%s.*SUSPEND'|sort -k8" %
+                (job_name, job_name, job_name), show_command=False)[:-1].rstrip('\n').split('\n')
+        else:
+            oozie_job_info = cls.run_command(
+                "oozie jobs info -jobtype coordinator -len 5000|grep '%s.*RUNNING\|%s.*PREP'|sort -k8" %
+                (job_name, job_name), show_command=False)[:-1].rstrip('\n').split('\n')
         print("JobID\t\t\t\t     Next Materialized    App Name")
         oozie_job_list = {}
         for each_job in oozie_job_info:
@@ -704,7 +701,7 @@ if __name__ == "__main__":
         else:
             if main_job.new_deploy:
                 build_folder, build_version = DT.get_build()
-                #DT.add_cronjob(main_job.data_site, build_folder)
+                # DT.add_cronjob(main_job.data_site, build_folder)
                 DT.config_env(main_job.data_site, build_folder, build_version)
                 all_jobs, flag_list = DT.get_job_list_from_build(main_job.data_site, build_folder)
                 DT.set_job_time(main_job.data_site, build_folder, all_jobs, flag_list)
@@ -740,7 +737,7 @@ if __name__ == "__main__":
     elif main_job.rerun:
         DT.rerun_failed_jobs(DT.check_job_status("all", DT.get_job_list("all")))
     elif main_job.restart:
-        previous_jobs = DT.wait_and_suspend_all_jobs(DT.get_job_list("all"))
+        previous_jobs = DT.wait_and_suspend_all_jobs(DT.get_job_list("all", show_suspend=False))
         DT.restart_hive_server(previous_jobs)
     else:
         print('Please using -s <data_site>, -c <job>, --restart, -p, -r or -R')
