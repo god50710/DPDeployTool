@@ -579,7 +579,7 @@ class DeployTool(object):
         # all_job_status(string) : just like "python deploy_tool.py -c all" result
         job_list = [x.split()[:2] for x in (all_job_status.split('\n')[6:-1])]
         for job in job_list:
-            if job[1] in "KILLED, TIMEDOUT, FAILED":
+            if job[1] in "KILLED, TIMEDOUT":
                 job_id, action_id = job[0].split('@')
                 cls.run_command('oozie job -rerun %s -action %s' % (job_id, action_id))
 
@@ -630,12 +630,10 @@ class DeployTool(object):
             print('\n# To change build on Beta  data site')
             print('python %s -s beta -C' % os.path.basename(__file__))
             print('\n# To prepare testing build on current site')
-            print(
-                '\n# build_version=1.0.280, database_name=eric_shn_dp, bucket=s3://eric-shn-dp, timeout=28800 minutes, job concurrency=3')
+            print('\n# build_version=1.0.280, database_name=eric_shn_dp, bucket=s3://eric-shn-dp, timeout=28800 minutes, job concurrency=3')
             print('python %s -s test -b 280 --prefix eric -t 28800 --con 3' % os.path.basename(__file__))
             print('\n# To prepare testing build on current site with default value')
-            print(
-                '\n# build_version=latest version in testing build folder, database_name=function_shn_dp, bucket=s3://function-shn-dp, timeout=28800 minutes, job concurrency=1')
+            print('\n# build_version=latest version in testing build folder, database_name=function_shn_dp, bucket=s3://function-shn-dp, timeout=28800 minutes, job concurrency=1')
             print('python %s -s test' % os.path.basename(__file__))
             print('\n# To check all Oozie job status')
             print('python %s -c all' % os.path.basename(__file__))

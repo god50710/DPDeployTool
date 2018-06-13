@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1a5c9656-1468-4f51-be86-49f2f9d7ed4e" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/deploy_tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/deploy_tool.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -17,8 +16,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="510">
-              <caret line="415" column="29" lean-forward="true" selection-start-line="415" selection-start-column="29" selection-end-line="415" selection-end-column="29" />
+            <state relative-caret-position="720">
+              <caret line="632" column="18" selection-start-line="632" selection-start-column="18" selection-end-line="632" selection-end-column="18" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -524,8 +523,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="415" column="29" lean-forward="true" selection-start-line="415" selection-start-column="29" selection-end-line="415" selection-end-column="29" />
+        <state relative-caret-position="720">
+          <caret line="632" column="18" selection-start-line="632" selection-start-column="18" selection-end-line="632" selection-end-column="18" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
