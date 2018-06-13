@@ -422,7 +422,7 @@ class DeployTool(object):
             cls.run_command("cp -r %s/QA/dp2/update_tmufe /home/hadoop/" % build_path)
             cls.run_command("echo '0 * * * * /home/hadoop/update_tmufe/bg_executor.sh %s' >> %s " %
                             (data_site, cronjob_file))
-            
+
         cls.run_command("crontab %s" % cronjob_file)
         cls.run_command("rm %s" % cronjob_file)
 
@@ -579,7 +579,7 @@ class DeployTool(object):
         # all_job_status(string) : just like "python deploy_tool.py -c all" result
         job_list = [x.split()[:2] for x in (all_job_status.split('\n')[6:-1])]
         for job in job_list:
-            if job[1] == 'KILLED' or job[1] == 'TIMEDOUT':
+            if job[1] in "KILLED, TIMEDOUT, FAILED":
                 job_id, action_id = job[0].split('@')
                 cls.run_command('oozie job -rerun %s -action %s' % (job_id, action_id))
 
