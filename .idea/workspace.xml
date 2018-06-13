@@ -16,8 +16,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="720">
-              <caret line="632" column="18" selection-start-line="632" selection-start-column="18" selection-end-line="632" selection-end-column="18" />
+            <state relative-caret-position="475">
+              <caret line="412" column="13" selection-start-line="412" selection-start-column="13" selection-end-line="412" selection-end-column="13" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -38,7 +38,6 @@
     <findStrings>
       <find>conf</find>
       <find>trs_src</find>
-      <find>cron</find>
       <find>run_command</find>
       <find>False</find>
       <find>path</find>
@@ -66,6 +65,7 @@
       <find>AWS_PROD_SHN_PATH</find>
       <find>AWS_BETA_SHN_PATH</find>
       <find>repair</find>
+      <find>cron</find>
     </findStrings>
     <replaceStrings>
       <replace>'t_</replace>
@@ -86,11 +86,11 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="1">
-    <option name="x" value="-2086" />
-    <option name="y" value="41" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-1705" />
+    <option name="y" value="26" />
     <option name="width" value="1936" />
-    <option name="height" value="1056" />
+    <option name="height" value="987" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="1" id="Add" />
@@ -206,16 +206,16 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-2086" y="41" width="1936" height="1056" extended-state="1" />
+    <frame x="-1928" y="-8" width="1936" height="1096" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.48606467" visible="true" weight="0.104166664" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48665956" visible="true" weight="0.104166664" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50654763" side_tool="true" visible="true" weight="0.046758767" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50654763" side_tool="true" visible="true" weight="0.044852193" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.7952381" weight="0.31208792" />
-      <window_info id="Structure" order="1" sideWeight="0.5139353" side_tool="true" visible="true" weight="0.104166664" />
+      <window_info active="true" id="Structure" order="1" sideWeight="0.5133405" side_tool="true" visible="true" weight="0.104166664" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
@@ -523,8 +523,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="720">
-          <caret line="632" column="18" selection-start-line="632" selection-start-column="18" selection-end-line="632" selection-end-column="18" />
+        <state relative-caret-position="475">
+          <caret line="412" column="13" selection-start-line="412" selection-start-column="13" selection-end-line="412" selection-end-column="13" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>

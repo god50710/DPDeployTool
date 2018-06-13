@@ -19,6 +19,7 @@ class DeployTool(object):
     AWS_VERIFIED_BUILD_PATH = "s3://eric-staging-us-west-2/build"
     AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
+    OP_PATH = "/home/hadoop/op"
     DISPLAY_COUNT = 50
     TOOL_VERSION = "20180608"
     FLAGS = {'dp_shn': {'t_routerinfo_001_hourly': 'f_routerinfo_001_hourly',
@@ -407,21 +408,36 @@ class DeployTool(object):
                                         throw_error=False)
         tmufe_cronjob = cls.run_command("cat %s | grep 'update_tmufe/bg_executor.sh'" % cronjob_file,
                                         throw_error=False)
+        stunnel_cronjob = cls.run_command("cat %s | grep 'backup_stunnel/backup_stunnel.sh'" % cronjob_file,
+                                          throw_error=False)
+        clean_cronjob = cls.run_command("cat %s | grep 'clean_joblog/clean_joblog.sh'" % cronjob_file,
+                                        throw_error=False)
         # before run this method, cronjob has not update signature cronjob
+        cls.run_command("mkdir -p /home/hadoop/op/")
         if not signature_cronjob:
-            cls.run_command("cp -r %s/QA/dp2/update_signature /home/hadoop/" % build_path)
-            cls.run_command("echo '0 * * * * /home/hadoop/update_signature/bg_executor.sh %s' >> %s " %
-                            (data_site, cronjob_file))
+            cls.run_command("cp -r %s/QA/dp2/update_signature %s/" % (build_path, cls.OP_PATH))
+            cls.run_command("echo '0 * * * * %s/update_signature/bg_executor.sh %s' >> %s " %
+                            (cls.OP_PATH, data_site, cronjob_file))
         # before run this method, cronjob has not update geoip cronjob
         if not geoip_cronjob:
-            cls.run_command("cp -r %s/QA/dp2/update_geoip /home/hadoop/" % build_path)
-            cls.run_command("echo '0 * * * * /home/hadoop/update_geoip/geoip_bg_executor_with_mail.sh %s' >> %s " %
-                            (data_site, cronjob_file))
+            cls.run_command("cp -r %s/QA/dp2/update_geoip %s/" % (build_path, cls.OP_PATH))
+            cls.run_command("echo '0 * * * * %s/update_geoip/geoip_bg_executor_with_mail.sh %s' >> %s " %
+                            (cls.OP_PATH, data_site, cronjob_file))
         # before run this method, cronjob has not update tmufe cronjob
         if not tmufe_cronjob:
-            cls.run_command("cp -r %s/QA/dp2/update_tmufe /home/hadoop/" % build_path)
-            cls.run_command("echo '0 * * * * /home/hadoop/update_tmufe/bg_executor.sh %s' >> %s " %
-                            (data_site, cronjob_file))
+            cls.run_command("cp -r %s/QA/dp2/update_tmufe %s/" % (build_path, cls.OP_PATH))
+            cls.run_command("echo '0 * * * * %s/update_tmufe/bg_executor.sh %s' >> %s " %
+                            (cls.OP_PATH, data_site, cronjob_file))
+        # before run this method, cronjob has not update tmufe cronjob
+        if not stunnel_cronjob:
+            cls.run_command("cp -r %s/QA/dp2/backup_stunnel %s/" % (build_path, cls.OP_PATH))
+            cls.run_command("echo '0 * * * * %s/backup_stunnel/backup_stunnel.sh %s' >> %s " %
+                            (cls.OP_PATH, data_site, cronjob_file))
+        # before run this method, cronjob has not update tmufe cronjob
+        if not clean_cronjob:
+            cls.run_command("cp -r %s/QA/dp2/clean_joblog %s/" % (build_path, cls.OP_PATH))
+            cls.run_command("echo '0 * * * * %s/clean_joblog/clean_joblog.sh %s' >> %s " %
+                            (cls.OP_PATH, data_site, cronjob_file))
 
         cls.run_command("crontab %s" % cronjob_file)
         cls.run_command("rm %s" % cronjob_file)
@@ -630,10 +646,12 @@ class DeployTool(object):
             print('\n# To change build on Beta  data site')
             print('python %s -s beta -C' % os.path.basename(__file__))
             print('\n# To prepare testing build on current site')
-            print('\n# build_version=1.0.280, database_name=eric_shn_dp, bucket=s3://eric-shn-dp, timeout=28800 minutes, job concurrency=3')
+            print(
+                '\n# build_version=1.0.280, database_name=eric_shn_dp, bucket=s3://eric-shn-dp, timeout=28800 minutes, job concurrency=3')
             print('python %s -s test -b 280 --prefix eric -t 28800 --con 3' % os.path.basename(__file__))
             print('\n# To prepare testing build on current site with default value')
-            print('\n# build_version=latest version in testing build folder, database_name=function_shn_dp, bucket=s3://function-shn-dp, timeout=28800 minutes, job concurrency=1')
+            print(
+                '\n# build_version=latest version in testing build folder, database_name=function_shn_dp, bucket=s3://function-shn-dp, timeout=28800 minutes, job concurrency=1')
             print('python %s -s test' % os.path.basename(__file__))
             print('\n# To check all Oozie job status')
             print('python %s -c all' % os.path.basename(__file__))
