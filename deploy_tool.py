@@ -431,13 +431,13 @@ class DeployTool(object):
         # before run this method, cronjob has not update tmufe cronjob
         if not stunnel_cronjob:
             cls.run_command("cp -r %s/QA/dp2/backup_stunnel %s/" % (build_path, cls.OP_PATH))
-            cls.run_command("echo '0 * * * * %s/backup_stunnel/backup_stunnel.sh %s' >> %s " %
-                            (cls.OP_PATH, data_site, cronjob_file))
+            cls.run_command("echo '* */24 * * * %s/backup_stunnel/backup_stunnel.sh' >> %s " %
+                            (cls.OP_PATH, cronjob_file))
         # before run this method, cronjob has not update tmufe cronjob
         if not clean_cronjob:
             cls.run_command("cp -r %s/QA/dp2/clean_joblog %s/" % (build_path, cls.OP_PATH))
-            cls.run_command("echo '0 * * * * %s/clean_joblog/clean_joblog.sh %s' >> %s " %
-                            (cls.OP_PATH, data_site, cronjob_file))
+            cls.run_command("echo '* */24 * * * %s/clean_joblog/clean_joblog.sh' >> %s " %
+                            (cls.OP_PATH, cronjob_file))
 
         cls.run_command("crontab %s" % cronjob_file)
         cls.run_command("rm %s" % cronjob_file)
