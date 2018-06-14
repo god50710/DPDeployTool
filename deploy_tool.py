@@ -279,9 +279,7 @@ class DeployTool(object):
         deploy_folder = "%s/output/%s/op-utils" % (build_path, target_folder)
         try:
             cls.run_command("bash %s/deploy.sh all" % deploy_folder, throw_error=False)
-            cls.run_command("sed -i '/t2_router_device_activity_daily_extract/d' %s/run-jobs.sh" % deploy_folder)
             cls.run_command("bash %s/run-jobs.sh" % deploy_folder)
-            # print("bash %s/run-jobs.sh" % deploy_folder)
         except Exception:
             if change_build:
                 print('[Error] Deploy failed, resume previous jobs')
