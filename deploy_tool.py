@@ -177,6 +177,7 @@ class DeployTool(object):
                 cls.run_command("sed -i 's/180/%s/g' %s" % (timeout, test_env_path))
             cls.run_command("sed -i 's/concurrency=./concurrency=%i/g' %s/*/job.properties" %
                             (concurrency, test_oozie_folder))
+            cls.run_command("sed -d '/export BACKUP_DOMAIN/d' %s" % test_env_path)
             cls.run_command("sed -i '/export DB_PREFIX/d' %s" % test_env_path)
             cls.run_command("sed -i '6a export DB_PREFIX=%s_' %s" % (prefix, test_env_path))
             cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s " % test_env_path)
