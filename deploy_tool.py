@@ -494,15 +494,20 @@ class DeployTool(object):
         # table(string) : table name
         # clean *_$folder$ on table parquet file path
         # in dp2 and dp2_beta, table name : t_<table_name>, flag name : f_<table_name>
-        if "dp_beta" in database:
-            s3_folder = cls.FLAGS[database][table].replace('f_', 't_')
-            # skip datalake because parquet file does not exists on our bucket
-            aws_shn_path = cls.AWS_BETA_SHN_PATH
-            aws_cam_path = cls.AWS_BETA_CAM_PATH
-            cls.run_command(
-                "aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_shn_path, s3_folder))
-            cls.run_command(
-                "aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_cam_path, s3_folder))
+        if "misc" in database:
+            aws_path = cls.AWS_PROD_MISC_PATH
+        elif "dp_beta" in database and "cam" in database:
+            aws_path = cls.AWS_BETA_CAM_PATH
+        elif "dp_beta" in database:
+            aws_path = cls.AWS_BETA_SHN_PATH
+        elif "cam" in database:
+            aws_path = cls.AWS_PROD_CAM_PATH
+        else:
+            aws_path = cls.AWS_PROD_SHN_PATH
+        s3_folder = cls.FLAGS[database][table].replace('f_', 't_')
+        # skip datalake because parquet file does not exists on our bucket
+        cls.run_command(
+            "aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_path, s3_folder))
 
     @classmethod
     def check_missing_partitions(cls, database, table):
