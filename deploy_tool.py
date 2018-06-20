@@ -21,7 +21,7 @@ class DeployTool(object):
     AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
     OP_PATH = "/home/hadoop/op"
     DISPLAY_COUNT = 50
-    TOOL_VERSION = "20180608"
+    TOOL_VERSION = "20180620"
     FLAGS = {'dp_shn': {'t_routerinfo_001_hourly': 'f_routerinfo_001_hourly',
                         't_routerstat_001_hourly': 'f_routerstat_001_hourly',
                         't_device_best_recognition_hourly': 'f_device_best_recognition_hourly',
@@ -98,17 +98,15 @@ class DeployTool(object):
         # data_site(string) : for adjusting reference data path and database suffix
         # build_path(string) : build path for specific reference data path
         # output : [["hourly",[jobs]],["daily",[jobs]],["weekly",[jobs]]], {'oozie job name' : 'flag path'}
+        # for DP2, output just left hourly jobs. just keep this structure for flexible.
         output_element = "dp2"
         if data_site == "beta":
             output_element = output_element + "-beta"
         output_path = build_path + "/output/" + output_element
         flags = dict()
         hourly_jobs = list()
-        flag = ""
         table_jobs = cls.run_command("ls -d %s/oozie/t*" % output_path).split()
         for job_path in table_jobs:
-            if "daily" in job_path:
-                continue
             job = job_path.split('/')[-1]
             frequency = cls.run_command("grep 'coordExecFreq=' %s/job.properties | tail -n 1" % job_path)
             flag = cls.run_command("grep 'TARGET_FLAG=' %s/job.properties | cut -d'=' -f2" % job_path)[:-1]
@@ -129,6 +127,8 @@ class DeployTool(object):
             flags[job] = '%s/%s' % (flag_path_prefix, flag)
             if "hours(1)" in frequency:
                 hourly_jobs.append(job)
+            elif "days(1)" in frequency:
+                continue
             else:
                 raise Exception('[Error] frequency out of excepted: %s' % frequency)
         return [["hourly", hourly_jobs]], flags
@@ -163,18 +163,18 @@ class DeployTool(object):
         # version(string) : for adding oozie job name suffix name to identify easier
         if data_site == "production":
             prod_env_path = "%s/output/dp2/op-utils/set-env.sh" % folder
-            cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s " % prod_env_path)
-            cls.run_command("sed -i '7a OOZIE_APP_EXT=.AWS_Production%s' %s" % (version, prod_env_path))
+            cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s" % prod_env_path)
+            cls.run_command("sed -i '7a OOZIE_APP_EXT=.AWS_Production%s_DP2' %s" % (version, prod_env_path))
+            cls.run_command("sed -i 's/export BACKUP_DOMAIN/#export BACKUP_DOMAIN/g' %s" % prod_env_path)
         elif data_site == "beta":
             beta_env_path = "%s/output/dp2-beta/op-utils/set-env.sh" % folder
             cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s " % beta_env_path)
-            cls.run_command("sed -i '7a OOZIE_APP_EXT=.AWS_Beta%s' %s" % (version, beta_env_path))
+            cls.run_command("sed -i '7a OOZIE_APP_EXT=.AWS_Beta%s_DP2' %s" % (version, beta_env_path))
+            cls.run_command("sed -i 's/export BACKUP_DOMAIN/#export BACKUP_DOMAIN/g' %s" % beta_env_path)
         elif data_site == "test":
             test_env_path = "%s/output/dp2/op-utils/set-env.sh" % folder
             test_oozie_folder = "%s/output/dp2/oozie" % folder
-            # default timeout is 180 minutes
-            if timeout != 180:
-                cls.run_command("sed -i 's/180/%s/g' %s" % (timeout, test_env_path))
+            cls.run_command("sed -i 's/180/%s/g' %s" % (timeout, test_env_path))
             cls.run_command("sed -i 's/concurrency=./concurrency=%i/g' %s/*/job.properties" %
                             (concurrency, test_oozie_folder))
             cls.run_command("sed -d '/export BACKUP_DOMAIN/d' %s" % test_env_path)
@@ -182,6 +182,7 @@ class DeployTool(object):
             cls.run_command("sed -i '6a export DB_PREFIX=%s_' %s" % (prefix, test_env_path))
             cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s " % test_env_path)
             cls.run_command("sed -i '7a export OOZIE_APP_EXT=.AWS_Test%s' %s" % (version, test_env_path))
+            cls.run_command("sed -i 's/export BACKUP_DOMAIN/#export BACKUP_DOMAIN/g' %s" % test_env_path)
 
     @classmethod
     def create_bucket(cls, prefix="function"):
@@ -506,8 +507,7 @@ class DeployTool(object):
             aws_path = cls.AWS_PROD_SHN_PATH
         s3_folder = cls.FLAGS[database][table].replace('f_', 't_')
         # skip datalake because parquet file does not exists on our bucket
-        cls.run_command(
-            "aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_path, s3_folder))
+        cls.run_command("aws s3 rm %s/%s --recursive --exclude '*' --include '*folder*'" % (aws_path, s3_folder))
 
     @classmethod
     def check_missing_partitions(cls, database, table):
@@ -650,12 +650,10 @@ class DeployTool(object):
             print('\n# To change build on Beta  data site')
             print('python %s -s beta -C' % os.path.basename(__file__))
             print('\n# To prepare testing build on current site')
-            print(
-                '\n# build_version=1.0.280, database_name=eric_shn_dp, bucket=s3://eric-shn-dp, timeout=28800 minutes, job concurrency=3')
+            print('\n# build_version=1.0.280, database_name=eric_shn_dp, bucket=s3://eric-shn-dp, timeout=28800 minutes, job concurrency=3')
             print('python %s -s test -b 280 --prefix eric -t 28800 --con 3' % os.path.basename(__file__))
             print('\n# To prepare testing build on current site with default value')
-            print(
-                '\n# build_version=latest version in testing build folder, database_name=function_shn_dp, bucket=s3://function-shn-dp, timeout=28800 minutes, job concurrency=1')
+            print('\n# build_version=latest version in testing build folder, database_name=function_shn_dp, bucket=s3://function-shn-dp, timeout=28800 minutes, job concurrency=1')
             print('python %s -s test' % os.path.basename(__file__))
             print('\n# To check all Oozie job status')
             print('python %s -c all' % os.path.basename(__file__))
@@ -703,7 +701,7 @@ if __name__ == "__main__":
                           concurrency=main_job.concurrency, timeout=main_job.timeout)
             print('Testing build %s is ready to go' % build_version)
             print('Need to create database metadata')
-            print('Need to msck repair')
+            print('Need to import signature')
             print('Need to set oozie jobs start and end time')
             DT.disable_stunnel()
         else:
