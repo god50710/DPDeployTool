@@ -16,9 +16,9 @@ class DeployTool(object):
     AWS_BETA_SHN_PATH = "s3://dp-beta-shn-us-west-2/dp_beta_shn"
     AWS_BETA_CAM_PATH = "s3://dp-beta-cam-us-west-2/dp_beta_cam"
     AWS_BETA_SIG_PATH = "s3://dp-beta-sig-us-west-2/dp_beta_sig"
-    AWS_VERIFIED_BUILD_PATH = "s3://eric-staging-us-west-2/build"
-    AWS_TESTING_BUILD_PATH = "s3://eric-staging-us-west-2/test_build"
-    AWS_SIGNATURE_PATH = "s3://eric-staging-us-west-2/signature"
+    AWS_VERIFIED_BUILD_PATH = "s3://dp-misc-staging-us-west-2/build"
+    AWS_TESTING_BUILD_PATH = "s3://dp-misc-staging-us-west-2/test_build"
+    AWS_SIGNATURE_PATH = "s3://dp-misc-staging-us-west-2/signature"
     OP_PATH = "/home/hadoop/op"
     DISPLAY_COUNT = 50
     TOOL_VERSION = "20180620"
