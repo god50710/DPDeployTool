@@ -21,7 +21,7 @@ class DeployTool(object):
     AWS_SIGNATURE_PATH = "s3://dp-misc-staging-us-west-2/signature"
     OP_PATH = "/home/hadoop/op"
     DISPLAY_COUNT = 50
-    TOOL_VERSION = "20180620"
+    TOOL_VERSION = "20180626"
     FLAGS = {'dp_shn': {'t_routerinfo_001_hourly': 'f_routerinfo_001_hourly',
                         't_routerstat_001_hourly': 'f_routerstat_001_hourly',
                         't_device_best_recognition_hourly': 'f_device_best_recognition_hourly',
@@ -620,6 +620,8 @@ class DeployTool(object):
         action_group.add_argument("-r", action="store_true", dest="repair_partition", help="Repair partitions")
         action_group.add_argument("-R", action="store_true", dest="rerun", help="Rerun all KILLED/TIMEDOUT jobs")
         action_group.add_argument("--restart", action="store_true", dest="restart", help="Restart hive server2")
+        oozie_action_group = parser.add_argument_group('Oozie actions')
+        oozie_action_group.add_argument("-o", dest="oozie_action", help="Oozie action")
         partition_group = parser.add_argument_group('Parameters for check missing partition')
         partition_group.add_argument("--database", dest="database", help="Database name")
         partition_group.add_argument("--table", dest="table", help="Table name")
@@ -679,6 +681,14 @@ class DeployTool(object):
             print('python %s -r --database dp_beta' % os.path.basename(__file__))
             print('\n# To restart hive server')
             print('python %s --restart' % os.path.basename(__file__))
+            print('\n# To wait running and suspend all oozie jobs')
+            print('python %s -o wait-suspend' % os.path.basename(__file__))
+            print('\n# To suspend all running oozie jobs')
+            print('python %s -o suspend' % os.path.basename(__file__))
+            print('\n# To resume all oozie jobs')
+            print('python %s -o resume' % os.path.basename(__file__))
+            print('\n# To kill all oozie jobs')
+            print('python %s -o kill' % os.path.basename(__file__))
             exit(0)
         return parser.parse_args()
 
@@ -739,6 +749,17 @@ if __name__ == "__main__":
             DT.get_missing_partitions(database=main_job.database, source=main_job.source)
         else:
             DT.get_missing_partitions(source=main_job.source)
+    elif main_job.oozie_action:
+        if main_job.oozie_action == "wait-suspend":
+            DT.wait_and_suspend_all_jobs(DT.get_job_list("all"))
+        elif main_job.oozie_action == "suspend":
+            DT.suspend_all_job(DT.get_job_list("all"))
+        elif main_job.oozie_action == "resume":
+            DT.resume_all_job(DT.get_job_list("all"))
+        elif main_job.oozie_action == "kill":
+            DT.kill_all_job(DT.get_job_list("all"))
+        else:
+            print('Please using wait-suspend, suspend, resume, kill after -o')
     elif main_job.rerun:
         DT.rerun_failed_jobs(DT.check_job_status("all", DT.get_job_list("all")))
     elif main_job.restart:
