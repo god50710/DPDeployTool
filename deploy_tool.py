@@ -407,6 +407,8 @@ class DeployTool(object):
                                         throw_error=False)
         tmufe_cronjob = cls.run_command("cat %s | grep 'update_tmufe/bg_executor.sh'" % cronjob_file,
                                         throw_error=False)
+        timedout_cronjob = cls.run_command("cat %s | grep 'timedout_monitor/timedout_monitor.sh'" % cronjob_file,
+                                        throw_error=False)
         stunnel_cronjob = cls.run_command("cat %s | grep 'backup_stunnel/backup_stunnel.sh'" % cronjob_file,
                                           throw_error=False)
         clean_cronjob = cls.run_command("cat %s | grep 'clean_joblog/clean_joblog.sh'" % cronjob_file,
@@ -427,12 +429,17 @@ class DeployTool(object):
             cls.run_command("cp -r %s/QA/dp2/update_tmufe %s/" % (build_path, cls.OP_PATH))
             cls.run_command("echo '0 * * * * %s/update_tmufe/bg_executor.sh %s' >> %s " %
                             (cls.OP_PATH, data_site, cronjob_file))
-        # before run this method, cronjob has not update tmufe cronjob
+        # before run this method, cronjob has not timedout monitor cronjob
+        if not timedout_cronjob:
+            cls.run_command("cp -r %s/QA/dp2/timedout_monitor %s/" % (build_path, cls.OP_PATH))
+            cls.run_command("echo '*/30 * * * * %s/timedout_monitor/timedout_monitor.sh %s' >> %s " %
+                            (cls.OP_PATH, data_site, cronjob_file))
+        # before run this method, cronjob has not backup stunnel cronjob
         if not stunnel_cronjob:
             cls.run_command("cp -r %s/QA/dp2/backup_stunnel %s/" % (build_path, cls.OP_PATH))
             cls.run_command("echo '* */24 * * * %s/backup_stunnel/backup_stunnel.sh' >> %s " %
                             (cls.OP_PATH, cronjob_file))
-        # before run this method, cronjob has not update tmufe cronjob
+        # before run this method, cronjob has not clean joblog cronjob
         if not clean_cronjob:
             cls.run_command("cp -r %s/QA/dp2/clean_joblog %s/" % (build_path, cls.OP_PATH))
             cls.run_command("echo '* */24 * * * %s/clean_joblog/clean_joblog.sh' >> %s " %
