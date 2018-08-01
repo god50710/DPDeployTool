@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 
 class DeployTool(object):
-    START_TIME = datetime(2018, 5, 1)
+    START_TIME = datetime(2018, 1, 1)
     AWS_PROD_SHN_PATH = "s3://dp-shn-us-west-2/dp_shn"
     AWS_PROD_CAM_PATH = "s3://dp-cam-us-west-2/dp_cam"
     AWS_PROD_MISC_PATH = "s3://dp-misc-us-west-2/dp_misc"
@@ -16,12 +16,12 @@ class DeployTool(object):
     AWS_BETA_SHN_PATH = "s3://dp-beta-shn-us-west-2/dp_beta_shn"
     AWS_BETA_CAM_PATH = "s3://dp-beta-cam-us-west-2/dp_beta_cam"
     AWS_BETA_SIG_PATH = "s3://dp-beta-sig-us-west-2/dp_beta_sig"
-    AWS_VERIFIED_BUILD_PATH = "s3://dp-misc-staging-us-west-2/build"
-    AWS_TESTING_BUILD_PATH = "s3://dp-misc-staging-us-west-2/test_build"
-    AWS_SIGNATURE_PATH = "s3://dp-misc-staging-us-west-2/signature"
+    AWS_VERIFIED_BUILD_PATH = "s3://dp-aws-services-files-production-us-west-2/build"
+    AWS_TESTING_BUILD_PATH = "s3://dp-aws-services-files-production-us-west-2/test_build"
+    AWS_SIGNATURE_PATH = "s3://dp-aws-services-files-production-us-west-2/signature"
     OP_PATH = "/home/hadoop/op"
     DISPLAY_COUNT = 50
-    TOOL_VERSION = "20180626"
+    TOOL_VERSION = "20180801"
     FLAGS = {'dp_shn': {'t_routerinfo_001_hourly': 'f_routerinfo_001_hourly',
                         't_routerstat_001_hourly': 'f_routerstat_001_hourly',
                         't_device_best_recognition_hourly': 'f_device_best_recognition_hourly',
@@ -408,14 +408,16 @@ class DeployTool(object):
         tmufe_cronjob = cls.run_command("cat %s | grep 'update_tmufe/bg_executor.sh'" % cronjob_file,
                                         throw_error=False)
         timedout_cronjob = cls.run_command("cat %s | grep 'timedout_monitor/timedout_monitor.sh'" % cronjob_file,
-                                        throw_error=False)
+                                           throw_error=False)
         stunnel_cronjob = cls.run_command("cat %s | grep 'backup_stunnel/backup_stunnel.sh'" % cronjob_file,
                                           throw_error=False)
         clean_cronjob = cls.run_command("cat %s | grep 'clean_joblog/clean_joblog.sh'" % cronjob_file,
                                         throw_error=False)
+        geoip_sync_cronjob = cls.run_command("cat %s | grep 'spn-data-us-west-2/dataset/GeoIP/'" % cronjob_file,
+                                             throw_error=False)
         # before run this method, cronjob has not update signature cronjob
         cls.run_command("mkdir -p /home/hadoop/op/")
-        if not signature_cronjob:
+        if data_site == "production" and not signature_cronjob:
             cls.run_command("cp -r %s/QA/dp2/update_signature %s/" % (build_path, cls.OP_PATH))
             cls.run_command("echo '0 * * * * %s/update_signature/bg_executor.sh %s' >> %s " %
                             (cls.OP_PATH, data_site, cronjob_file))
@@ -425,7 +427,7 @@ class DeployTool(object):
             cls.run_command("echo '0 * * * * %s/update_geoip/geoip_bg_executor_with_mail.sh %s' >> %s " %
                             (cls.OP_PATH, data_site, cronjob_file))
         # before run this method, cronjob has not update tmufe cronjob
-        if not tmufe_cronjob:
+        if data_site == "production" and not tmufe_cronjob:
             cls.run_command("cp -r %s/QA/dp2/update_tmufe %s/" % (build_path, cls.OP_PATH))
             cls.run_command("echo '0 * * * * %s/update_tmufe/bg_executor.sh %s' >> %s " %
                             (cls.OP_PATH, data_site, cronjob_file))
@@ -444,6 +446,11 @@ class DeployTool(object):
             cls.run_command("cp -r %s/QA/dp2/clean_joblog %s/" % (build_path, cls.OP_PATH))
             cls.run_command("echo '* */24 * * * %s/clean_joblog/clean_joblog.sh' >> %s " %
                             (cls.OP_PATH, cronjob_file))
+
+        if data_site == "beta" and not geoip_sync_cronjob:
+            cls.run_command(
+                "echo '0 * * * * aws s3 sync s3://spn-data-us-west-2/dataset/GeoIP/ s3://dp-aws-services-files-staging-us-west-2/geoip/ >> /home/hadoop/cron.log' >> %s " %
+                cronjob_file)
 
         cls.run_command("crontab %s" % cronjob_file)
         cls.run_command("rm %s" % cronjob_file)
@@ -658,10 +665,12 @@ class DeployTool(object):
             print('\n# To change build on Beta  data site')
             print('python %s -s beta -C' % os.path.basename(__file__))
             print('\n# To prepare testing build on current site')
-            print('\n# build_version=1.0.280, database_name=eric_shn_dp, bucket=s3://eric-shn-dp, timeout=28800 minutes, job concurrency=3')
+            print(
+                '\n# build_version=1.0.280, database_name=eric_shn_dp, bucket=s3://eric-shn-dp, timeout=28800 minutes, job concurrency=3')
             print('python %s -s test -b 280 --prefix eric -t 28800 --con 3' % os.path.basename(__file__))
             print('\n# To prepare testing build on current site with default value')
-            print('\n# build_version=latest version in testing build folder, database_name=function_shn_dp, bucket=s3://function-shn-dp, timeout=28800 minutes, job concurrency=1')
+            print(
+                '\n# build_version=latest version in testing build folder, database_name=function_shn_dp, bucket=s3://function-shn-dp, timeout=28800 minutes, job concurrency=1')
             print('python %s -s test' % os.path.basename(__file__))
             print('\n# To check all Oozie job status')
             print('python %s -c all' % os.path.basename(__file__))
