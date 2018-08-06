@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 
 class DeployTool(object):
-    START_TIME = datetime(2018, 1, 1)
+    START_TIME = datetime(2018, 8, 1)
     AWS_PROD_SHN_PATH = "s3://dp-shn-us-west-2/dp_shn"
     AWS_PROD_CAM_PATH = "s3://dp-cam-us-west-2/dp_cam"
     AWS_PROD_MISC_PATH = "s3://dp-misc-us-west-2/dp_misc"
@@ -20,8 +20,8 @@ class DeployTool(object):
     AWS_TESTING_BUILD_PATH = "s3://dp-aws-services-files-production-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://dp-aws-services-files-production-us-west-2/signature"
     OP_PATH = "/home/hadoop/op"
-    DISPLAY_COUNT = 50
-    TOOL_VERSION = "20180801"
+    DISPLAY_COUNT = 100
+    TOOL_VERSION = "20180806"
     FLAGS = {'dp_shn': {'t_routerinfo_001_hourly': 'f_routerinfo_001_hourly',
                         't_routerstat_001_hourly': 'f_routerstat_001_hourly',
                         't_device_best_recognition_hourly': 'f_device_best_recognition_hourly',
@@ -73,7 +73,17 @@ class DeployTool(object):
                              't_cam_security_event_filtered_hourly': 'f_cam_security_event_filtered_hourly',
                              't_cam_security_event_raw_hourly': 'f_cam_security_event_raw_hourly',
                              't_cam_session_info_hourly': 'f_cam_session_info_hourly',
-                             't_cam_trs_stat_hourly': 'f_cam_trs_stat_hourly'}
+                             't_cam_trs_stat_hourly': 'f_cam_trs_stat_hourly'},
+             'datalake': {'akamai_rgom': 'Fake',
+                          'akamai_web': 'Fake',
+                          'akamai_malicious': 'Fake',
+                          'iotlog': 'Fake'},
+             'trs_src': {'akamai_malicious_20180319': 'Fake',
+                         'honeypot_logs': 'Fake',
+                         'honeypot_ssh_2': 'Fake',
+                         'honeypot_telnet_2': 'Fake',
+                         'tdts_logs': 'Fake'
+                         }
              }
 
     @staticmethod
@@ -484,20 +494,23 @@ class DeployTool(object):
         if database == "all":
             for database in cls.FLAGS.keys():
                 for table in cls.FLAGS[database].keys():
-                    cls.clean_fake_folder(database, table)
+                    if 'beta' in database:
+                        cls.clean_fake_folder(database, table)
                     cls.run_command(
                         'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
                         (database, table))
         # repair all tables in specific database
         elif not table:
             for table in cls.FLAGS[database].keys():
-                cls.clean_fake_folder(database, table)
+                if 'beta' in database:
+                    cls.clean_fake_folder(database, table)
                 cls.run_command(
                     'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
                     (database, table))
         # repair specific table
         else:
-            cls.clean_fake_folder(database, table)
+            if 'beta' in database:
+                cls.clean_fake_folder(database, table)
             cls.run_command(
                 'beeline -u "jdbc:hive2://localhost:10000/" --silent=true -e "msck repair table %s.%s;"' %
                 (database, table))
@@ -534,7 +547,9 @@ class DeployTool(object):
             'beeline -u "jdbc:hive2://localhost:10000/" -e "show partitions %s.%s;"' % (database, table))
         # consider hourly partition may generating when user query at same hour, so end time will be set at 2 hours before
         while check_time < datetime.now() - timedelta(hours=2):
-            if check_time.strftime('d=%Y-%m-%d/h=%H') not in partition_list:
+            if check_time.strftime('d=%Y-%m-%d/h=%H') not in partition_list \
+                    and check_time.strftime('pdd=%Y-%m-%d/phh=%H') not in partition_list \
+                    and check_time.strftime('dt=%Y-%m-%d-%H') not in partition_list:
                 missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
             check_time += stepping_time
         return missing_partitions
@@ -576,23 +591,22 @@ class DeployTool(object):
         if database == "all":
             for database in cls.FLAGS.keys():
                 for table in cls.FLAGS[database].keys():
-                    if source == "flag":
+                    if source == "flag" and database not in ['trs_src','datalake']:
                         all_missing_partitions[database + '.' + table] = cls.check_missing_flags(database, table)
                     else:
                         all_missing_partitions[database + '.' + table] = cls.check_missing_partitions(database, table)
         elif not table:
             for table in cls.FLAGS[database].keys():
-                if source == "flag":
+                if source == "flag" and database not in ['trs_src', 'datalake']:
                     all_missing_partitions[database + '.' + table] = cls.check_missing_flags(database, table)
                 else:
                     all_missing_partitions[database + '.' + table] = cls.check_missing_partitions(database, table)
         else:
-            if source == "flag":
+            if source == "flag" and database not in ['trs_src', 'datalake']:
                 all_missing_partitions[database + '.' + table] = cls.check_missing_flags(database, table)
             else:
                 all_missing_partitions[database + '.' + table] = cls.check_missing_partitions(database, table)
-        # print all missing partitions when item less than 50
-        # print head and tail when item greater than 50
+        # print head and tail when item greater than DISPLAY_COUNT
         for item in all_missing_partitions.keys():
             if all_missing_partitions[item]:
                 print(item + ' has %s missing partitions:' % len(all_missing_partitions[item]))
@@ -721,7 +735,7 @@ if __name__ == "__main__":
                 build_folder, build_version = DT.get_build(version=main_job.build_name, mode="test")
             else:
                 build_folder, build_version = DT.get_build(mode="test")
-            DT.create_bucket(prefix=main_job.prefix)
+            # DT.create_bucket(prefix=main_job.prefix)
             DT.config_env(main_job.data_site, build_folder, build_version, prefix=main_job.prefix,
                           concurrency=main_job.concurrency, timeout=main_job.timeout)
             print('Testing build %s is ready to go' % build_version)

@@ -17,8 +17,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="441">
-              <caret line="450" selection-start-line="450" selection-end-line="450" />
+            <state relative-caret-position="357">
+              <caret line="86" column="14" lean-forward="true" selection-end-line="799" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -37,10 +37,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>%h</find>
-      <find>create_bucket</find>
-      <find>add_cronjob</find>
-      <find>deploy</find>
       <find>/dp2/</find>
       <find>/dp2</find>
       <find>oozie</find>
@@ -67,6 +63,10 @@
       <find>sed</find>
       <find>grep</find>
       <find>config</find>
+      <find>create_bu</find>
+      <find>check_missing_flags</find>
+      <find>missing</find>
+      <find>rm</find>
     </findStrings>
     <replaceStrings>
       <replace>'t_</replace>
@@ -88,11 +88,11 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
-    <option name="x" value="-8" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-1928" />
     <option name="y" value="-8" />
     <option name="width" value="1936" />
-    <option name="height" value="1056" />
+    <option name="height" value="1096" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="1" id="Add" />
@@ -117,7 +117,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../poker" />
+    <property name="last_opened_file_path" value="$USER_HOME$/Desktop/ChangBaoChen-master" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
@@ -208,16 +208,16 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-1928" y="-8" width="1936" height="1096" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.47067901" visible="true" weight="0.028645834" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.47093022" visible="true" weight="0.028645834" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.20520833" side_tool="true" visible="true" weight="0.31137088" />
+      <window_info active="true" anchor="bottom" id="Event Log" order="7" sideWeight="0.20520833" side_tool="true" visible="true" weight="0.29867482" />
       <window_info anchor="bottom" id="Run" order="2" sideWeight="0.79479164" weight="0.31137088" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" />
-      <window_info id="Structure" order="1" sideWeight="0.529321" side_tool="true" visible="true" weight="0.028645834" />
+      <window_info id="Structure" order="1" sideWeight="0.5290698" side_tool="true" visible="true" weight="0.028645834" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info id="Favorites" order="2" side_tool="true" />
@@ -525,8 +525,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="441">
-          <caret line="450" selection-start-line="450" selection-end-line="450" />
+        <state relative-caret-position="357">
+          <caret line="86" column="14" lean-forward="true" selection-end-line="799" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
