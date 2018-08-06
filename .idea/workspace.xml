@@ -17,8 +17,8 @@
       <file leaf-file-name="deploy_tool.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="357">
-              <caret line="86" column="14" lean-forward="true" selection-end-line="799" />
+            <state relative-caret-position="266">
+              <caret line="449" column="31" lean-forward="true" selection-end-line="799" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -37,8 +37,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>/dp2/</find>
-      <find>/dp2</find>
       <find>oozie</find>
       <find>get_job_list_from_build</find>
       <find>build_folder</find>
@@ -67,6 +65,8 @@
       <find>check_missing_flags</find>
       <find>missing</find>
       <find>rm</find>
+      <find>create_bucket</find>
+      <find>staging</find>
     </findStrings>
     <replaceStrings>
       <replace>'t_</replace>
@@ -88,7 +88,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="-1928" />
     <option name="y" value="-8" />
     <option name="width" value="1936" />
@@ -208,7 +208,7 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1928" y="-8" width="1936" height="1096" extended-state="6" />
+    <frame x="-1928" y="-8" width="1936" height="1096" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.47093022" visible="true" weight="0.028645834" />
@@ -525,8 +525,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="86" column="14" lean-forward="true" selection-end-line="799" />
+        <state relative-caret-position="266">
+          <caret line="449" column="31" lean-forward="true" selection-end-line="799" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>

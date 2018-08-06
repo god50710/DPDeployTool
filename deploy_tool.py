@@ -459,7 +459,7 @@ class DeployTool(object):
 
         if data_site == "beta" and not geoip_sync_cronjob:
             cls.run_command(
-                "echo '0 * * * * aws s3 sync s3://spn-data-us-west-2/dataset/GeoIP/ s3://dp-aws-services-files-staging-us-west-2/geoip/ >> /home/hadoop/cron.log' >> %s " %
+                "echo '0 * * * * aws s3 sync s3://spn-data-us-west-2/dataset/GeoIP/ s3://dp-aws-services-files-production-us-west-2/geoip/ >> /home/hadoop/cron.log' >> %s " %
                 cronjob_file)
 
         cls.run_command("crontab %s" % cronjob_file)
