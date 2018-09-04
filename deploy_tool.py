@@ -47,8 +47,7 @@ class DeployTool(object):
                         't_cam_security_event_raw_hourly': 'f_cam_security_event_raw_hourly',
                         't_cam_session_info_hourly': 'f_cam_session_info_hourly',
                         't_cam_trs_stat_hourly': 'f_cam_trs_stat_hourly'},
-             'dp_misc': {'t_ddi_001_hourly': 'f_ddi_001_hourly',
-                         't_ncie_001_hourly': 'f_ncie_001_hourly'},
+             'dp_misc': {'t_ncie_001_hourly': 'f_ncie_001_hourly'},
              'dp_beta_shn': {'t_routerinfo_001_hourly': 'f_routerinfo_001_hourly',
                              't_routerstat_001_hourly': 'f_routerstat_001_hourly',
                              't_device_best_recognition_hourly': 'f_device_best_recognition_hourly',
@@ -125,7 +124,7 @@ class DeployTool(object):
             if data_site == "production":
                 if "cam" in job:
                     flag_path_prefix = cls.AWS_PROD_CAM_PATH
-                elif "ddi" in job or "ncie" in job:
+                elif "ncie" in job:
                     flag_path_prefix = cls.AWS_PROD_MISC_PATH
                 else:
                     flag_path_prefix = cls.AWS_PROD_SHN_PATH
