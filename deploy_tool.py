@@ -21,7 +21,7 @@ class DeployTool(object):
     AWS_SIGNATURE_PATH = "s3://dp-aws-services-files-production-us-west-2/signature"
     OP_PATH = "/home/hadoop/op"
     DISPLAY_COUNT = 100
-    TOOL_VERSION = "20180806"
+    TOOL_VERSION = "20181009"
     FLAGS = {'dp_shn': {'t_routerinfo_001_hourly': 'f_routerinfo_001_hourly',
                         't_routerstat_001_hourly': 'f_routerstat_001_hourly',
                         't_device_best_recognition_hourly': 'f_device_best_recognition_hourly',
@@ -47,7 +47,8 @@ class DeployTool(object):
                         't_cam_security_event_raw_hourly': 'f_cam_security_event_raw_hourly',
                         't_cam_session_info_hourly': 'f_cam_session_info_hourly',
                         't_cam_trs_stat_hourly': 'f_cam_trs_stat_hourly'},
-             'dp_misc': {'t_ncie_001_hourly': 'f_ncie_001_hourly'},
+             'dp_misc': {'t_ncie_001_hourly': 'f_ncie_001_hourly',
+                         't_dp2_major_object_counts_daily': 'f_dp2_major_object_counts_daily'},
              'dp_beta_shn': {'t_routerinfo_001_hourly': 'f_routerinfo_001_hourly',
                              't_routerstat_001_hourly': 'f_routerstat_001_hourly',
                              't_device_best_recognition_hourly': 'f_device_best_recognition_hourly',
@@ -114,6 +115,7 @@ class DeployTool(object):
         output_path = build_path + "/output/" + output_element
         flags = dict()
         hourly_jobs = list()
+        daily_jobs = list()
         table_jobs = cls.run_command("ls -d %s/oozie/t*" % output_path).split()
         for job_path in table_jobs:
             job = job_path.split('/')[-1]
@@ -137,10 +139,10 @@ class DeployTool(object):
             if "hours(1)" in frequency:
                 hourly_jobs.append(job)
             elif "days(1)" in frequency:
-                continue
+                daily_jobs.append(job)
             else:
                 raise Exception('[Error] frequency out of excepted: %s' % frequency)
-        return [["hourly", hourly_jobs]], flags
+        return [["hourly", hourly_jobs],["daily",daily_jobs]], flags
 
     @classmethod
     def get_build(cls, mode="verified", version=""):
@@ -181,16 +183,26 @@ class DeployTool(object):
             cls.run_command("sed -i '7a OOZIE_APP_EXT=.AWS_Beta%s_DP2' %s" % (version, beta_env_path))
             cls.run_command("sed -i 's/export BACKUP_DOMAIN/#export BACKUP_DOMAIN/g' %s" % beta_env_path)
         elif data_site == "test":
-            test_env_path = "%s/output/dp2/op-utils/set-env.sh" % folder
-            test_oozie_folder = "%s/output/dp2/oozie" % folder
-            cls.run_command("sed -i 's/180/%s/g' %s" % (timeout, test_env_path))
+            prod_env_path = "%s/output/dp2/op-utils/set-env.sh" % folder
+            beta_env_path = "%s/output/dp2-beta/op-utils/set-env.sh" % folder
+            prod_oozie_folder = "%s/output/dp2/oozie" % folder
+            beta_oozie_folder = "%s/output/dp2/oozie" % folder
+            cls.run_command("sed -i 's/180/%s/g' %s" % (timeout, prod_env_path))
+            cls.run_command("sed -i 's/180/%s/g' %s" % (timeout, beta_env_path))
             cls.run_command("sed -i 's/concurrency=./concurrency=%i/g' %s/*/job.properties" %
-                            (concurrency, test_oozie_folder))
-            cls.run_command("sed -i '/export DB_PREFIX/d' %s" % test_env_path)
-            cls.run_command("sed -i '6a export DB_PREFIX=%s_' %s" % (prefix, test_env_path))
-            cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s " % test_env_path)
-            cls.run_command("sed -i '7a export OOZIE_APP_EXT=.AWS_Test%s' %s" % (version, test_env_path))
-            cls.run_command("sed -i 's/export BACKUP_DOMAIN/#export BACKUP_DOMAIN/g' %s" % test_env_path)
+                            (concurrency, prod_oozie_folder))
+            cls.run_command("sed -i 's/concurrency=./concurrency=%i/g' %s/*/job.properties" %
+                            (concurrency, beta_oozie_folder))
+            cls.run_command("sed -i '/export DB_PREFIX/d' %s" % prod_env_path)
+            cls.run_command("sed -i '/export DB_PREFIX/d' %s" % beta_env_path)
+            cls.run_command("sed -i '6a export DB_PREFIX=%s_' %s" % (prefix, prod_env_path))
+            cls.run_command("sed -i '6a export DB_PREFIX=%s_' %s" % (prefix, beta_env_path))
+            cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s " % prod_env_path)
+            cls.run_command("sed -i '/OOZIE_APP_EXT/d' %s " % beta_env_path)
+            cls.run_command("sed -i '7a export OOZIE_APP_EXT=.AWS_Test%s' %s" % (version, prod_env_path))
+            cls.run_command("sed -i '7a export OOZIE_APP_EXT=.AWS_Test%s' %s" % (version, beta_env_path))
+            cls.run_command("sed -i 's/export BACKUP_DOMAIN/#export BACKUP_DOMAIN/g' %s" % prod_env_path)
+            cls.run_command("sed -i 's/export BACKUP_DOMAIN/#export BACKUP_DOMAIN/g' %s" % beta_env_path)
 
     @classmethod
     def create_bucket(cls, prefix="function"):
@@ -210,6 +222,8 @@ class DeployTool(object):
         job_time_list = list()
         job_time_list.append("#hourly jobs")
         job_time_list.extend(cls.get_next_start_time(data_site, folder, flags, jobs[0]))
+        job_time_list.append("#daily jobs")
+        job_time_list.extend(cls.get_next_start_time(data_site, folder, flags, jobs[1]))
         cls.export_app_time(data_site, job_time_list, folder)
 
     @staticmethod
@@ -259,20 +273,35 @@ class DeployTool(object):
                 "aws s3 ls %s/y=%s/ | tail -1 | awk '{print $4}'" % (flags[job], flag_year))[2:4]
             flag_day = cls.run_command("aws s3 ls %s/y=%s/m=%s/ | tail -1 | awk '{print $4}'" %
                                        (flags[job], flag_year, flag_month))[2:12]
-            flag_hour = cls.run_command("aws s3 ls %s/y=%s/m=%s/d=%s/ | tail -1 | awk '{print $4}'" %
-                                        (flags[job], flag_year, flag_month, flag_day))[2:4]
-            if not re.match('\d{4}-\d{2}-\d{2}', flag_day) or not re.match('\d{2}', flag_hour):
-                print('[Error] Get malformed time from s3:d=%s, h=%s' % (flag_day, flag_hour))
-                flag_day = datetime.now().strftime('%Y-%m-%d')
-                flag_hour = datetime.now().strftime('%H')
-            print('Last f_flag date: %s, hour: %s' % (flag_day, flag_hour))
-            job_start_time = datetime.strptime(flag_day + flag_hour, '%Y-%m-%d%H') + add_time
-            job_end_time = job_start_time + timedelta(days=36524)
-            job_time_list.append(
-                "%s:    coordStart=%s:%s" % (job, job_start_time.strftime('%Y-%m-%dT%H'), flag_minute))
-            print(job_time_list[-1])
-            job_time_list.append("%s:    coordEnd=%s:00Z" % (job, job_end_time.strftime('%Y-%m-%dT%H')))
-            print(job_time_list[-1])
+            if 'hourly' in job:
+                flag_hour = cls.run_command("aws s3 ls %s/y=%s/m=%s/d=%s/ | tail -1 | awk '{print $4}'" %
+                                            (flags[job], flag_year, flag_month, flag_day))[2:4]
+                if not re.match('\d{4}-\d{2}-\d{2}', flag_day) or not re.match('\d{2}', flag_hour):
+                    print('[Error] Get malformed time from s3:d=%s, h=%s' % (flag_day, flag_hour))
+                    flag_day = datetime.now().strftime('%Y-%m-%d')
+                    flag_hour = datetime.now().strftime('%H')
+                print('Last f_flag date: %s, hour: %s' % (flag_day, flag_hour))
+                job_start_time = datetime.strptime(flag_day + flag_hour, '%Y-%m-%d%H') + add_time
+                job_end_time = job_start_time + timedelta(days=36524)
+                job_time_list.append(
+                    "%s:    coordStart=%s:%s" % (job, job_start_time.strftime('%Y-%m-%dT%H'), flag_minute))
+                print(job_time_list[-1])
+                job_time_list.append("%s:    coordEnd=%s:00Z" % (job, job_end_time.strftime('%Y-%m-%dT%H')))
+                print(job_time_list[-1])
+            else:
+                flag_hour = cls.run_command("aws s3 ls %s/y=%s/m=%s/d=%s/ | tail -1 | awk '{print $4}'" %
+                                            (flags[job], flag_year, flag_month, flag_day))[2:4]
+                if not re.match('\d{4}-\d{2}-\d{2}', flag_day):
+                    print('[Error] Get malformed time from s3:d=%s' % flag_day)
+                    flag_day = datetime.now().strftime('%Y-%m-%d')
+                print('Last f_flag date: %s, hour: %s' % flag_day)
+                job_start_time = datetime.strptime(flag_day + flag_hour, '%Y-%m-%d') + add_time
+                job_end_time = job_start_time + timedelta(days=36524)
+                job_time_list.append(
+                    "%s:    coordStart=%s:%s" % (job, job_start_time.strftime('%Y-%m-%dT00'), flag_minute))
+                print(job_time_list[-1])
+                job_time_list.append("%s:    coordEnd=%s:00Z" % (job, job_end_time.strftime('%Y-%m-%dT02')))
+                print(job_time_list[-1])
         return job_time_list
 
     @classmethod
@@ -428,7 +457,7 @@ class DeployTool(object):
         cls.run_command("mkdir -p /home/hadoop/op/")
         if data_site == "production" and not signature_cronjob:
             cls.run_command("cp -r %s/QA/dp2/update_signature %s/" % (build_path, cls.OP_PATH))
-            cls.run_command("echo '0 * * * * %s/update_signature/bg_executor.sh %s' >> %s " %
+            cls.run_command("echo '*/10 * * * * %s/update_signature/bg_executor.sh %s' >> %s " %
                             (cls.OP_PATH, data_site, cronjob_file))
         # before run this method, cronjob has not update geoip cronjob
         if not geoip_cronjob:
@@ -540,16 +569,23 @@ class DeployTool(object):
         # table(string) : table name
         # output : missing_partitions(list) [datetime]
         check_time = cls.START_TIME
-        stepping_time = timedelta(hours=1)
+        stepping_time = timedelta(hours=1) if 'hourly' in table else timedelta(days=1)
         missing_partitions = list()
         partition_list = cls.run_command(
             'beeline -u "jdbc:hive2://localhost:10000/" -e "show partitions %s.%s;"' % (database, table))
         # consider hourly partition may generating when user query at same hour, so end time will be set at 2 hours before
-        while check_time < datetime.now() - timedelta(hours=2):
-            if check_time.strftime('d=%Y-%m-%d/h=%H') not in partition_list \
-                    and check_time.strftime('pdd=%Y-%m-%d/phh=%H') not in partition_list \
-                    and check_time.strftime('dt=%Y-%m-%d-%H') not in partition_list:
-                missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
+        time_suffix = timedelta(hours=2) if 'hourly' in table else timedelta(days=2)
+        while check_time < datetime.now() - time_suffix:
+            if 'hourly' in table:
+                if check_time.strftime('d=%Y-%m-%d/h=%H') not in partition_list \
+                        and check_time.strftime('pdd=%Y-%m-%d/phh=%H') not in partition_list \
+                        and check_time.strftime('dt=%Y-%m-%d-%H') not in partition_list:
+                    missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
+            else:
+                if check_time.strftime('d=%Y-%m-%d') not in partition_list \
+                        and check_time.strftime('pdd=%Y-%m-%d') not in partition_list \
+                        and check_time.strftime('dt=%Y-%m-%d') not in partition_list:
+                    missing_partitions.append(check_time.strftime('date=%Y-%m-%d'))
             check_time += stepping_time
         return missing_partitions
 
@@ -559,7 +595,7 @@ class DeployTool(object):
         # table(string) : table name
         # output : missing_partitions(list) [datetime]
         check_time = cls.START_TIME
-        stepping_time = timedelta(hours=1)
+        stepping_time = timedelta(hours=1) if 'hourly' in table else timedelta(days=1)
         missing_partitions = list()
         if database == "dp_shn":
             s3_path = cls.AWS_PROD_SHN_PATH
@@ -573,9 +609,14 @@ class DeployTool(object):
             s3_path = cls.AWS_BETA_CAM_PATH
         partition_list = cls.run_command('aws s3 ls %s/%s/ --recursive' % (s3_path, cls.FLAGS[database][table]))
         # consider hourly partition may generating when user query at same hour, so end time will be set at 2 hours before
-        while check_time < datetime.now() - timedelta(hours=2):
-            if check_time.strftime('d=%Y-%m-%d/h=%H_') not in partition_list:
-                missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
+        time_suffix = timedelta(hours=2) if 'hourly' in table else timedelta(days=2)
+        while check_time < datetime.now() - time_suffix:
+            if 'hourly' in table:
+                if check_time.strftime('d=%Y-%m-%d/h=%H_') not in partition_list:
+                    missing_partitions.append(check_time.strftime('date=%Y-%m-%d, hour=%H'))
+            else:
+                if check_time.strftime('d=%Y-%m-%d_') not in partition_list:
+                    missing_partitions.append(check_time.strftime('date=%Y-%m-%d'))
             check_time += stepping_time
         return missing_partitions
 
