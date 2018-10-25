@@ -18,18 +18,21 @@
           <entry key="project.closed" value="3" />
           <entry key="project.open.time.1" value="2" />
           <entry key="project.open.time.19" value="1" />
+          <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.4" value="1" />
-          <entry key="project.opened" value="4" />
+          <entry key="project.open.time.55" value="1" />
+          <entry key="project.open.time.93" value="1" />
+          <entry key="project.opened" value="7" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="519" />
+          <entry key="py" value="698" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="519" />
+          <entry key="Python" value="698" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -49,8 +52,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="588">
-              <caret line="40" column="73" lean-forward="true" selection-start-line="40" selection-start-column="73" selection-end-line="40" selection-end-column="73" />
+            <state relative-caret-position="72">
+              <caret line="286" column="79" lean-forward="true" selection-start-line="286" selection-start-column="79" selection-end-line="286" selection-end-column="79" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -69,9 +72,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>add_cron</find>
-      <find>suspend</find>
-      <find>get_job_list</find>
       <find>show_susp</find>
       <find>/f_</find>
       <find>AWS_PROD_SHN_PATH</find>
@@ -82,7 +82,6 @@
       <find>t_router_security_event_filtered_hourly</find>
       <find>t_routerstat_001_hourly</find>
       <find>cronjob</find>
-      <find>days</find>
       <find>eric-staging</find>
       <find>wait_and</find>
       <find>resume</find>
@@ -99,6 +98,10 @@
       <find>profile</find>
       <find>ddi</find>
       <find>test</find>
+      <find>daily</find>
+      <find>aws s3</find>
+      <find>days</find>
+      <find>pass</find>
     </findStrings>
     <replaceStrings>
       <replace>'t_</replace>
@@ -134,7 +137,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -146,10 +148,11 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$USER_HOME$/Desktop/breaking_hearts-master/TI6_mctsbot" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
@@ -244,8 +247,8 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.46746203" visible="true" weight="0.11169652" />
-      <window_info id="Structure" order="1" sideWeight="0.53253794" side_tool="true" visible="true" weight="0.11169652" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.46420825" visible="true" weight="0.11011591" />
+      <window_info id="Structure" order="1" sideWeight="0.53579175" side_tool="true" visible="true" weight="0.11011591" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49345237" weight="0.32637364" />
@@ -306,16 +309,13 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="966">
           <caret line="46" column="37" lean-forward="true" selection-start-line="46" selection-start-column="37" selection-end-line="46" selection-end-column="37" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="588">
-          <caret line="40" column="73" lean-forward="true" selection-start-line="40" selection-start-column="73" selection-end-line="40" selection-end-column="73" />
+        <state relative-caret-position="72">
+          <caret line="286" column="79" lean-forward="true" selection-start-line="286" selection-start-column="79" selection-end-line="286" selection-end-column="79" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>

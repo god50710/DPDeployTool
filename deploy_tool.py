@@ -21,7 +21,7 @@ class DeployTool(object):
     AWS_SIGNATURE_PATH = "s3://dp-aws-services-files-production-us-west-2/signature"
     OP_PATH = "/home/hadoop/op"
     DISPLAY_COUNT = 100
-    TOOL_VERSION = "20181009"
+    TOOL_VERSION = "20181025"
     FLAGS = {'dp_shn': {'t_routerinfo_001_hourly': 'f_routerinfo_001_hourly',
                         't_routerstat_001_hourly': 'f_routerstat_001_hourly',
                         't_device_best_recognition_hourly': 'f_device_best_recognition_hourly',
@@ -126,7 +126,7 @@ class DeployTool(object):
             if data_site == "production":
                 if "cam" in job:
                     flag_path_prefix = cls.AWS_PROD_CAM_PATH
-                elif "ncie" in job:
+                elif "ncie" in job or "dp2_major_object_counts" in job:
                     flag_path_prefix = cls.AWS_PROD_MISC_PATH
                 else:
                     flag_path_prefix = cls.AWS_PROD_SHN_PATH
@@ -139,10 +139,12 @@ class DeployTool(object):
             if "hours(1)" in frequency:
                 hourly_jobs.append(job)
             elif "days(1)" in frequency:
+                if "router_device_activity_daily" in job:
+                    continue
                 daily_jobs.append(job)
             else:
                 raise Exception('[Error] frequency out of excepted: %s' % frequency)
-        return [["hourly", hourly_jobs],["daily",daily_jobs]], flags
+        return [["hourly", hourly_jobs], ["daily", daily_jobs]], flags
 
     @classmethod
     def get_build(cls, mode="verified", version=""):
@@ -257,8 +259,10 @@ class DeployTool(object):
             reference_path = "dp2-beta"
         # oozie job start time executes previous hour/day/week partition
         # if we got flag h=09, next job is h=10, so oozie job start time needs to be configured as 11:00(+2h)
-        add_time = timedelta(hours=2)
+
         for job in jobs[1]:
+            add_time = timedelta(days=2) if 'daily' in job else timedelta(hours=2)
+
             # get oozie job start time minutes from original app-time.conf
             flag_minute = cls.run_command(
                 "cat %s/output/%s/op-utils/app-time.conf | grep '%s' | grep coordStart | head -1 " % (
@@ -289,13 +293,11 @@ class DeployTool(object):
                 job_time_list.append("%s:    coordEnd=%s:00Z" % (job, job_end_time.strftime('%Y-%m-%dT%H')))
                 print(job_time_list[-1])
             else:
-                flag_hour = cls.run_command("aws s3 ls %s/y=%s/m=%s/d=%s/ | tail -1 | awk '{print $4}'" %
-                                            (flags[job], flag_year, flag_month, flag_day))[2:4]
                 if not re.match('\d{4}-\d{2}-\d{2}', flag_day):
                     print('[Error] Get malformed time from s3:d=%s' % flag_day)
                     flag_day = datetime.now().strftime('%Y-%m-%d')
-                print('Last f_flag date: %s, hour: %s' % flag_day)
-                job_start_time = datetime.strptime(flag_day + flag_hour, '%Y-%m-%d') + add_time
+                print('Last f_flag date: %s' % flag_day)
+                job_start_time = datetime.strptime(flag_day, '%Y-%m-%d') + add_time
                 job_end_time = job_start_time + timedelta(days=36524)
                 job_time_list.append(
                     "%s:    coordStart=%s:%s" % (job, job_start_time.strftime('%Y-%m-%dT00'), flag_minute))
@@ -631,7 +633,7 @@ class DeployTool(object):
         if database == "all":
             for database in cls.FLAGS.keys():
                 for table in cls.FLAGS[database].keys():
-                    if source == "flag" and database not in ['trs_src','datalake']:
+                    if source == "flag" and database not in ['trs_src', 'datalake']:
                         all_missing_partitions[database + '.' + table] = cls.check_missing_flags(database, table)
                     else:
                         all_missing_partitions[database + '.' + table] = cls.check_missing_partitions(database, table)
