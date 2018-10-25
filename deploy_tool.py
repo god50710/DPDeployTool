@@ -459,7 +459,7 @@ class DeployTool(object):
         cls.run_command("mkdir -p /home/hadoop/op/")
         if data_site == "production" and not signature_cronjob:
             cls.run_command("cp -r %s/QA/dp2/update_signature %s/" % (build_path, cls.OP_PATH))
-            cls.run_command("echo '*/10 * * * * %s/update_signature/bg_executor.sh %s' >> %s " %
+            cls.run_command("echo '*/30 * * * * %s/update_signature/bg_executor.sh %s' >> %s " %
                             (cls.OP_PATH, data_site, cronjob_file))
         # before run this method, cronjob has not update geoip cronjob
         if not geoip_cronjob:
