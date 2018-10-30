@@ -461,11 +461,15 @@ class DeployTool(object):
             cls.run_command("cp -r %s/QA/dp2/update_signature %s/" % (build_path, cls.OP_PATH))
             cls.run_command("echo '*/30 * * * * %s/update_signature/bg_executor.sh %s' >> %s " %
                             (cls.OP_PATH, data_site, cronjob_file))
+            cls.run_command("echo '%s' > %s/update_signature/current_version" %
+                            (datetime.now().strftime('%Y%m%d'), cls.OP_PATH))
         # before run this method, cronjob has not update geoip cronjob
         if not geoip_cronjob:
             cls.run_command("cp -r %s/QA/dp2/update_geoip %s/" % (build_path, cls.OP_PATH))
             cls.run_command("echo '0 * * * * %s/update_geoip/geoip_bg_executor_with_mail.sh %s' >> %s " %
                             (cls.OP_PATH, data_site, cronjob_file))
+            cls.run_command("echo '%s' > %s/update_geoip/current_version" %
+                            (datetime.now().strftime('%Y%m%d'), cls.OP_PATH))
         # before run this method, cronjob has not update tmufe cronjob
         if data_site == "production" and not tmufe_cronjob:
             cls.run_command("cp -r %s/QA/dp2/update_tmufe %s/" % (build_path, cls.OP_PATH))
