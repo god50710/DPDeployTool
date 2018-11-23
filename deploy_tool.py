@@ -21,7 +21,7 @@ class DeployTool(object):
     AWS_SIGNATURE_PATH = "s3://dp-aws-services-files-production-us-west-2/signature"
     OP_PATH = "/home/hadoop/op"
     DISPLAY_COUNT = 100
-    TOOL_VERSION = "20181025"
+    TOOL_VERSION = "20181123"
     FLAGS = {'dp_shn': {'t_routerinfo_001_hourly': 'f_routerinfo_001_hourly',
                         't_routerstat_001_hourly': 'f_routerstat_001_hourly',
                         't_device_best_recognition_hourly': 'f_device_best_recognition_hourly',
@@ -483,7 +483,7 @@ class DeployTool(object):
         # before run this method, cronjob has not backup stunnel cronjob
         if not stunnel_cronjob:
             cls.run_command("cp -r %s/QA/dp2/backup_stunnel %s/" % (build_path, cls.OP_PATH))
-            cls.run_command("echo '* 0 * * * %s/backup_stunnel/backup_stunnel.sh' >> %s " %
+            cls.run_command("echo '* */24 * * * %s/backup_stunnel/backup_stunnel.sh' >> %s " %
                             (cls.OP_PATH, cronjob_file))
         # before run this method, cronjob has not clean joblog cronjob
         if not clean_cronjob:
