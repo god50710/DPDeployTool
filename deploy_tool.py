@@ -459,7 +459,7 @@ class DeployTool(object):
         cls.run_command("mkdir -p /home/hadoop/op/")
         if data_site == "production" and not signature_cronjob:
             cls.run_command("cp -r %s/QA/dp2/update_signature %s/" % (build_path, cls.OP_PATH))
-            cls.run_command("echo '*/30 * * * * %s/update_signature/bg_executor.sh %s' >> %s " %
+            cls.run_command("echo '20 * * * * %s/update_signature/bg_executor.sh %s' >> %s " %
                             (cls.OP_PATH, data_site, cronjob_file))
             cls.run_command("echo '%s' > %s/update_signature/current_version" %
                             (datetime.now().strftime('%Y%m%d'), cls.OP_PATH))
@@ -483,7 +483,7 @@ class DeployTool(object):
         # before run this method, cronjob has not backup stunnel cronjob
         if not stunnel_cronjob:
             cls.run_command("cp -r %s/QA/dp2/backup_stunnel %s/" % (build_path, cls.OP_PATH))
-            cls.run_command("echo '* */24 * * * %s/backup_stunnel/backup_stunnel.sh' >> %s " %
+            cls.run_command("echo '* 0 * * * %s/backup_stunnel/backup_stunnel.sh' >> %s " %
                             (cls.OP_PATH, cronjob_file))
         # before run this method, cronjob has not clean joblog cronjob
         if not clean_cronjob:
