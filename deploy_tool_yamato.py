@@ -10,12 +10,10 @@ from datetime import datetime, timedelta
 class DeployTool(object):
     START_TIME = datetime(2018, 8, 1)
     AWS_PROD_SHN_PATH = "s3://yamato-dp-shn-us-west-2/dp_shn"
-    AWS_PROD_CAM_PATH = "s3://yamato-dp-cam-us-west-2/dp_cam"
     AWS_PROD_MISC_PATH = "s3://yamato-dp-misc-us-west-2/dp_misc"
     AWS_PROD_SIG_PATH = "s3://yamato-dp-sig-us-west-2/dp_sig"
     AWS_BETA_SHN_PATH = "s3://yamato-dp-beta-shn-us-west-2/dp_beta_shn"
-    AWS_BETA_CAM_PATH = "s3://yamato-dp-beta-cam-us-west-2/dp_beta_cam"
-    AWS_BETA_SIG_PATH = "s3://yamato-dp-beta-sig-us-west-2/dp_beta_sig"
+    AWS_BETA_SIG_PATH = "s3://yamato-dp-sig-us-west-2/dp_sig"
     AWS_VERIFIED_BUILD_PATH = "s3://yamato-dp-aws-services-files-production-us-west-2/build"
     AWS_TESTING_BUILD_PATH = "s3://yamato-dp-aws-services-files-production-us-west-2/test_build"
     AWS_SIGNATURE_PATH = "s3://yamato-dp-aws-services-files-production-us-west-2/signature"
@@ -38,15 +36,6 @@ class DeployTool(object):
                         't_rule_hit_stat_hourly': 'f_rule_hit_stat_hourly',
                         't_security_event_filtered_hourly': 'f_security_event_filtered_hourly',
                         't_security_event_raw_hourly': 'f_security_event_raw_hourly'},
-             'dp_cam': {'t_tmis_cam_001_hourly': 'f_tmis_cam_001_hourly',
-                        't_cam_bfld_stat_hourly': 'f_cam_bfld_stat_hourly',
-                        't_cam_collection_hourly': 'f_cam_collection_hourly',
-                        't_cam_feedback_normalized_hourly': 'f_cam_feedback_normalized_hourly',
-                        't_cam_ips_hit_rule_collection_hourly': 'f_cam_ips_hit_rule_collection_hourly',
-                        't_cam_security_event_filtered_hourly': 'f_cam_security_event_filtered_hourly',
-                        't_cam_security_event_raw_hourly': 'f_cam_security_event_raw_hourly',
-                        't_cam_session_info_hourly': 'f_cam_session_info_hourly',
-                        't_cam_trs_stat_hourly': 'f_cam_trs_stat_hourly'},
              'dp_misc': {'t_ncie_001_hourly': 'f_ncie_001_hourly',
                          't_dp2_major_object_counts_daily': 'f_dp2_major_object_counts_daily'},
              'dp_beta_shn': {'t_routerinfo_001_hourly': 'f_routerinfo_001_hourly',
@@ -64,26 +53,7 @@ class DeployTool(object):
                              't_routerstat_normalized_hourly': 'f_routerstat_normalized_hourly',
                              't_rule_hit_stat_hourly': 'f_rule_hit_stat_hourly',
                              't_security_event_filtered_hourly': 'f_security_event_filtered_hourly',
-                             't_security_event_raw_hourly': 'f_security_event_raw_hourly'},
-             'dp_beta_cam': {'t_tmis_cam_001_hourly': 'f_tmis_cam_001_hourly',
-                             't_cam_bfld_stat_hourly': 'f_cam_bfld_stat_hourly',
-                             't_cam_collection_hourly': 'f_cam_collection_hourly',
-                             't_cam_feedback_normalized_hourly': 'f_cam_feedback_normalized_hourly',
-                             't_cam_ips_hit_rule_collection_hourly': 'f_cam_ips_hit_rule_collection_hourly',
-                             't_cam_security_event_filtered_hourly': 'f_cam_security_event_filtered_hourly',
-                             't_cam_security_event_raw_hourly': 'f_cam_security_event_raw_hourly',
-                             't_cam_session_info_hourly': 'f_cam_session_info_hourly',
-                             't_cam_trs_stat_hourly': 'f_cam_trs_stat_hourly'},
-             'datalake': {'akamai_rgom': 'Fake',
-                          'akamai_web': 'Fake',
-                          'akamai_malicious': 'Fake',
-                          'iotlog': 'Fake'},
-             'trs_src': {'akamai_malicious_20180319': 'Fake',
-                         'honeypot_logs': 'Fake',
-                         'honeypot_ssh_2': 'Fake',
-                         'honeypot_telnet_2': 'Fake',
-                         'tdts_logs': 'Fake'
-                         }
+                             't_security_event_raw_hourly': 'f_security_event_raw_hourly'}
              }
 
     @staticmethod
@@ -124,17 +94,9 @@ class DeployTool(object):
             if not flag:
                 raise Exception('[Error] Flag is empty')
             if data_site == "production":
-                if "cam" in job:
-                    flag_path_prefix = cls.AWS_PROD_CAM_PATH
-                elif "ncie" in job or "dp2_major_object_counts" in job:
-                    flag_path_prefix = cls.AWS_PROD_MISC_PATH
-                else:
-                    flag_path_prefix = cls.AWS_PROD_SHN_PATH
+                flag_path_prefix = cls.AWS_PROD_SHN_PATH
             else:
-                if "cam" in job:
-                    flag_path_prefix = cls.AWS_BETA_CAM_PATH
-                else:
-                    flag_path_prefix = cls.AWS_BETA_SHN_PATH
+                flag_path_prefix = cls.AWS_BETA_SHN_PATH
             flags[job] = '%s/%s' % (flag_path_prefix, flag)
             if "hours(1)" in frequency:
                 hourly_jobs.append(job)
@@ -157,11 +119,11 @@ class DeployTool(object):
             s3_build_path = cls.AWS_VERIFIED_BUILD_PATH
 
         if not version:
-            build_file = cls.run_command("aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | sort | tail -1 | awk '{print $4}'"
+            build_file = cls.run_command("aws s3 ls %s/ | grep 'Yamato-Data-Pipeline' | sort | tail -1 | awk '{print $4}'"
                                          % s3_build_path)[:-1]
         else:
             build_file = cls.run_command(
-                "aws s3 ls %s/ | grep 'SHN-Data-Pipeline' | grep '%s' | sort | tail -1 | awk '{print $4}'"
+                "aws s3 ls %s/ | grep 'Yamato-Data-Pipeline' | grep '%s' | sort | tail -1 | awk '{print $4}'"
                 % (s3_build_path, version))[:-1]
         if not build_file:
             raise Exception('[Error] No available build to deploy')
@@ -210,7 +172,6 @@ class DeployTool(object):
     def create_bucket(cls, prefix="function"):
         if "%s-dp-shn" % prefix not in cls.run_command("aws s3 ls"):
             cls.run_command("aws s3 mb s3://%s-dp-shn-us-west-2" % prefix)
-            cls.run_command("aws s3 mb s3://%s-dp-cam-us-west-2" % prefix)
             cls.run_command("aws s3 mb s3://%s-dp-sig-us-west-2" % prefix)
             cls.run_command("aws s3 mb s3://%s-dp-misc-us-west-2" % prefix)
 
@@ -557,12 +518,8 @@ class DeployTool(object):
         # in dp2 and dp2_beta, table name : t_<table_name>, flag name : f_<table_name>
         if "misc" in database:
             aws_path = cls.AWS_PROD_MISC_PATH
-        elif "dp_beta" in database and "cam" in database:
-            aws_path = cls.AWS_BETA_CAM_PATH
         elif "dp_beta" in database:
             aws_path = cls.AWS_BETA_SHN_PATH
-        elif "cam" in database:
-            aws_path = cls.AWS_PROD_CAM_PATH
         else:
             aws_path = cls.AWS_PROD_SHN_PATH
         s3_folder = cls.FLAGS[database][table].replace('f_', 't_')
@@ -605,14 +562,10 @@ class DeployTool(object):
         missing_partitions = list()
         if database == "dp_shn":
             s3_path = cls.AWS_PROD_SHN_PATH
-        elif database == "dp_cam":
-            s3_path = cls.AWS_PROD_CAM_PATH
-        elif database == "dp_misc":
-            s3_path = cls.AWS_PROD_MISC_PATH
         elif database == "dp_beta_shn":
             s3_path = cls.AWS_BETA_SHN_PATH
         else:
-            s3_path = cls.AWS_BETA_CAM_PATH
+            s3_path = cls.AWS_PROD_MISC_PATH
         partition_list = cls.run_command('aws s3 ls %s/%s/ --recursive' % (s3_path, cls.FLAGS[database][table]))
         # consider hourly partition may generating when user query at same hour, so end time will be set at 2 hours before
         time_suffix = timedelta(hours=2) if 'hourly' in table else timedelta(days=2)

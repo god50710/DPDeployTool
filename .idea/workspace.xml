@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="1a5c9656-1468-4f51-be86-49f2f9d7ed4e" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/deploy_tool_yamato.py" beforeDir="false" afterPath="$PROJECT_DIR$/deploy_tool_yamato.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,6 +20,7 @@
           <entry key="project.open.time.19" value="1" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.23" value="1" />
+          <entry key="project.open.time.25" value="1" />
           <entry key="project.open.time.27" value="1" />
           <entry key="project.open.time.32" value="1" />
           <entry key="project.open.time.37" value="1" />
@@ -27,17 +29,17 @@
           <entry key="project.open.time.55" value="1" />
           <entry key="project.open.time.8" value="1" />
           <entry key="project.open.time.93" value="1" />
-          <entry key="project.opened" value="14" />
+          <entry key="project.opened" value="15" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="807" />
+          <entry key="py" value="835" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="807" />
+          <entry key="Python" value="835" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -57,8 +59,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/deploy_tool.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="294">
-              <caret line="14" column="54" lean-forward="true" selection-start-line="14" selection-start-column="54" selection-end-line="14" selection-end-column="54" />
+            <state relative-caret-position="168">
+              <caret line="14" column="54" selection-start-line="14" selection-start-column="54" selection-end-line="14" selection-end-column="54" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -69,8 +71,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/deploy_tool_yamato.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3980">
-              <caret line="833" column="37" selection-start-line="833" selection-start-column="37" selection-end-line="833" selection-end-column="37" />
+            <state relative-caret-position="342">
+              <caret line="404" column="87" lean-forward="true" selection-end-line="798" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -89,7 +91,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>AWS_BETA_SHN_PATH</find>
       <find>repair</find>
       <find>clean_fake</find>
       <find>t_router_security_event_filtered_hourly</find>
@@ -119,11 +120,13 @@
       <find>date</find>
       <find>test</find>
       <find>disable</find>
+      <find>cam</find>
     </findStrings>
     <replaceStrings>
       <replace>'t_</replace>
       <replace>f_</replace>
       <replace>dp-misc-staging</replace>
+      <replace>Yamato-Data</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -143,9 +146,8 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
-    <option name="x" value="-8" />
-    <option name="y" value="-8" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="-1938" />
     <option name="width" value="1936" />
     <option name="height" value="1056" />
   </component>
@@ -157,6 +159,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -168,7 +171,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -264,11 +266,11 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-1938" y="0" width="1936" height="1056" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.45770064" visible="true" weight="0.11011591" />
-      <window_info id="Structure" order="1" sideWeight="0.54229933" side_tool="true" visible="true" weight="0.11011591" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.45661604" visible="true" weight="0.11011591" />
+      <window_info id="Structure" order="1" sideWeight="0.54338396" side_tool="true" visible="true" weight="0.11011591" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49345237" weight="0.32637364" />
@@ -341,8 +343,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
-          <caret line="14" column="54" lean-forward="true" selection-start-line="14" selection-start-column="54" selection-end-line="14" selection-end-column="54" />
+        <state relative-caret-position="168">
+          <caret line="14" column="54" selection-start-line="14" selection-start-column="54" selection-end-line="14" selection-end-column="54" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
@@ -351,8 +353,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/deploy_tool_yamato.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3980">
-          <caret line="833" column="37" selection-start-line="833" selection-start-column="37" selection-end-line="833" selection-end-column="37" />
+        <state relative-caret-position="342">
+          <caret line="404" column="87" lean-forward="true" selection-end-line="798" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
