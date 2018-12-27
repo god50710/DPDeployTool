@@ -19,7 +19,7 @@ class DeployTool(object):
     AWS_SIGNATURE_PATH = "s3://yamato-dp-aws-services-files-production-us-west-2/signature"
     OP_PATH = "/home/hadoop/op"
     DISPLAY_COUNT = 100
-    TOOL_VERSION = "20181123"
+    TOOL_VERSION = "20181227"
     FLAGS = {'dp_shn': {'t_routerinfo_001_hourly': 'f_routerinfo_001_hourly',
                         't_routerstat_001_hourly': 'f_routerstat_001_hourly',
                         't_device_best_recognition_hourly': 'f_device_best_recognition_hourly',
@@ -36,8 +36,7 @@ class DeployTool(object):
                         't_rule_hit_stat_hourly': 'f_rule_hit_stat_hourly',
                         't_security_event_filtered_hourly': 'f_security_event_filtered_hourly',
                         't_security_event_raw_hourly': 'f_security_event_raw_hourly'},
-             'dp_misc': {'t_ncie_001_hourly': 'f_ncie_001_hourly',
-                         't_dp2_major_object_counts_daily': 'f_dp2_major_object_counts_daily'},
+             'dp_misc': {'t_dp2_major_object_counts_daily': 'f_dp2_major_object_counts_daily'},
              'dp_beta_shn': {'t_routerinfo_001_hourly': 'f_routerinfo_001_hourly',
                              't_routerstat_001_hourly': 'f_routerstat_001_hourly',
                              't_device_best_recognition_hourly': 'f_device_best_recognition_hourly',
