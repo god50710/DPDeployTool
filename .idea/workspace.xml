@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1a5c9656-1468-4f51-be86-49f2f9d7ed4e" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/deploy_tool_yamato.py" beforeDir="false" afterPath="$PROJECT_DIR$/deploy_tool_yamato.py" afterDir="false" />
-    </list>
+    <list default="true" id="1a5c9656-1468-4f51-be86-49f2f9d7ed4e" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,7 +12,7 @@
     <session id="1750424583">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="9" />
+          <entry key="project.closed" value="10" />
           <entry key="project.open.time.1" value="3" />
           <entry key="project.open.time.19" value="1" />
           <entry key="project.open.time.2" value="1" />
@@ -72,7 +69,7 @@
         <entry file="file://$PROJECT_DIR$/deploy_tool_yamato.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="441">
-              <caret line="21" column="28" selection-start-line="21" selection-start-column="28" selection-end-line="21" selection-end-column="28" />
+              <caret line="21" column="29" lean-forward="true" selection-start-line="21" selection-start-column="29" selection-end-line="21" selection-end-column="29" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -91,7 +88,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>repair</find>
       <find>clean_fake</find>
       <find>t_router_security_event_filtered_hourly</find>
       <find>t_routerstat_001_hourly</find>
@@ -121,6 +117,7 @@
       <find>test</find>
       <find>disable</find>
       <find>cam</find>
+      <find>misc</find>
     </findStrings>
     <replaceStrings>
       <replace>'t_</replace>
@@ -267,11 +264,11 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1296" height="776" extended-state="6" />
+    <frame x="-8" y="-8" width="1696" height="1026" extended-state="7" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.45482865" visible="true" weight="0.10969793" />
-      <window_info id="Structure" order="1" sideWeight="0.5451713" side_tool="true" visible="true" weight="0.10969793" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.45515695" visible="true" weight="0.08323281" />
+      <window_info id="Structure" order="1" sideWeight="0.5448431" side_tool="true" visible="true" weight="0.08323281" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49345237" weight="0.32637364" />
@@ -355,7 +352,7 @@
     <entry file="file://$PROJECT_DIR$/deploy_tool_yamato.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="441">
-          <caret line="21" column="28" selection-start-line="21" selection-start-column="28" selection-end-line="21" selection-end-column="28" />
+          <caret line="21" column="29" lean-forward="true" selection-start-line="21" selection-start-column="29" selection-end-line="21" selection-end-column="29" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
